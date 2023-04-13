@@ -2,15 +2,20 @@ package trust
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"os"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/api/apitest"
 )
 
 var srv = &apitest.Server{
+	Host:    "api.anchor.lcl.host",
 	RootDir: "../..",
 }
 
@@ -32,20 +37,79 @@ func TestTrust(t *testing.T) {
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.API.Token = "test-token"
+	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 
-	cmd := &Command{
-		Config: cfg,
-	}
-
-	buf, err := apitest.RunTUI(ctx, cmd.TUI())
-	if err != nil {
+	var err error
+	if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
 		t.Fatal(err)
 	}
 
-	msg := "\"oas-examples - AnchorCA\" Ed25519 cert (61c111892d03dbaa77505062) installed in the mock store\n\"oas-examples - AnchorCA\" ECDSA cert (61c111892d03fec352f95595) installed in the mock store\n\"oas-examples - AnchorCA\" RSA cert (61c111892d03674512b31880) installed in the mock store\n"
-	if want, got := msg, buf.String(); want != got {
-		t.Errorf("want output %q, got %q", want, got)
+	t.Run("default to personal org and localhost realm", func(t *testing.T) {
+		cmd := &Command{
+			Config: cfg,
+		}
+
+		buf, err := apitest.RunTUI(ctx, cmd.TUI())
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		msgPattern := regexp.MustCompile(` - AnchorCA" \w+ cert \([a-z0-9]+\) installed in the mock store$`)
+
+		for _, line := range strings.Split(buf.String(), "\n") {
+			if len(line) == 0 {
+				continue
+			}
+
+			if !msgPattern.MatchString(line) {
+				t.Errorf("want output %q to match %q", line, msgPattern)
+			}
+		}
+	})
+
+	t.Run("specified org and realm", func(t *testing.T) {
+		cfg.Trust.Org = mustFetchPersonalOrgSlug(cfg)
+		cfg.Trust.Realm = "localhost"
+
+		cmd := &Command{
+			Config: cfg,
+		}
+
+		buf, err := apitest.RunTUI(ctx, cmd.TUI())
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		msgPattern := regexp.MustCompile(` - AnchorCA" \w+ cert \([a-z0-9]+\) installed in the mock store$`)
+
+		for _, line := range strings.Split(buf.String(), "\n") {
+			if len(line) == 0 {
+				continue
+			}
+
+			if !msgPattern.MatchString(line) {
+				t.Errorf("want output %q to match %q", line, msgPattern)
+			}
+		}
+	})
+}
+
+func mustFetchPersonalOrgSlug(cfg *cli.Config) string {
+	anc, err := api.Client(cfg)
+	if err != nil {
+		panic(err)
 	}
+
+	res, err := anc.Get("")
+	if err != nil {
+		panic(err)
+	}
+
+	var userInfo *api.Root
+	if err = json.NewDecoder(res.Body).Decode(&userInfo); err != nil {
+		panic(err)
+	}
+
+	return *userInfo.PersonalOrg.Slug
 }

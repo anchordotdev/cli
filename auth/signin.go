@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -49,7 +48,7 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	req, err := http.NewRequest("GET", s.Config.API.URL, nil)
+	req, err := http.NewRequest("GET", "", nil)
 	if err != nil {
 		return err
 	}
@@ -60,18 +59,19 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return errors.New("unexpected response")
+		return fmt.Errorf("unexpected response code: %d", res.StatusCode)
 	}
 
 	var userInfo *api.Root
 	if err := json.NewDecoder(res.Body).Decode(&userInfo); err != nil {
+		return fmt.Errorf("decoding userInfo failed: %w", err)
+	}
+
+	kr := keyring.Keyring{Config: s.Config}
+	if err := kr.Set(keyring.APIToken, apiToken); err != nil {
 		return err
 	}
 
-	if err := keyring.Set(s.Config, keyring.APIToken, apiToken); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(tty, "Success, hello %s!\n", *userInfo.Whoami)
+	fmt.Fprintf(tty, "Success, hello %s!\n", userInfo.Whoami)
 	return nil
 }

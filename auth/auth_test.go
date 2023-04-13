@@ -8,14 +8,10 @@ import (
 	"github.com/anchordotdev/cli/api/apitest"
 )
 
-var (
-	srv = &apitest.Server{
-		RootDir: "../..",
-		// RootDir: "../..",
-	}
-
-	proxyMode = flag.Bool("proxy", false, "run prism in proxy mode")
-)
+var srv = &apitest.Server{
+	Host:    "api.anchor.lcl.host",
+	RootDir: "../..",
+}
 
 func TestMain(m *testing.M) {
 	flag.Parse()

@@ -12,14 +12,17 @@ type Config struct {
 	Verbose        bool `desc:"Verbose output." flag:"verbose,v" env:"VERBOSE" toml:"verbose"`
 
 	API struct {
-		URL   string `default:"https://api.anchor.dev/" desc:"Anchor API endpoint URL." flag:"api-url,u" env:"API_URL" json:"api_url" toml:"api-url"`
+		URL   string `default:"https://api.anchor.dev/v0" desc:"Anchor API endpoint URL." flag:"api-url,u" env:"API_URL" json:"api_url" toml:"api-url"`
 		Token string `desc:"Anchor API personal access token (PAT)." flag:"api-token,t" env:"API_TOKEN" json:"api_token" toml:"token"`
 	}
 
 	Trust struct {
-		Target string `arg:"0..1" desc:"Organization, Realm, or CA"`
+		Org   string `desc:"organization" flag:"org,o" env:"ORG" json:"org" toml:"org"`
+		Realm string `desc:"realm" flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
 
 		NoSudo bool `desc:"Disable sudo prompts." flag:"no-sudo" env:"NO_SUDO" toml:"no-sudo"`
+
+		MockMode bool `env:"ANCHOR_CLI_TRUSTSTORE_MOCK_MODE"`
 	} `cmd:"trust"`
 
 	User struct {
@@ -33,6 +36,10 @@ type Config struct {
 			WhoAmI struct{} `cmd:"whoami"`
 		} `cmd:"auth"`
 	} `group:"user,user management" toml:"user"`
+
+	Keyring struct {
+		MockMode bool `env:"ANCHOR_CLI_KEYRING_MOCK_MODE"`
+	}
 }
 
 type TUI struct {

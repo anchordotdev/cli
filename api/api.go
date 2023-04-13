@@ -4,11 +4,14 @@ package api
 
 import (
 	"errors"
+	"fmt"
+	"mime"
 	"net/http"
 	"net/url"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/keyring"
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -19,18 +22,25 @@ var (
 func Client(cfg *cli.Config) (*http.Client, error) {
 	client := &http.Client{
 		Transport: urlRewriter{
-			RoundTripper: new(http.Transport),
-			URL:          cfg.API.URL,
+			RoundTripper: responseChecker{
+				RoundTripper: new(http.Transport),
+			},
+			URL: cfg.API.URL,
 		},
 	}
 
 	apiToken := cfg.API.Token
 	if apiToken == "" {
-		var err error
-		if apiToken, err = keyring.Get(cfg, keyring.APIToken); err == keyring.ErrNotFound {
+		var (
+			kr = keyring.Keyring{Config: cfg}
+
+			err error
+		)
+
+		if apiToken, err = kr.Get(keyring.APIToken); err == keyring.ErrNotFound {
 			return client, ErrSignedOut
 		} else if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("reading API token from keyring failed: %w", err)
 		}
 	}
 
@@ -56,6 +66,30 @@ func (r basicAuther) RoundTrip(req *http.Request) (*http.Response, error) {
 	return r.RoundTripper.RoundTrip(req)
 }
 
+type responseChecker struct {
+	http.RoundTripper
+}
+
+var jsonMediaTypes = mediaTypes{
+	"application/json",
+	"application/problem+json",
+}
+
+func (r responseChecker) RoundTrip(req *http.Request) (*http.Response, error) {
+	res, err := r.RoundTripper.RoundTrip(req)
+	if err != nil {
+		return nil, fmt.Errorf("request error %s %s: %w", req.Method, req.URL.Path, err)
+	}
+
+	if res.StatusCode == 500 {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	if contentType := res.Header.Get("Content-Type"); !jsonMediaTypes.Matches(contentType) {
+		return nil, fmt.Errorf("non-json response received: %q: %w", contentType, err)
+	}
+	return res, nil
+}
+
 type urlRewriter struct {
 	http.RoundTripper
 
@@ -67,10 +101,17 @@ func (r urlRewriter) RoundTrip(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	if u, err = u.Parse(req.URL.Path); err != nil {
-		return nil, err
-	}
-	req.URL = u
+	req.URL = u.JoinPath(req.URL.Path)
 
 	return r.RoundTripper.RoundTrip(req)
+}
+
+type mediaTypes []string
+
+func (s mediaTypes) Matches(val string) bool {
+	media, _, err := mime.ParseMediaType(val)
+	if err != nil {
+		return false
+	}
+	return slices.Contains(s, media)
 }

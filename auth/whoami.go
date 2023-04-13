@@ -33,7 +33,7 @@ func (w *WhoAmI) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	res, err := anc.Get("/")
+	res, err := anc.Get("")
 	if err != nil {
 		return err
 	}
@@ -46,6 +46,6 @@ func (w *WhoAmI) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	fmt.Fprintf(tty, "Hello %s!\n", *userInfo.Whoami)
+	fmt.Fprintf(tty, "Hello %s!\n", userInfo.Whoami)
 	return nil
 }

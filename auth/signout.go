@@ -20,5 +20,6 @@ func (s SignOut) TUI() cli.TUI {
 }
 
 func (s *SignOut) run(ctx context.Context, tty termenv.File) error {
-	return keyring.Delete(s.Config, keyring.APIToken)
+	kr := keyring.Keyring{Config: s.Config}
+	return kr.Delete(keyring.APIToken)
 }

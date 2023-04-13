@@ -4,21 +4,22 @@ import (
 	"context"
 	"testing"
 
-	"github.com/zalando/go-keyring"
-
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
 )
 
 func TestSignIn(t *testing.T) {
-	keyring.MockInit()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.API.Token = "test-token"
+	cfg.Keyring.MockMode = true
+
+	var err error
+	if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
+		t.Fatal(err)
+	}
 
 	cmd := &SignIn{
 		Config: cfg,
@@ -29,7 +30,7 @@ func TestSignIn(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if want, got := "Success, hello username!\n", buf.String(); want != got {
+	if want, got := "Success, hello example@example.com!\n", buf.String(); want != got {
 		t.Errorf("want output %q, got %q", want, got)
 	}
 }

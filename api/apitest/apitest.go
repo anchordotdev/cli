@@ -6,6 +6,7 @@ import (
 	"errors"
 	"flag"
 	"path/filepath"
+	"strings"
 
 	"io"
 	"log"
@@ -32,6 +33,7 @@ var (
 )
 
 type Server struct {
+	Host    string
 	RootDir string
 
 	URL string
@@ -46,6 +48,26 @@ type Server struct {
 func (s *Server) Close() {
 	s.stopfn()
 	s.waitfn()
+}
+
+func (s *Server) IsProxy() bool {
+	return *proxy
+}
+
+func (s *Server) GeneratePAT(email string) (string, error) {
+	if !s.IsProxy() {
+		return "test-token", nil
+	}
+
+	cmd := exec.Command("script/clitest-gen-pat", email)
+	cmd.Dir = s.RootDir
+
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimSpace(string(out)), nil
 }
 
 func (s *Server) Start(ctx context.Context) error {
@@ -69,7 +91,17 @@ func (s *Server) StartMock(ctx context.Context) error {
 		return err
 	}
 
-	s.URL = "http://" + addr + "/"
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		stopfn()
+		return err
+	}
+
+	if s.Host != "" {
+		host = s.Host
+	}
+
+	s.URL = "http://" + host + ":" + port + "/v0"
 	s.stopfn = stopfn
 	s.waitfn = func() { waitfn() }
 
@@ -92,7 +124,17 @@ func (s *Server) StartProxy(ctx context.Context) error {
 		return err
 	}
 
-	addr, waitPrism, err := s.startProxy(ctx, addrRails)
+	host, port, err := net.SplitHostPort(addrRails)
+	if err != nil {
+		stopfn()
+		return err
+	}
+
+	if s.Host != "" {
+		host = s.Host
+	}
+
+	addr, waitPrism, err := s.startProxy(ctx, host+":"+port)
 	if err != nil {
 		lock.Unlock()
 		stopfn()
@@ -115,7 +157,17 @@ func (s *Server) StartProxy(ctx context.Context) error {
 	group.Go(waitPrism)
 	group.Go(waitRails)
 
-	s.URL = "http://" + addr + "/"
+	host, port, err = net.SplitHostPort(addr)
+	if err != nil {
+		stopfn()
+		return err
+	}
+
+	if s.Host != "" {
+		host = s.Host
+	}
+
+	s.URL = "http://" + host + ":" + port + "/v0"
 	s.stopfn = stopfn
 	s.waitfn = func() {
 		defer lock.Unlock()
@@ -178,13 +230,13 @@ func (s *Server) startRails(ctx context.Context) (string, func() error, error) {
 		return "", nil, err
 	}
 
-	host, port, err := net.SplitHostPort(addr)
+	_, port, err := net.SplitHostPort(addr)
 	if err != nil {
 		return "", nil, err
 	}
 
 	args := []string{
-		"rails", "server", "--port", port, "--binding", host,
+		"script/clitest-server", "::", port,
 	}
 
 	wait, err := s.startCmd(ctx, args)

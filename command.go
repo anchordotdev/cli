@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joeshaw/envdecode"
 	"github.com/mcuadros/go-defaults"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
@@ -28,6 +29,10 @@ type Command struct {
 
 func (c *Command) Execute(ctx context.Context, cfg *Config) error {
 	defaults.SetDefaults(cfg)
+
+	if err := envdecode.Decode(cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
+		return err
+	}
 
 	return c.cobraCommand(ctx, reflect.ValueOf(cfg)).ExecuteContext(ctx)
 }

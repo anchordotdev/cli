@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -39,7 +40,29 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	res, err := anc.Get("/username/localhost/certs")
+	res, err := anc.Get("")
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return errors.New("unexpected response")
+	}
+
+	org, realm := c.Config.Trust.Org, c.Config.Trust.Realm
+	if (org == "") != (realm == "") {
+		return errors.New("--org and --realm flags must both be present or absent")
+	}
+	if org == "" && realm == "" {
+		// TODO: use personal org value from API check-in call
+		var userInfo *api.Root
+		if err = json.NewDecoder(res.Body).Decode(&userInfo); err != nil {
+			return err
+		}
+		org = *userInfo.PersonalOrg.Slug
+		realm = "localhost"
+	}
+
+	res, err = anc.Get("/orgs/" + url.QueryEscape(org) + "/realms/" + url.QueryEscape(realm) + "/x509/credentials")
 	if err != nil {
 		return err
 	}
@@ -48,7 +71,7 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 	}
 
 	var certs struct {
-		Items *[]api.Cert `json:"items,omitempty"`
+		Items *[]api.Credential `json:"items,omitempty"`
 	}
 	if err := json.NewDecoder(res.Body).Decode(&certs); err != nil {
 		return err
@@ -81,7 +104,7 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 	}
 
 	for _, cert := range *certs.Items {
-		blk, _ := pem.Decode([]byte(*cert.TextualEncoding))
+		blk, _ := pem.Decode([]byte(cert.TextualEncoding))
 
 		cert, err := x509.ParseCertificate(blk.Bytes)
 		if err != nil {
@@ -108,8 +131,13 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 			UniqueName: uniqueName,
 		}
 
-		if c.Config.Trust.NoSudo {
+		if c.Config.Trust.MockMode {
 			fmt.Fprintf(tty, "\"%s\" %s cert (%s) installed in the mock store\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
+			continue
+		}
+
+		if ca.SignatureAlgorithm == x509.PureEd25519 {
+			fmt.Fprintf(tty, "skipping \"%s\" %s cert (%s), Ed25519 certificates are not yet supported\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
 			continue
 		}
 

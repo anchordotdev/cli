@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/zalando/go-keyring"
-
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
 )
@@ -15,10 +13,9 @@ func TestWhoAmI(t *testing.T) {
 	defer cancel()
 
 	t.Run("signed-out", func(t *testing.T) {
-		keyring.MockInit()
-
 		cfg := new(cli.Config)
 		cfg.API.URL = srv.URL
+		cfg.Keyring.MockMode = true
 
 		cmd := &WhoAmI{
 			Config: cfg,
@@ -35,11 +32,14 @@ func TestWhoAmI(t *testing.T) {
 	})
 
 	t.Run("signed-in", func(t *testing.T) {
-		keyring.MockInit()
-
 		cfg := new(cli.Config)
 		cfg.API.URL = srv.URL
-		cfg.API.Token = "test-token"
+		cfg.Keyring.MockMode = true
+
+		var err error
+		if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
+			t.Fatal(err)
+		}
 
 		cmd := &WhoAmI{
 			Config: cfg,
@@ -50,7 +50,7 @@ func TestWhoAmI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if want, got := "Hello username!\n", buf.String(); want != got {
+		if want, got := "Hello example@example.com!\n", buf.String(); want != got {
 			t.Errorf("want output %q, got %q", want, got)
 		}
 	})

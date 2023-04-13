@@ -5,6 +5,8 @@ package api
 
 import (
 	"time"
+
+	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 )
 
 const (
@@ -12,67 +14,73 @@ const (
 	Pat_bearerScopes = "pat_bearer.Scopes"
 )
 
-// Defines values for CertStatus.
+// Defines values for CredentialStatus.
 const (
-	Expired CertStatus = "expired"
-	Online  CertStatus = "online"
-	Revoked CertStatus = "revoked"
+	Expired CredentialStatus = "expired"
+	Online  CredentialStatus = "online"
+	Revoked CredentialStatus = "revoked"
 )
 
-// Cert defines model for cert.
-type Cert struct {
-	// Algorithm Algorithm used to sign certificate
-	Algorithm *interface{} `json:"algorithm,omitempty"`
+// Credential defines model for credential.
+type Credential struct {
+	// CreatedAt UTC time when credential was created.
+	CreatedAt time.Time `json:"created_at"`
 
-	// CreatedAt UTC time when certificate was created.
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	// Name name of credential
+	Name string `json:"name"`
 
-	// Name name of certificate
-	Name *string `json:"name,omitempty"`
+	// Revision Current revision of credential
+	Revision int64 `json:"revision"`
 
-	// Revision Current revision of certificate.
-	Revision *int64 `json:"revision,omitempty"`
-
-	// RevokedAt UTC time after which certificate was revoked.
+	// RevokedAt UTC time after which credential will be revoked
 	RevokedAt *time.Time `json:"revoked_at"`
 
-	// Serial serial id for certificate.
-	Serial *string `json:"serial,omitempty"`
+	// Serial serial id for credetial
+	Serial string `json:"serial"`
 
-	// Status current status of certificate.
-	Status *CertStatus `json:"status,omitempty"`
+	// SignatureAlgorithm Algorithm used to sign credential
+	SignatureAlgorithm interface{} `json:"signature_algorithm"`
 
-	// TextualEncoding base64 textual encoding of certificate based on RFC7468.
-	TextualEncoding *string `json:"textual_encoding,omitempty"`
+	// Status current status of credential
+	Status CredentialStatus `json:"status"`
 
-	// ValidAfter UTC time after which certificate will be valid.
-	ValidAfter *time.Time `json:"valid_after,omitempty"`
+	// TextualEncoding base64 textual encoding of credential based on RFC7468
+	TextualEncoding string `json:"textual_encoding"`
 
-	// ValidBefore UTC time after which certificate will no longer be valid.
-	ValidBefore *time.Time `json:"valid_before,omitempty"`
+	// Uuid uuid for credential
+	Uuid *openapi_types.UUID `json:"uuid,omitempty"`
+
+	// ValidAfter UTC time after which credential will be valid.
+	ValidAfter time.Time `json:"valid_after"`
+
+	// ValidBefore UTC time after which credential will no longer be valid.
+	ValidBefore time.Time `json:"valid_before"`
 }
 
-// CertStatus current status of certificate.
-type CertStatus string
+// CredentialStatus current status of credential
+type CredentialStatus string
 
 // Error defines model for error.
 type Error struct {
 	// Detail A human-readable description of this occurrence of the problem.
-	Detail *string `json:"detail,omitempty"`
+	Detail string `json:"detail"`
 
 	// Status HTTP status code of this occurrence of the problem.
-	Status *int32 `json:"status,omitempty"`
+	Status int32 `json:"status"`
 
 	// Title A human-readable description of this problem type.
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title"`
 
 	// Type URI identifying problem.
-	Type *string `json:"type,omitempty"`
+	Type string `json:"type"`
 }
 
 // Root defines model for root.
 type Root struct {
-	Whoami *string `json:"whoami,omitempty"`
+	PersonalOrg struct {
+		Slug *string `json:"slug,omitempty"`
+	} `json:"personal_org"`
+	Whoami string `json:"whoami"`
 }
 
 // PathOrgParam defines model for path_org_param.
@@ -84,8 +92,8 @@ type PathRealmParam = string
 // QueryCaParam defines model for query_ca_param.
 type QueryCaParam = string
 
-// GetCertsParams defines parameters for GetCerts.
-type GetCertsParams struct {
+// GetCredentialsParams defines parameters for GetCredentials.
+type GetCredentialsParams struct {
 	// CaParam ca for operation
 	CaParam *QueryCaParam `form:"ca_param,omitempty" json:"ca_param,omitempty"`
 }
