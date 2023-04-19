@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -13,6 +14,10 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/keyring"
+)
+
+var (
+	ErrSigninFailed = errors.New("sign in failed")
 )
 
 type SignIn struct {
@@ -26,9 +31,10 @@ func (s SignIn) TUI() cli.TUI {
 }
 
 func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
-	apiToken := s.Config.API.Token
-	if len(apiToken) == 0 {
-		if _, err := fmt.Fprintf(tty, "API Token: "); err != nil {
+	if len(s.Config.API.Token) == 0 {
+		fmt.Fprintf(tty, "To complete sign in, please:\n  1. Visit https://anchor.dev/settings and add a new Personal Access Token (PAT).\n  2. Copy the key from the new token and paste it below when prompted.\n")
+
+		if _, err := fmt.Fprintf(tty, "Personal Access Token (PAT): "); err != nil {
 			return err
 		}
 
@@ -36,7 +42,12 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 		if err != nil {
 			return err
 		}
-		apiToken = strings.TrimSpace(string(line))
+		pat := strings.TrimSpace(string(line))
+		if !strings.HasPrefix(pat, "ap0_") || len(pat) != 64 {
+			return fmt.Errorf("invalid PAT key")
+		}
+
+		s.Config.API.Token = pat
 
 		if _, err := fmt.Fprintln(tty); err != nil {
 			return err
@@ -52,11 +63,14 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 	if err != nil {
 		return err
 	}
-	req.SetBasicAuth(apiToken, "")
+	req.SetBasicAuth(s.Config.API.Token, "")
 
 	res, err := anc.Do(req)
 	if err != nil {
 		return err
+	}
+	if res.StatusCode == http.StatusForbidden {
+		return ErrSigninFailed
 	}
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected response code: %d", res.StatusCode)
@@ -68,7 +82,7 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 	}
 
 	kr := keyring.Keyring{Config: s.Config}
-	if err := kr.Set(keyring.APIToken, apiToken); err != nil {
+	if err := kr.Set(keyring.APIToken, s.Config.API.Token); err != nil {
 		return err
 	}
 

@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/keyring"
@@ -40,7 +41,10 @@ func Client(cfg *cli.Config) (*http.Client, error) {
 		if apiToken, err = kr.Get(keyring.APIToken); err == keyring.ErrNotFound {
 			return client, ErrSignedOut
 		} else if err != nil {
-			return nil, fmt.Errorf("reading API token from keyring failed: %w", err)
+			return nil, fmt.Errorf("reading PAT token from keyring failed: %w", err)
+		}
+		if !strings.HasPrefix(apiToken, "ap0_") || len(apiToken) != 64 {
+			return nil, fmt.Errorf("read invalid PAT token from keyring")
 		}
 	}
 

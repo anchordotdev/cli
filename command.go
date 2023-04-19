@@ -30,11 +30,13 @@ type Command struct {
 func (c *Command) Execute(ctx context.Context, cfg *Config) error {
 	defaults.SetDefaults(cfg)
 
+	cmd := c.cobraCommand(ctx, reflect.ValueOf(cfg))
+
 	if err := envdecode.Decode(cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
 		return err
 	}
 
-	return c.cobraCommand(ctx, reflect.ValueOf(cfg)).ExecuteContext(ctx)
+	return cmd.ExecuteContext(ctx)
 }
 
 func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.Command {
