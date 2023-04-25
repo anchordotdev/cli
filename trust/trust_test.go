@@ -1,12 +1,12 @@
 package trust
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"flag"
 	"os"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/anchordotdev/cli"
@@ -45,6 +45,10 @@ func TestTrust(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	headerPattern := regexp.MustCompile(`Installing "[^"]+ - AnchorCA" \w+ \([a-z0-9]+\) certificate:$`)
+	installPattern := regexp.MustCompile(`  - installed in the mock store.$`)
+	skipPattern := regexp.MustCompile(`  - skipped awaiting broader support.$`)
+
 	t.Run("default to personal org and localhost realm", func(t *testing.T) {
 		cmd := &Command{
 			Config: cfg,
@@ -55,15 +59,24 @@ func TestTrust(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		msgPattern := regexp.MustCompile(` - AnchorCA" \w+ cert \([a-z0-9]+\) installed in the mock store$`)
-
-		for _, line := range strings.Split(buf.String(), "\n") {
-			if len(line) == 0 {
-				continue
+		scanner := bufio.NewScanner(buf)
+		if !scanner.Scan() {
+			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
+		}
+		if line := scanner.Text(); line != sudoWarning {
+			t.Errorf("want output %q to match %q", line, sudoWarning)
+		}
+		for scanner.Scan() {
+			if line := scanner.Text(); !headerPattern.MatchString(line) {
+				t.Errorf("want output %q to match %q", line, headerPattern)
 			}
 
-			if !msgPattern.MatchString(line) {
-				t.Errorf("want output %q to match %q", line, msgPattern)
+			if !scanner.Scan() {
+				t.Fatalf("want detail line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
+			}
+
+			if line := scanner.Text(); !(installPattern.MatchString(line) || skipPattern.MatchString(line)) {
+				t.Errorf("want output %q to match %q or %q", line, installPattern, skipPattern)
 			}
 		}
 	})
@@ -81,15 +94,24 @@ func TestTrust(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		msgPattern := regexp.MustCompile(` - AnchorCA" \w+ cert \([a-z0-9]+\) installed in the mock store$`)
-
-		for _, line := range strings.Split(buf.String(), "\n") {
-			if len(line) == 0 {
-				continue
+		scanner := bufio.NewScanner(buf)
+		if !scanner.Scan() {
+			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
+		}
+		if line := scanner.Text(); line != sudoWarning {
+			t.Errorf("want output %q to match %q", line, sudoWarning)
+		}
+		for scanner.Scan() {
+			if line := scanner.Text(); !headerPattern.MatchString(line) {
+				t.Errorf("want output %q to match %q", line, headerPattern)
 			}
 
-			if !msgPattern.MatchString(line) {
-				t.Errorf("want output %q to match %q", line, msgPattern)
+			if !scanner.Scan() {
+				t.Fatalf("want detail line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
+			}
+
+			if line := scanner.Text(); !(installPattern.MatchString(line) || skipPattern.MatchString(line)) {
+				t.Errorf("want output %q to match %q or %q", line, installPattern, skipPattern)
 			}
 		}
 	})

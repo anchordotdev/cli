@@ -20,6 +20,10 @@ import (
 	"github.com/anchordotdev/cli/truststore"
 )
 
+const (
+	sudoWarning = "! Anchor needs sudo permission to add the specified certificates to your local trust stores."
+)
+
 type Command struct {
 	Config *cli.Config
 }
@@ -88,6 +92,8 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 		log.Fatal(err)
 	}
 
+	fmt.Fprintln(tty, sudoWarning)
+
 	rootFS := truststore.RootFS()
 	systemStore := &truststore.Platform{
 		HomeDir: homeDir,
@@ -131,23 +137,26 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 			UniqueName: uniqueName,
 		}
 
-		if c.Config.Trust.MockMode {
-			fmt.Fprintf(tty, "\"%s\" %s cert (%s) installed in the mock store\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
+		if ca.SignatureAlgorithm == x509.PureEd25519 {
+			fmt.Fprintf(tty, "Installing \"%s\" %s (%s) certificate:\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
+			fmt.Fprintf(tty, "  - skipped awaiting broader support.\n")
 			continue
 		}
 
-		if ca.SignatureAlgorithm == x509.PureEd25519 {
-			fmt.Fprintf(tty, "skipping \"%s\" %s cert (%s), Ed25519 certificates are not yet supported\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
+		fmt.Fprintf(tty, "Installing \"%s\" %s (%s) certificate:\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
+
+		if c.Config.Trust.MockMode {
+			fmt.Fprintf(tty, "  - installed in the mock store.\n")
 			continue
 		}
 
 		if installed, err := systemStore.InstallCA(ca); installed {
-			fmt.Fprintf(tty, "\"%s\" %s cert (%s) installed in the system store\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
+			fmt.Fprintf(tty, "  - installed in the system store.\n")
 		} else if err != nil {
 			return err
 		}
 		if installed, err := nssStore.InstallCA(ca); installed {
-			fmt.Fprintf(tty, "\"%s\" %s cert (%s) installed in the NSS store\n", ca.Subject.CommonName, ca.PublicKeyAlgorithm, uniqueName)
+			fmt.Fprintf(tty, "  - installed in the Network Security Services (NSS) store.\n")
 		} else if err != nil {
 			return err
 		}
