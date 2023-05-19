@@ -2,8 +2,10 @@ package truststore
 
 import (
 	"bytes"
+	"errors"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -123,6 +125,11 @@ func (s *NSS) CheckCA(ca *CA) (installed bool, err error) {
 	})
 
 	if err != nil {
+		var exerr *exec.ExitError
+		if errors.As(err, &exerr) && exerr.ProcessState.ExitCode() == 255 {
+			return false, nil
+		}
+
 		return false, Error{
 			Op: OpCheck,
 

@@ -2,12 +2,14 @@ package truststore
 
 import (
 	"bytes"
+	"encoding/pem"
+	"errors"
 	"fmt"
-	"io/fs"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 )
 
 var nssBrowsers = "Firefox and/or Chrome/Chromium"
@@ -15,7 +17,7 @@ var nssBrowsers = "Firefox and/or Chrome/Chromium"
 type Platform struct {
 	HomeDir string
 
-	DataFS fs.StatFS
+	DataFS DataFS
 	SysFS  CmdFS
 
 	inito                sync.Once
@@ -73,6 +75,32 @@ func (s *Platform) check() (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (s *Platform) checkCA(ca *CA) (bool, error) {
+	if ok, err := s.check(); !ok {
+		return ok, err
+	}
+
+	buf, err := s.DataFS.ReadFile(s.trustFilenamePath(ca))
+	if err != nil {
+		if errors.Is(err, syscall.ENOENT) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	var blk *pem.Block
+	for len(buf) > 0 {
+		if blk, buf = pem.Decode(buf); blk == nil {
+			return false, nil
+		}
+
+		if bytes.Equal(ca.Raw, blk.Bytes) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (s *Platform) installCA(ca *CA) (bool, error) {

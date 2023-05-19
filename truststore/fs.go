@@ -1,10 +1,15 @@
 package truststore
 
 import (
+	"errors"
 	"io/fs"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
+	"reflect"
+	"strings"
 	"sync"
 )
 
@@ -17,14 +22,29 @@ type CmdFS interface {
 	LookPath(cmd string) (string, error)
 }
 
-func RootFS() CmdFS {
+type DataFS interface {
+	fs.StatFS
+	fs.ReadFileFS
+
+	AppendToFile(name string, p []byte) error
+}
+
+type FS interface {
+	CmdFS
+	DataFS
+}
+
+func RootFS() FS {
 	return &rootFS{
-		StatFS: os.DirFS("/").(fs.StatFS),
+		StatFS:   os.DirFS("/").(fs.StatFS),
+		rootPath: "/",
 	}
 }
 
 type rootFS struct {
 	fs.StatFS
+
+	rootPath string
 
 	sudoWarningOnce sync.Once
 }
@@ -67,4 +87,55 @@ func (r *rootFS) SudoExec(cmd *exec.Cmd) (out []byte, err error) {
 
 func (r *rootFS) LookPath(cmd string) (string, error) {
 	return exec.LookPath(cmd)
+}
+
+func (r *rootFS) AppendToFile(name string, p []byte) error {
+	if err := r.checkFile(name); err != nil {
+		return err
+	}
+
+	f, err := os.OpenFile(filepath.Join(r.rootPath, name), os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if _, err := f.Write(p); err != nil {
+		return err
+	}
+	return f.Close()
+}
+
+func (r *rootFS) ReadFile(name string) ([]byte, error) {
+	if err := r.checkFile(name); err != nil {
+		return nil, err
+	}
+
+	f, err := os.OpenFile(filepath.Join(r.rootPath, name), os.O_RDONLY, 0444)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return ioutil.ReadAll(f)
+}
+
+func (r *rootFS) checkFile(name string) error {
+	infoFS, err := r.StatFS.Stat(strings.Trim(name, string(os.PathSeparator)))
+	if err != nil {
+		return err
+	}
+
+	infoOS, err := os.Stat(filepath.Join(r.rootPath, name))
+	if err != nil {
+		return err
+	}
+
+	if infoFS.Name() == infoOS.Name() && infoFS.Size() == infoOS.Size() &&
+		infoFS.Mode() == infoOS.Mode() && infoFS.ModTime().Equal(infoOS.ModTime()) &&
+		reflect.DeepEqual(infoFS.Sys(), infoOS.Sys()) {
+		return nil
+	}
+
+	return errors.New("file system setup is misconfigured or corrupt")
 }

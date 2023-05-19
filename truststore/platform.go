@@ -16,6 +16,25 @@ func (s *Platform) Check() (bool, error) {
 	return ok, err
 }
 
+func (s *Platform) CheckCA(ca *CA) (installed bool, err error) {
+	if _, cerr := s.check(); cerr != nil {
+		defer func() {
+			err = Error{
+				Op: OpCheck,
+
+				Warning: PlatformError{
+					Err: cerr,
+
+					NSSBrowsers: nssBrowsers,
+					RootCA:      ca.FilePath,
+				},
+			}
+		}()
+	}
+
+	return s.checkCA(ca)
+}
+
 func (s *Platform) InstallCA(ca *CA) (installed bool, err error) {
 	if _, cerr := s.check(); cerr != nil {
 		defer func() {

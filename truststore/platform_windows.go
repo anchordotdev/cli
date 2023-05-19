@@ -45,6 +45,10 @@ func (s *Platform) check() (bool, error) {
 	return true, nil
 }
 
+func (s *Platform) checkCA(ca *CA) (bool, error) {
+	return false, nil
+}
+
 func (s *Platform) installCA(ca *CA) (bool, error) {
 	// Load cert
 	cert, err := ioutil.ReadFile(ca.FilePath)

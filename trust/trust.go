@@ -109,6 +109,13 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 		SysFS:  rootFS,
 	}
 
+	brewStore := &truststore.Brew{
+		RootDir: "/",
+
+		DataFS: rootFS,
+		SysFS:  rootFS,
+	}
+
 	for _, cert := range *certs.Items {
 		blk, _ := pem.Decode([]byte(cert.TextualEncoding))
 
@@ -150,17 +157,48 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 			continue
 		}
 
-		if installed, err := systemStore.InstallCA(ca); installed {
-			fmt.Fprintf(tty, "  - installed in the system store.\n")
-		} else if err != nil {
+		if err := install(tty, ca, systemStore, "system"); err != nil {
 			return err
 		}
-		if installed, err := nssStore.InstallCA(ca); installed {
-			fmt.Fprintf(tty, "  - installed in the Network Security Services (NSS) store.\n")
-		} else if err != nil {
+		if err := install(tty, ca, nssStore, "Network Security Services (NSS)"); err != nil {
+			return err
+		}
+		if err := install(tty, ca, brewStore, "Homebrew OpenSSL (ca-certificates)"); err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+type trustStore interface {
+	Check() (bool, error)
+	CheckCA(*truststore.CA) (bool, error)
+	InstallCA(*truststore.CA) (bool, error)
+}
+
+func install(tty termenv.File, ca *truststore.CA, store trustStore, name string) error {
+	if ok, err := store.Check(); !ok {
+		if err != nil {
+			fmt.Fprintf(tty, "  - skipping the %s store: %s\n", name, err)
+		} else {
+			fmt.Fprintf(tty, "  - skipping the %s store\n", name)
+		}
+		return nil
+	}
+
+	if ok, err := store.CheckCA(ca); err != nil {
+		fmt.Fprintf(tty, "  - skipping the %s store: %s\n", name, err)
+		return nil
+	} else if ok {
+		fmt.Fprintf(tty, "  - already installed in the %s store.\n", name)
+		return nil
+	}
+
+	if installed, err := store.InstallCA(ca); err != nil {
+		return err
+	} else if installed {
+		fmt.Fprintf(tty, "  - installed in the %s store.\n", name)
+	}
 	return nil
 }

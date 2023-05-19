@@ -3,6 +3,7 @@ package truststore
 import (
 	"bytes"
 	"encoding/asn1"
+	"encoding/pem"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
@@ -72,6 +73,30 @@ func (s *Platform) check() (bool, error) {
 	})
 
 	return true, nil
+}
+
+func (s *Platform) checkCA(ca *CA) (bool, error) {
+	args := []string{
+		"find-certificate", "-a", "-c", ca.Subject.CommonName,
+		"-p", "/Library/Keychains/System.keychain",
+	}
+	out, err := s.SysFS.Exec(s.SysFS.Command("security", args...))
+	if err != nil {
+		return false, fatalCmdErr(err, "security find-certificate", out)
+	}
+
+	var blk *pem.Block
+	for buf := []byte(out); len(buf) > 0; {
+		if blk, buf = pem.Decode(buf); blk == nil {
+			return false, nil
+		}
+
+		if bytes.Equal(ca.Raw, blk.Bytes) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (s *Platform) installCA(ca *CA) (bool, error) {
