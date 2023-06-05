@@ -30,6 +30,13 @@ type Command struct {
 func (c *Command) Execute(ctx context.Context, cfg *Config) error {
 	defaults.SetDefaults(cfg)
 
+	// enable ANSI processing for Windows, see: https://github.com/muesli/termenv#platform-support
+	restoreConsole, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
+	if err != nil {
+		panic(err)
+	}
+	defer restoreConsole()
+
 	cmd := c.cobraCommand(ctx, reflect.ValueOf(cfg))
 
 	if err := envdecode.Decode(cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {

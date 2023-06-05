@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/api/apitest"
 )
 
@@ -21,13 +22,9 @@ func TestWhoAmI(t *testing.T) {
 			Config: cfg,
 		}
 
-		buf, err := apitest.RunTUI(ctx, cmd.TUI())
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if want, got := "Sign-in required!\n", buf.String(); want != got {
-			t.Errorf("want output %q, got %q", want, got)
+		_, err := apitest.RunTUI(ctx, cmd.TUI())
+		if want, got := api.ErrSignedOut, err; want != got {
+			t.Fatalf("want signin failure error %q, got %q", want, got)
 		}
 	})
 

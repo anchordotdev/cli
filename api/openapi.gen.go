@@ -21,6 +21,30 @@ const (
 	Revoked CredentialStatus = "revoked"
 )
 
+// AuthCliCodesResponse defines model for auth_cli_codes_response.
+type AuthCliCodesResponse struct {
+	// DeviceCode Unique code associated with origin device for CLI auth flow.
+	DeviceCode string `json:"device_code"`
+
+	// ExpiresIn Number of seconds until device and user codes expire, defaults to 900s (15m).
+	ExpiresIn int32 `json:"expires_in"`
+
+	// Interval Minimum number of seconds to wait before re-polling during CLI auth flow, defaults to 5s.
+	Interval int32 `json:"interval"`
+
+	// UserCode User verification code to be presented for the user to enter into a browser, formed by 8 characters with a hyphen in the middle.
+	UserCode string `json:"user_code"`
+
+	// VerificationUri The URL where the user will need to enter their code to complete the CLI auth flow.
+	VerificationUri string `json:"verification_uri"`
+}
+
+// AuthCliPatTokensResponse defines model for auth_cli_pat_tokens_response.
+type AuthCliPatTokensResponse struct {
+	// PatToken Authenticated token for user API interactions.
+	PatToken string `json:"pat_token"`
+}
+
 // Credential defines model for credential.
 type Credential struct {
 	// CreatedAt UTC time when credential was created.
@@ -92,8 +116,17 @@ type PathRealmParam = string
 // QueryCaParam defines model for query_ca_param.
 type QueryCaParam = string
 
+// CreateCliTokenJSONBody defines parameters for CreateCliToken.
+type CreateCliTokenJSONBody struct {
+	// DeviceCode Unique code associated with origin device for CLI auth flow.
+	DeviceCode string `json:"device_code"`
+}
+
 // GetCredentialsParams defines parameters for GetCredentials.
 type GetCredentialsParams struct {
 	// CaParam ca for operation
 	CaParam *QueryCaParam `form:"ca_param,omitempty" json:"ca_param,omitempty"`
 }
+
+// CreateCliTokenJSONRequestBody defines body for CreateCliToken for application/json ContentType.
+type CreateCliTokenJSONRequestBody CreateCliTokenJSONBody

@@ -36,10 +36,6 @@ func (c Command) TUI() cli.TUI {
 
 func (c *Command) run(ctx context.Context, tty termenv.File) error {
 	anc, err := api.Client(c.Config)
-	if err == api.ErrSignedOut {
-		fmt.Fprintf(tty, "Authentication required!\n")
-		return nil
-	}
 	if err != nil {
 		return err
 	}
@@ -49,7 +45,7 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return errors.New("unexpected response")
+		return fmt.Errorf("unexpected response code: %d", res.StatusCode)
 	}
 
 	org, realm := c.Config.Trust.Org, c.Config.Trust.Realm
@@ -71,7 +67,7 @@ func (c *Command) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return errors.New("unexpected response")
+		return fmt.Errorf("unexpected response code: %d", res.StatusCode)
 	}
 
 	var certs struct {

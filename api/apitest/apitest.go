@@ -349,7 +349,8 @@ func RunTUI(ctx context.Context, tui cli.TUI) (*bytes.Buffer, error) {
 	}
 	tty.w = io.MultiWriter(ptmx, &tty.buf)
 
-	output := termenv.NewOutput(tty)
+	output := termenv.NewOutput(tty, termenv.WithProfile(termenv.Ascii))
+	termenv.SetDefaultOutput(output)
 	if err := tui.Run(ctx, output.TTY()); err != nil {
 		return nil, err
 	}

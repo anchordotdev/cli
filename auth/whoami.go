@@ -25,10 +25,6 @@ func (w WhoAmI) TUI() cli.TUI {
 
 func (w *WhoAmI) run(ctx context.Context, tty termenv.File) error {
 	anc, err := api.Client(w.Config)
-	if err == api.ErrSignedOut {
-		fmt.Fprintf(tty, "Sign-in required!\n")
-		return nil
-	}
 	if err != nil {
 		return err
 	}

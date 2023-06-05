@@ -85,7 +85,10 @@ func (r responseChecker) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, fmt.Errorf("request error %s %s: %w", req.Method, req.URL.Path, err)
 	}
 
-	if res.StatusCode == 500 {
+	switch res.StatusCode {
+	case http.StatusForbidden:
+		return nil, ErrSignedOut
+	case http.StatusInternalServerError:
 		return nil, fmt.Errorf("request failed: %w", err)
 	}
 	if contentType := res.Header.Get("Content-Type"); !jsonMediaTypes.Matches(contentType) {
