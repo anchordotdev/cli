@@ -25,6 +25,8 @@ type Command struct {
 	Group string
 
 	SubCommands []*Command
+
+	Preflight func(context.Context) error
 }
 
 func (c *Command) Execute(ctx context.Context, cfg *Config) error {
@@ -52,6 +54,12 @@ func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.C
 		Short:   c.Short,
 		Long:    c.Long,
 		GroupID: c.Group,
+	}
+
+	if c.Preflight != nil {
+		cmd.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
+			return c.Preflight(ctx)
+		}
 	}
 
 	if c.Run != nil {

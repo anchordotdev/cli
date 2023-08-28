@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/google/go-github/v54/github"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/auth"
@@ -85,9 +87,17 @@ var (
 				`),
 			},
 		},
+
+		Preflight: versionCheck,
 	}
 
 	cfg = new(cli.Config)
+
+	// Version info set by GoReleaser via ldflags
+
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 func main() {
@@ -97,4 +107,19 @@ func main() {
 	if err := cmd.Execute(ctx, cfg); err != nil {
 		os.Exit(1)
 	}
+}
+
+func versionCheck(ctx context.Context) error {
+	if version == "dev" {
+		return nil
+	}
+
+	release, _, err := github.NewClient(nil).Repositories.GetLatestRelease(ctx, "anchordotdev", "cli")
+	if err != nil {
+		return err
+	}
+	if release.TagName == nil || *release.TagName != "v"+version {
+		return fmt.Errorf("Anchor CLI v%s is out of date, run `brew upgrade anchordotdev/tap/anchor` to install the latest", version)
+	}
+	return nil
 }

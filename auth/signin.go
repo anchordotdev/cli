@@ -113,6 +113,8 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 				switch errorsRes.Type {
 				case "urn:anchordev:api:cli-auth:authorization-pending":
 					time.Sleep(time.Duration(codes.Interval) * time.Second)
+				case "urn:anchordev:api:cli-auth:expired-device-code":
+					return fmt.Errorf("Your authorization request has expired, please try again.")
 				case "urn:anchordev:api:cli-auth:incorrect-device-code":
 					return fmt.Errorf("Your authorization request was not found, please try again.")
 				default:
