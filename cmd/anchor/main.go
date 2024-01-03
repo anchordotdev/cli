@@ -63,7 +63,7 @@ var (
 
 						Name:  "whoami",
 						Use:   "whoami",
-						Short: "Identitify your account",
+						Short: "Identify current account",
 						Long: heredoc.Doc(`
 							Print the details of the Anchor account for your local system user.
 						`),

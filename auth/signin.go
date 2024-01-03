@@ -41,7 +41,7 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	codesRes, err := anc.Post("/auth/cli/codes", "application/json", nil)
+	codesRes, err := anc.Post("/cli/codes", "application/json", nil)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 			if err = json.NewEncoder(body).Encode(req); err != nil {
 				return err
 			}
-			tokensRes, err := anc.Post("/auth/cli/pat_tokens", "application/json", body)
+			tokensRes, err := anc.Post("/cli/pat-tokens", "application/json", body)
 			if err != nil {
 				return err
 			}
