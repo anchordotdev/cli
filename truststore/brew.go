@@ -2,7 +2,9 @@ package truststore
 
 import (
 	"bytes"
+	"crypto/x509"
 	"encoding/pem"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -71,6 +73,36 @@ func (s *Brew) CheckCA(ca *CA) (bool, error) {
 	return false, nil
 }
 
+func (s *Brew) Description() string { return "Homebrew OpenSSL (ca-certificates)" }
+
+func (s *Brew) ListCAs() ([]*CA, error) {
+	if ok, err := s.Check(); !ok {
+		return nil, err
+	}
+
+	buf, err := s.DataFS.ReadFile(s.certPath)
+	if err != nil {
+		return nil, err
+	}
+
+	var cas []*CA
+	for p, buf := pem.Decode(buf); p != nil; p, buf = pem.Decode(buf) {
+		cert, err := x509.ParseCertificate(p.Bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		ca := &CA{
+			Certificate: cert,
+			UniqueName:  cert.SerialNumber.Text(16),
+		}
+
+		cas = append(cas, ca)
+	}
+
+	return cas, nil
+}
+
 func (s *Brew) InstallCA(ca *CA) (bool, error) {
 	if ok, err := s.Check(); !ok {
 		return ok, err
@@ -82,6 +114,52 @@ func (s *Brew) InstallCA(ca *CA) (bool, error) {
 	}
 
 	if err := s.DataFS.AppendToFile(s.certPath, pem.EncodeToMemory(blk)); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (s *Brew) UninstallCA(ca *CA) (bool, error) {
+	if ok, err := s.Check(); !ok {
+		return false, err
+	}
+
+	tmpf := s.certPath + ".tmp"
+	if _, err := s.DataFS.Stat(tmpf); err != nil && !os.IsNotExist(err) {
+		return false, err
+	}
+
+	odata, err := s.DataFS.ReadFile(s.certPath)
+	if err != nil {
+		return false, err
+	}
+	ndata := make([]byte, 0, len(odata))
+
+	for buf := odata; len(buf) > 0; {
+		blk, rem := pem.Decode(buf)
+		if blk == nil {
+			break
+		}
+
+		data := buf[:len(buf)-len(rem)]
+		buf = rem
+
+		cert, err := x509.ParseCertificate(blk.Bytes)
+		if err != nil {
+			return false, err
+		}
+		if bytes.Equal(cert.Raw, ca.Raw) {
+			continue
+		}
+
+		ndata = append(ndata, data...)
+	}
+
+	if err := s.DataFS.AppendToFile(tmpf, ndata); err != nil {
+		s.DataFS.Remove(tmpf)
+		return false, err
+	}
+	if err := s.DataFS.Rename(tmpf, s.certPath); err != nil {
 		return false, err
 	}
 	return true, nil

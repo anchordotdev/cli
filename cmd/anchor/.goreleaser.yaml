@@ -26,9 +26,14 @@ archives:
       format: zip
 
 brews:
-  - tap:
-      owner: anchordotdev
+  - repository:
       name: homebrew-tap
+      owner: anchordotdev
 
+    description: Command-line tools for Anchor.dev
     folder: Formula
     homepage: https://anchor.dev/
+    license: MIT
+
+    test: |
+      assert_match "anchor is a command line interface for the Anchor certificate management platform.", shell_output("#{bin}/anchor")

@@ -54,6 +54,24 @@ func (s *Platform) InstallCA(ca *CA) (installed bool, err error) {
 	return s.installCA(ca)
 }
 
+func (s *Platform) ListCAs() (cas []*CA, err error) {
+	if _, cerr := s.check(); cerr != nil {
+		defer func() {
+			err = Error{
+				Op: OpList,
+
+				Warning: PlatformError{
+					Err: cerr,
+
+					NSSBrowsers: nssBrowsers,
+				},
+			}
+		}()
+	}
+
+	return s.listCAs()
+}
+
 func (s *Platform) UninstallCA(ca *CA) (uninstalled bool, err error) {
 	if _, cerr := s.check(); cerr != nil {
 		defer func() {

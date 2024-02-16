@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/anchordotdev/cli/ui"
 	"github.com/joeshaw/envdecode"
 	"github.com/mcuadros/go-defaults"
 	"github.com/muesli/termenv"
@@ -16,13 +17,15 @@ import (
 )
 
 type Command struct {
-	TUI
+	UI
 
 	Name        string
 	Use         string
 	Short, Long string
 
 	Group string
+
+	Hidden bool
 
 	SubCommands []*Command
 
@@ -54,6 +57,7 @@ func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.C
 		Short:   c.Short,
 		Long:    c.Long,
 		GroupID: c.Group,
+		Hidden:  c.Hidden,
 	}
 
 	if c.Preflight != nil {
@@ -62,11 +66,42 @@ func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.C
 		}
 	}
 
-	if c.Run != nil {
+	switch {
+	case c.RunTUI != nil:
 		cmd.RunE = func(_ *cobra.Command, args []string) error {
 			// TODO: positional args
 
-			return c.Run(ctx, termenv.DefaultOutput().TTY())
+			ctx, cancel := context.WithCancelCause(ctx)
+			defer cancel(nil)
+
+			drv, prg := ui.NewDriverTUI(ctx)
+			errc := make(chan error)
+
+			go func() {
+				defer close(errc)
+
+				_, err := prg.Run()
+				cancel(err)
+
+				errc <- err
+			}()
+
+			if err := c.RunTUI(ctx, drv); err != nil && err != context.Canceled {
+				prg.Quit()
+
+				<-errc // TODO: report this somewhere?
+				return err
+			}
+
+			prg.Quit()
+
+			return <-errc // TODO: special handling for a UI error
+		}
+	case c.RunTTY != nil:
+		cmd.RunE = func(_ *cobra.Command, args []string) error {
+			// TODO: positional args
+
+			return c.RunTTY(ctx, termenv.DefaultOutput().TTY())
 		}
 	}
 
@@ -86,7 +121,7 @@ func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.C
 
 func (c *Command) cobraBuild(cmd *cobra.Command, cfgv reflect.Value, cmdVals map[string]reflect.Value) {
 	flags := cmd.Flags()
-	if c.TUI.Run == nil {
+	if c.UI.RunTTY == nil {
 		flags = cmd.PersistentFlags()
 	}
 

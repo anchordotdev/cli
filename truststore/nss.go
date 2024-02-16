@@ -2,6 +2,8 @@ package truststore
 
 import (
 	"bytes"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"io/fs"
 	"os"
@@ -144,6 +146,8 @@ func (s *NSS) CheckCA(ca *CA) (installed bool, err error) {
 	return count != 0, err
 }
 
+func (s *NSS) Description() string { return "Network Security Services (NSS)" }
+
 func (s *NSS) InstallCA(ca *CA) (installed bool, err error) {
 	s.init()
 
@@ -207,6 +211,97 @@ func (s *NSS) InstallCA(ca *CA) (installed bool, err error) {
 	return true, nil
 }
 
+func (s *NSS) ListCAs() ([]*CA, error) {
+	s.init()
+
+	if s.certutilPath == "" {
+		return nil, NSSError{
+			Err: ErrNoNSS,
+
+			CertutilInstallHelp: s.certutilInstallHelp,
+			NSSBrowsers:         nssBrowsers,
+		}
+	}
+
+	var pemData []byte
+	_, err := s.forEachNSSProfile(func(profile string) error {
+		out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile))
+		if err != nil {
+			return err
+		}
+
+		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+		if len(lines) < 2 {
+			return NSSError{
+				Err: errors.New("unexpected certutil output"),
+
+				CertutilInstallHelp: s.certutilInstallHelp,
+				NSSBrowsers:         nssBrowsers,
+			}
+		}
+
+		padLen := strings.Index(lines[0], "Trust Attributes")
+		if padLen <= 0 {
+			return NSSError{
+				Err: errors.New("unexpected certutil output format"),
+
+				CertutilInstallHelp: s.certutilInstallHelp,
+				NSSBrowsers:         nssBrowsers,
+			}
+		}
+
+		if len(lines) == 2 {
+			return nil // no certs in the output
+		}
+
+		var nicks []string
+		for _, line := range lines[3:] {
+			if len(line) < padLen {
+				return NSSError{
+					Err: errors.New("unexpected certutil line format"),
+
+					CertutilInstallHelp: s.certutilInstallHelp,
+					NSSBrowsers:         nssBrowsers,
+				}
+			}
+
+			nicks = append(nicks, strings.TrimSpace(line[:padLen]))
+		}
+
+		for _, nick := range nicks {
+			out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile, "-n", nick, "-a"))
+			if err != nil {
+				return err
+			}
+
+			pemData = append(pemData, out...)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var cas []*CA
+	for p, buf := pem.Decode(pemData); p != nil; p, buf = pem.Decode(buf) {
+		cert, err := x509.ParseCertificate(p.Bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		ca := &CA{
+			Certificate: cert,
+			UniqueName:  cert.SerialNumber.Text(16),
+		}
+
+		cas = append(cas, ca)
+	}
+
+	return cas, nil
+}
+
 func (s *NSS) UninstallCA(ca *CA) (bool, error) {
 	s.init()
 
@@ -257,6 +352,7 @@ func (s *NSS) UninstallCA(ca *CA) (bool, error) {
 		}
 		return nil
 	})
+
 	return err == nil, err
 }
 

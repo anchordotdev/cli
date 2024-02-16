@@ -2,8 +2,8 @@ package truststore
 
 import (
 	"errors"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/user"
@@ -27,6 +27,8 @@ type DataFS interface {
 	fs.ReadFileFS
 
 	AppendToFile(name string, p []byte) error
+	Rename(oldpath, newpath string) error
+	Remove(name string) error
 }
 
 type FS interface {
@@ -90,13 +92,15 @@ func (r *rootFS) LookPath(cmd string) (string, error) {
 }
 
 func (r *rootFS) AppendToFile(name string, p []byte) error {
-	if err := r.checkFile(name); err != nil {
-		return err
-	}
-
 	f, err := os.OpenFile(filepath.Join(r.rootPath, name), os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		if !os.IsNotExist(err) {
+			return err
+		}
+
+		if f, err = os.Create(filepath.Join(r.rootPath, name)); err != nil {
+			return err
+		}
 	}
 	defer f.Close()
 
@@ -104,6 +108,15 @@ func (r *rootFS) AppendToFile(name string, p []byte) error {
 		return err
 	}
 	return f.Close()
+}
+
+func (r *rootFS) Rename(oldpath, newpath string) error {
+	src, dst := filepath.Join(r.rootPath, oldpath), filepath.Join(r.rootPath, newpath)
+	return os.Rename(src, dst)
+}
+
+func (r *rootFS) Remove(name string) error {
+	return os.Remove(filepath.Join(r.rootPath, name))
 }
 
 func (r *rootFS) ReadFile(name string) ([]byte, error) {
@@ -117,7 +130,7 @@ func (r *rootFS) ReadFile(name string) ([]byte, error) {
 	}
 	defer f.Close()
 
-	return ioutil.ReadAll(f)
+	return io.ReadAll(f)
 }
 
 func (r *rootFS) checkFile(name string) error {

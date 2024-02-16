@@ -1,13 +1,23 @@
 package truststore
 
 import (
+	"crypto/subtle"
 	"crypto/x509"
 	"fmt"
 	"io/fs"
 	"os"
 	"strings"
-	"sync"
 )
+
+type Store interface {
+	Check() (bool, error)
+	Description() string
+
+	CheckCA(*CA) (bool, error)
+	InstallCA(*CA) (bool, error)
+	ListCAs() ([]*CA, error)
+	UninstallCA(*CA) (bool, error)
+}
 
 type CA struct {
 	*x509.Certificate
@@ -16,39 +26,8 @@ type CA struct {
 	UniqueName string
 }
 
-type Store struct {
-	CAROOT string
-	HOME   string
-
-	DataFS fs.StatFS
-	SysFS  CmdFS
-
-	hasNSS       bool
-	hasCertutil  bool
-	certutilPath string
-	initNSSOnce  sync.Once
-
-	systemTrustFilenameTemplate string
-	systemTrustCommand          []string
-	certutilInstallHelp         string
-	nssBrowsers                 string
-
-	hasJava    bool
-	hasKeytool bool
-
-	javaHome    string
-	cacertsPath string
-	keytoolPath string
-}
-
-func (s *Store) binaryExists(name string) bool {
-	_, err := s.SysFS.LookPath(name)
-	return err == nil
-}
-
-func (s *Store) pathExists(path string) bool {
-	_, err := s.DataFS.Stat(strings.Trim(path, string(os.PathSeparator)))
-	return err == nil
+func (c *CA) Equal(ca *CA) bool {
+	return c.UniqueName == ca.UniqueName && subtle.ConstantTimeCompare(c.Raw, ca.Raw) == 1
 }
 
 func fatalErr(err error, msg string) error {

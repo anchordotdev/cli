@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,13 +8,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/atotto/clipboard"
 	"github.com/cli/browser"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
+	"github.com/anchordotdev/cli/auth/models"
 	"github.com/anchordotdev/cli/keyring"
+	"github.com/anchordotdev/cli/ui"
 )
 
 var (
@@ -24,46 +26,62 @@ var (
 
 type SignIn struct {
 	Config *cli.Config
+
+	Preamble string
+	Source   string
 }
 
-func (s SignIn) TUI() cli.TUI {
-	return cli.TUI{
-		Run: s.run,
+func (s SignIn) UI() cli.UI {
+	return cli.UI{
+		RunTTY: s.runTTY,
+		RunTUI: s.RunTUI,
 	}
 }
 
-func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
+func (s *SignIn) runTTY(ctx context.Context, tty termenv.File) error {
 	output := termenv.DefaultOutput()
 	cp := output.ColorProfile()
 
-	anc, err := api.Client(s.Config)
+	fmt.Fprintln(tty,
+		output.String("# Run `anchor auth signin`").Bold(),
+	)
+
+	anc, err := api.NewClient(s.Config)
 	if err != nil && err != api.ErrSignedOut {
 		return err
 	}
 
-	codesRes, err := anc.Post("/cli/codes", "application/json", nil)
+	codes, err := anc.GenerateUserFlowCodes(ctx, s.Source)
 	if err != nil {
 		return err
 	}
-	if codesRes.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected response code: %d", codesRes.StatusCode)
-	}
 
-	var codes *api.AuthCliCodesResponse
-	if err = json.NewDecoder(codesRes.Body).Decode(&codes); err != nil {
-		return err
-	}
-
-	fmt.Fprintln(tty)
 	if isatty.IsTerminal(tty.Fd()) {
+		if err := clipboard.WriteAll(codes.UserCode); err != nil {
+			fmt.Fprintln(tty,
+				" ",
+				output.String("!").Background(cp.Color("#7000ff")),
+				output.String("Copy").Foreground(cp.Color("#ff6000")).Bold(),
+				"your user code:",
+				output.String(codes.UserCode).Background(cp.Color("#7000ff")).Bold(),
+			)
+		} else {
+			fmt.Fprintln(tty,
+				" ",
+				output.String("!").Background(cp.Color("#7000ff")),
+				"Copied your user code",
+				output.String(codes.UserCode).Background(cp.Color("#7000ff")).Bold(),
+				"to your clipboard.",
+			)
+		}
 		fmt.Fprintln(tty,
-			output.String("!").Foreground(cp.Color("#ff6000")),
-			"First copy your user code:",
-			output.String(codes.UserCode).Background(cp.Color("#7000ff")).Bold(),
+			" ",
+			output.String("| When prompted you will paste this code in your browser to connect your CLI.").Faint(),
 		)
 		fmt.Fprintln(tty,
-			"Then",
-			output.String("Press Enter").Bold(),
+			" ",
+			output.String("!").Background(cp.Color("#7000ff")),
+			output.String("Press Enter").Foreground(cp.Color("#ff6000")).Bold(),
 			"to open",
 			output.String(codes.VerificationUri).Faint().Underline(),
 			"in your browser...",
@@ -75,75 +93,29 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 		}
 	} else {
 		fmt.Fprintln(tty,
-			output.String("!").Foreground(cp.Color("#ff6000")),
-			"Open",
+			" ",
+			output.String("!").Background(cp.Color("#7000ff")),
+			output.String("Open").Foreground(cp.Color("#ff6000")).Bold(),
 			output.String(codes.VerificationUri).Faint().Underline(),
 			"in a browser and enter your user code:",
 			output.String(codes.UserCode).Bold(),
 		)
 	}
 
-	var looper = func() error {
-		for {
-			body := new(bytes.Buffer)
-			req := api.CreateCliTokenJSONRequestBody{
-				DeviceCode: codes.DeviceCode,
-			}
-			if err = json.NewEncoder(body).Encode(req); err != nil {
-				return err
-			}
-			tokensRes, err := anc.Post("/cli/pat-tokens", "application/json", body)
-			if err != nil {
-				return err
-			}
+	var patToken string
+	for patToken == "" {
+		if patToken, err = anc.CreatePATToken(ctx, codes.DeviceCode); err != nil {
+			return err
+		}
 
-			switch tokensRes.StatusCode {
-			case http.StatusOK:
-				var patTokens *api.AuthCliPatTokensResponse
-				if err = json.NewDecoder(tokensRes.Body).Decode(&patTokens); err != nil {
-					return err
-				}
-				s.Config.API.Token = patTokens.PatToken
-				return nil
-			case http.StatusBadRequest:
-				var errorsRes *api.Error
-				if err = json.NewDecoder(tokensRes.Body).Decode(&errorsRes); err != nil {
-					return err
-				}
-				switch errorsRes.Type {
-				case "urn:anchordev:api:cli-auth:authorization-pending":
-					time.Sleep(time.Duration(codes.Interval) * time.Second)
-				case "urn:anchordev:api:cli-auth:expired-device-code":
-					return fmt.Errorf("Your authorization request has expired, please try again.")
-				case "urn:anchordev:api:cli-auth:incorrect-device-code":
-					return fmt.Errorf("Your authorization request was not found, please try again.")
-				default:
-					return fmt.Errorf("unexpected error: %s", errorsRes.Detail)
-				}
-			default:
-				return fmt.Errorf("unexpected response code: %d", tokensRes.StatusCode)
-			}
+		if patToken == "" {
+			time.Sleep(time.Duration(codes.Interval) * time.Second)
 		}
 	}
-	if err := looper(); err != nil {
-		return err
-	}
+	s.Config.API.Token = patToken
 
-	anc, err = api.Client(s.Config)
+	userInfo, err := fetchUserInfo(s.Config)
 	if err != nil {
-		return err
-	}
-
-	res, err := anc.Get("")
-	if err != nil {
-		return err
-	}
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected response code: %d", res.StatusCode)
-	}
-
-	var userInfo *api.Root
-	if err := json.NewDecoder(res.Body).Decode(&userInfo); err != nil {
 		return err
 	}
 
@@ -154,10 +126,98 @@ func (s *SignIn) run(ctx context.Context, tty termenv.File) error {
 
 	fmt.Fprintln(tty)
 	fmt.Fprintf(tty,
-		"Success, hello %s!",
+		"  - Signed in as %s!",
 		output.String(userInfo.Whoami).Bold(),
 	)
 	fmt.Fprintln(tty)
 
 	return nil
+}
+
+func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
+	drv.Activate(ctx, models.SignInPreamble{
+		Message: s.Preamble,
+	})
+
+	anc, err := api.NewClient(s.Config)
+	if err != nil && err != api.ErrSignedOut {
+		return err
+	}
+
+	codes, err := anc.GenerateUserFlowCodes(ctx, s.Source)
+	if err != nil {
+		return err
+	}
+
+	// TODO: skipping TTY check since this is TUI mode, but is it needed?
+	clipboardErr := clipboard.WriteAll(codes.UserCode)
+
+	confirmc := make(chan struct{})
+	drv.Activate(ctx, &models.SignInPrompt{
+		ConfirmCh:       confirmc,
+		InClipboard:     (clipboardErr == nil),
+		UserCode:        codes.UserCode,
+		VerificationURL: codes.VerificationUri,
+	})
+
+	if !s.Config.NonInteractive {
+		select {
+		case <-confirmc:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+
+	if err := browser.OpenURL(codes.VerificationUri); err != nil {
+		return err
+	}
+
+	drv.Activate(ctx, new(models.SignInChecker))
+
+	var patToken string
+	for patToken == "" {
+		if patToken, err = anc.CreatePATToken(ctx, codes.DeviceCode); err != nil {
+			return err
+		}
+
+		if patToken == "" {
+			time.Sleep(time.Duration(codes.Interval) * time.Second)
+		}
+	}
+	s.Config.API.Token = patToken
+
+	userInfo, err := fetchUserInfo(s.Config)
+	if err != nil {
+		return err
+	}
+
+	kr := keyring.Keyring{Config: s.Config}
+	if err := kr.Set(keyring.APIToken, s.Config.API.Token); err != nil {
+		return err
+	}
+
+	drv.Send(models.UserSignInMsg(userInfo.Whoami))
+
+	return nil
+}
+
+func fetchUserInfo(cfg *cli.Config) (*api.Root, error) {
+	anc, err := api.NewClient(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := anc.Get("")
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected response code: %d", res.StatusCode)
+	}
+
+	var userInfo *api.Root
+	if err := json.NewDecoder(res.Body).Decode(&userInfo); err != nil {
+		return nil, err
+	}
+	return userInfo, nil
 }

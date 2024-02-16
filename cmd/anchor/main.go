@@ -10,6 +10,7 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/auth"
+	"github.com/anchordotdev/cli/lcl"
 	"github.com/anchordotdev/cli/trust"
 )
 
@@ -25,15 +26,15 @@ var (
 		`),
 
 		SubCommands: []*cli.Command{
-			&cli.Command{
+			{
 				Name:  "auth",
 				Use:   "auth <subcommand>",
 				Short: "Authentication",
 				Group: "user",
 
 				SubCommands: []*cli.Command{
-					&cli.Command{
-						TUI: auth.SignIn{Config: cfg}.TUI(),
+					{
+						UI: auth.SignIn{Config: cfg}.UI(),
 
 						Name:  "signin",
 						Use:   "signin",
@@ -45,8 +46,8 @@ var (
 							for the local system user.
 						`),
 					},
-					&cli.Command{
-						TUI: auth.SignOut{Config: cfg}.TUI(),
+					{
+						UI: auth.SignOut{Config: cfg}.UI(),
 
 						Name:  "signout",
 						Use:   "signout",
@@ -58,8 +59,8 @@ var (
 							system user.
 						`),
 					},
-					&cli.Command{
-						TUI: auth.WhoAmI{Config: cfg}.TUI(),
+					{
+						UI: auth.WhoAmI{Config: cfg}.UI(),
 
 						Name:  "whoami",
 						Use:   "whoami",
@@ -70,8 +71,26 @@ var (
 					},
 				},
 			},
-			&cli.Command{
-				TUI: trust.Command{Config: cfg}.TUI(),
+			{
+				UI: lcl.Command{Config: cfg}.UI(),
+
+				Name:   "lcl",
+				Use:    "lcl <subcommand>",
+				Short:  "lcl.host",
+				Hidden: true,
+
+				SubCommands: []*cli.Command{
+					{
+						UI: lcl.Detect{Config: cfg}.UI(),
+
+						Name:  "detect",
+						Use:   "detect",
+						Short: "Detect Framework/Language",
+					},
+				},
+			},
+			{
+				UI: trust.Sync{Config: cfg}.UI(),
 
 				Name:  "trust",
 				Use:   "trust [org[/realm[/ca]]]",
@@ -85,6 +104,41 @@ var (
 					After installation of the AnchorCA certificates, Leaf certificates under the
 					AnchorCA certificates will be trusted by browsers and programs on your system.
 				`),
+
+				SubCommands: []*cli.Command{
+					{
+						UI: trust.Audit{Config: cfg}.UI(),
+
+						Name:  "audit",
+						Use:   "audit [org[/realm[/ca]]]",
+						Short: "Local trust store audit",
+
+						Long: heredoc.Doc(`
+							Perform an audit of the local trust store(s) and report any expected, missing,
+							or extra CA certificates per store. A set of expected CAs is fetched for the
+							target org and (optional) realm. The default stores to audit are system, nss,
+							and homebrew.
+
+							CA certificate states:
+
+								* VALID:   an expected CA certificate is present in every trust store.
+								* MISSING: an expected CA certificate is missing in one or more stores.
+								* EXTRA:   an unexpected CA certificate is present in one or more stores.
+						`),
+					},
+					{
+						UI: trust.Clean{Config: cfg}.UI(),
+
+						Name:   "clean",
+						Use:    "clean TODO",
+						Short:  "clean the Local trust store(s)",
+						Hidden: true,
+
+						Long: heredoc.Doc(`
+						TODO
+						`),
+					},
+				},
 			},
 		},
 
@@ -96,8 +150,8 @@ var (
 	// Version info set by GoReleaser via ldflags
 
 	version = "dev"
-	commit  = "none"
-	date    = "unknown"
+	commit  = "none"    //lint:ignore U1000 set by GoReleaser
+	date    = "unknown" //lint:ignore U1000 set by GoReleaser
 )
 
 func main() {
@@ -119,7 +173,7 @@ func versionCheck(ctx context.Context) error {
 		return err
 	}
 	if release.TagName == nil || *release.TagName != "v"+version {
-		return fmt.Errorf("Anchor CLI v%s is out of date, run `brew upgrade anchordotdev/tap/anchor` to install the latest", version)
+		return fmt.Errorf("anchor CLI v%s is out of date, run `brew upgrade anchordotdev/tap/anchor` to install the latest", version)
 	}
 	return nil
 }

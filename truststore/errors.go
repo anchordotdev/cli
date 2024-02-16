@@ -20,6 +20,7 @@ type Op string
 const (
 	OpCheck     Op = "check"
 	OpInstall      = "install"
+	OpList         = "list"
 	OpSudo         = "sudo"
 	OpUninstall    = "uninstall"
 )

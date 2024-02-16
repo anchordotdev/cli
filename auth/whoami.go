@@ -17,14 +17,14 @@ type WhoAmI struct {
 	Config *cli.Config
 }
 
-func (w WhoAmI) TUI() cli.TUI {
-	return cli.TUI{
-		Run: w.run,
+func (w WhoAmI) UI() cli.UI {
+	return cli.UI{
+		RunTTY: w.run,
 	}
 }
 
 func (w *WhoAmI) run(ctx context.Context, tty termenv.File) error {
-	anc, err := api.Client(w.Config)
+	anc, err := api.NewClient(w.Config)
 	if err != nil {
 		return err
 	}

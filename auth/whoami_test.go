@@ -22,7 +22,7 @@ func TestWhoAmI(t *testing.T) {
 			Config: cfg,
 		}
 
-		_, err := apitest.RunTUI(ctx, cmd.TUI())
+		_, err := apitest.RunTTY(ctx, cmd.UI())
 		if want, got := api.ErrSignedOut, err; want != got {
 			t.Fatalf("want signin failure error %q, got %q", want, got)
 		}
@@ -42,7 +42,7 @@ func TestWhoAmI(t *testing.T) {
 			Config: cfg,
 		}
 
-		buf, err := apitest.RunTUI(ctx, cmd.TUI())
+		buf, err := apitest.RunTTY(ctx, cmd.UI())
 		if err != nil {
 			t.Fatal(err)
 		}

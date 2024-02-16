@@ -12,6 +12,7 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/api/apitest"
+	"github.com/anchordotdev/cli/truststore"
 )
 
 var srv = &apitest.Server{
@@ -37,7 +38,7 @@ func TestTrust(t *testing.T) {
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.Trust.MockMode = true
+	cfg.Trust.Stores = []string{"mock"}
 	cfg.Trust.NoSudo = true
 
 	var err error
@@ -45,16 +46,19 @@ func TestTrust(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	headerPattern := regexp.MustCompile(`Installing "[^"]+ - AnchorCA" \w+ \([a-z0-9]+\) certificate:$`)
-	installPattern := regexp.MustCompile(`  - installed in the mock store.$`)
-	skipPattern := regexp.MustCompile(`  - skipped awaiting broader support.$`)
+	header := "# Run `anchor trust`"
+	subheaderPattern := regexp.MustCompile(`  # Installing "[^"]+ - AnchorCA" \w+ \([a-z0-9]+\) certificate$`)
+	installPattern := regexp.MustCompile(`    - installed in the Mock store.$`)
+	skipPattern := regexp.MustCompile(`    - skipped awaiting broader support.$`)
 
 	t.Run("default to personal org and localhost realm", func(t *testing.T) {
+		defer func() { truststore.MockCAs = nil }()
+
 		cmd := &Command{
 			Config: cfg,
 		}
 
-		buf, err := apitest.RunTUI(ctx, cmd.TUI())
+		buf, err := apitest.RunTTY(ctx, cmd.UI())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -63,12 +67,20 @@ func TestTrust(t *testing.T) {
 		if !scanner.Scan() {
 			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
 		}
-		if line := scanner.Text(); line != sudoWarning {
-			t.Errorf("want output %q to match %q", line, sudoWarning)
+		if line := scanner.Text(); line != header {
+			t.Errorf("want output %q to match %q", line, header)
 		}
+
+		if !scanner.Scan() {
+			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
+		}
+		if line := scanner.Text(); line != "  ! "+sudoWarning {
+			t.Errorf("want output %q to match %q", line, "  ! "+sudoWarning)
+		}
+
 		for scanner.Scan() {
-			if line := scanner.Text(); !headerPattern.MatchString(line) {
-				t.Errorf("want output %q to match %q", line, headerPattern)
+			if line := scanner.Text(); !subheaderPattern.MatchString(line) {
+				t.Errorf("want output %q to match %q", line, subheaderPattern)
 			}
 
 			if !scanner.Scan() {
@@ -82,6 +94,8 @@ func TestTrust(t *testing.T) {
 	})
 
 	t.Run("specified org and realm", func(t *testing.T) {
+		defer func() { truststore.MockCAs = nil }()
+
 		cfg.Trust.Org = mustFetchPersonalOrgSlug(cfg)
 		cfg.Trust.Realm = "localhost"
 
@@ -89,7 +103,7 @@ func TestTrust(t *testing.T) {
 			Config: cfg,
 		}
 
-		buf, err := apitest.RunTUI(ctx, cmd.TUI())
+		buf, err := apitest.RunTTY(ctx, cmd.UI())
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -98,12 +112,19 @@ func TestTrust(t *testing.T) {
 		if !scanner.Scan() {
 			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
 		}
-		if line := scanner.Text(); line != sudoWarning {
-			t.Errorf("want output %q to match %q", line, sudoWarning)
+		if line := scanner.Text(); line != header {
+			t.Errorf("want output %q to match %q", line, header)
+		}
+
+		if !scanner.Scan() {
+			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
+		}
+		if line := scanner.Text(); line != "  ! "+sudoWarning {
+			t.Errorf("want output %q to match %q", line, "  ! "+sudoWarning)
 		}
 		for scanner.Scan() {
-			if line := scanner.Text(); !headerPattern.MatchString(line) {
-				t.Errorf("want output %q to match %q", line, headerPattern)
+			if line := scanner.Text(); !subheaderPattern.MatchString(line) {
+				t.Errorf("want output %q to match %q", line, subheaderPattern)
 			}
 
 			if !scanner.Scan() {
@@ -118,7 +139,7 @@ func TestTrust(t *testing.T) {
 }
 
 func mustFetchPersonalOrgSlug(cfg *cli.Config) string {
-	anc, err := api.Client(cfg)
+	anc, err := api.NewClient(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -133,5 +154,5 @@ func mustFetchPersonalOrgSlug(cfg *cli.Config) string {
 		panic(err)
 	}
 
-	return *userInfo.PersonalOrg.Slug
+	return userInfo.PersonalOrg.Slug
 }

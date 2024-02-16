@@ -2,11 +2,13 @@ package truststore
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"crypto/x509"
 	"encoding/asn1"
+	"encoding/hex"
 	"encoding/pem"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -66,6 +68,8 @@ type Platform struct {
 	firefoxProfiles     []string
 }
 
+func (s *Platform) Description() string { return "System (MacOS Keychain)" }
+
 func (s *Platform) check() (bool, error) {
 	s.inito.Do(func() {
 		s.certutilInstallHelp = certutilInstallHelp(s.SysFS)
@@ -112,7 +116,7 @@ func (s *Platform) installCA(ca *CA) (bool, error) {
 	// Make trustSettings explicit, as older Go does not know the defaults.
 	// https://github.com/golang/go/issues/24652
 
-	plistFile, err := ioutil.TempFile("", "trust-settings")
+	plistFile, err := os.CreateTemp("", "trust-settings")
 	if err != nil {
 		return false, fatalErr(err, "failed to create temp file")
 	}
@@ -126,7 +130,7 @@ func (s *Platform) installCA(ca *CA) (bool, error) {
 		return false, fatalCmdErr(err, "security trust-settings-export", out)
 	}
 
-	plistData, err := ioutil.ReadFile(plistFile.Name())
+	plistData, err := os.ReadFile(plistFile.Name())
 	if err != nil {
 		return false, fatalErr(err, "failed to read trust settings")
 	}
@@ -161,7 +165,7 @@ func (s *Platform) installCA(ca *CA) (bool, error) {
 	if plistData, err = plist.MarshalIndent(plistRoot, plist.XMLFormat, "\t"); err != nil {
 		return false, fatalErr(err, "failed to serialize trust settings")
 	}
-	if err = ioutil.WriteFile(plistFile.Name(), plistData, 0600); err != nil {
+	if err = os.WriteFile(plistFile.Name(), plistData, 0600); err != nil {
 		return false, fatalErr(err, "failed to write trust settings")
 	}
 
@@ -176,13 +180,65 @@ func (s *Platform) installCA(ca *CA) (bool, error) {
 	return true, nil
 }
 
+func (s *Platform) listCAs() ([]*CA, error) {
+	args := []string{
+		"find-certificate", "-a", "-p",
+	}
+
+	out, err := s.SysFS.Exec(s.SysFS.Command("security", args...))
+	if err != nil {
+		return nil, fatalCmdErr(err, "security add-trusted-cert", out)
+	}
+
+	var cas []*CA
+	for p, buf := pem.Decode(out); p != nil; p, buf = pem.Decode(buf) {
+		cert, err := x509.ParseCertificate(p.Bytes)
+		if err != nil {
+			if isDupExtErr(err) {
+				continue
+			}
+			return nil, err
+		}
+
+		ca := &CA{
+			Certificate: cert,
+			UniqueName:  cert.SerialNumber.Text(16),
+		}
+
+		cas = append(cas, ca)
+	}
+
+	return cas, nil
+}
+
+const untrustedCertOutput = "SecTrustSettingsRemoveTrustSettings: The specified item could not be found in the keychain.\n"
+
 func (s *Platform) uninstallCA(ca *CA) (bool, error) {
 	args := []string{
 		"remove-trusted-cert",
 		"-d", ca.FilePath,
 	}
 	if out, err := s.SysFS.SudoExec(s.SysFS.Command("security", args...)); err != nil {
-		return false, fatalCmdErr(err, "security remove-trusted-cert", out)
+		if !bytes.Equal(out, []byte(untrustedCertOutput)) {
+			return false, fatalCmdErr(err, "security remove-trusted-cert", out)
+		}
+	}
+
+	sum256 := sha256.Sum256(ca.Raw)
+
+	args = []string{
+		"delete-certificate",
+		"-Z", hex.EncodeToString(sum256[:]),
+	}
+
+	if out, err := s.SysFS.SudoExec(s.SysFS.Command("security", args...)); err != nil {
+		if !bytes.Equal(out, []byte(untrustedCertOutput)) {
+			return false, fatalCmdErr(err, "security delete-certificate", out)
+		}
 	}
 	return true, nil
+}
+
+func isDupExtErr(err error) bool {
+	return err.Error() == "x509: certificate contains duplicate extensions"
 }

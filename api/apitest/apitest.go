@@ -27,7 +27,7 @@ import (
 
 var (
 	proxy      = flag.Bool("prism-proxy", false, "run prism in proxy mode")
-	verbose    = flag.Bool("prism-verbose", false, "run prism in proxy mode")
+	verbose    = flag.Bool("prism-verbose", false, "verbose output for prism/rails servers")
 	oapiConfig = flag.String("oapi-config", "config/openapi.yml", "openapi spec file path")
 	lockfile   = flag.String("api-lockfile", "tmp/apitest.lock", "rails server lockfile path")
 )
@@ -36,7 +36,8 @@ type Server struct {
 	Host    string
 	RootDir string
 
-	URL string
+	URL       string
+	RailsPort string
 
 	proxy   bool
 	verbose bool
@@ -129,6 +130,7 @@ func (s *Server) StartProxy(ctx context.Context) error {
 		stopfn()
 		return err
 	}
+	s.RailsPort = port
 
 	if s.Host != "" {
 		host = s.Host
@@ -179,7 +181,7 @@ func (s *Server) StartProxy(ctx context.Context) error {
 }
 
 func (s *Server) startMock(ctx context.Context) (string, func() error, error) {
-	addr, err := unusedPort()
+	addr, err := UnusedPort()
 	if err != nil {
 		return "", nil, err
 	}
@@ -225,7 +227,7 @@ func (s *Server) startCmd(ctx context.Context, args []string) (func() error, err
 }
 
 func (s *Server) startRails(ctx context.Context) (string, func() error, error) {
-	addr, err := unusedPort()
+	addr, err := UnusedPort()
 	if err != nil {
 		return "", nil, err
 	}
@@ -247,7 +249,7 @@ func (s *Server) startRails(ctx context.Context) (string, func() error, error) {
 }
 
 func (s *Server) startProxy(ctx context.Context, upstreamAddr string) (string, func() error, error) {
-	addr, err := unusedPort()
+	addr, err := UnusedPort()
 	if err != nil {
 		return "", nil, err
 	}
@@ -327,7 +329,7 @@ func drainCmd(cmd *exec.Cmd) (func() error, error) {
 	}, nil
 }
 
-func unusedPort() (string, error) {
+func UnusedPort() (string, error) {
 	ln, err := net.Listen("tcp4", ":0")
 	if err != nil {
 		return "", err
@@ -337,12 +339,16 @@ func unusedPort() (string, error) {
 	return ln.Addr().String(), nil
 }
 
-func RunTUI(ctx context.Context, tui cli.TUI) (*bytes.Buffer, error) {
+func RunTTY(ctx context.Context, ui cli.UI) (*bytes.Buffer, error) {
 	ptmx, pts, err := pty.Open()
 	if err != nil {
 		return nil, err
 	}
-	defer pts.Close()
+
+	// the test TTY needs to be a real TTY (*os.File), but the data we want to
+	// read from is tee'd to the buffer, so throw away the TTY's data to avoid
+	// blocking on a full TTY buffer, which may stall the test.
+	go io.Copy(io.Discard, pts)
 
 	tty := &testTTY{
 		File: ptmx,
@@ -351,7 +357,7 @@ func RunTUI(ctx context.Context, tui cli.TUI) (*bytes.Buffer, error) {
 
 	output := termenv.NewOutput(tty, termenv.WithProfile(termenv.Ascii))
 	termenv.SetDefaultOutput(output)
-	if err := tui.Run(ctx, output.TTY()); err != nil {
+	if err := ui.RunTTY(ctx, output.TTY()); err != nil {
 		return nil, err
 	}
 	return &tty.buf, nil

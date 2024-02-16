@@ -2,6 +2,7 @@ package truststore
 
 import (
 	"bytes"
+	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ type Platform struct {
 	certutilInstallHelp  string
 	trustFilenamePattern string
 	trustCommand         []string
+	caBundleFileName     string
 }
 
 func firefoxProfiles(homeDir string) []string {
@@ -46,6 +48,8 @@ func certutilInstallHelp(sysFS CmdFS) string {
 	return ""
 }
 
+func (s *Platform) Description() string { return "System (Linux)" }
+
 func (s *Platform) init() {
 	s.inito.Do(func() {
 		s.certutilInstallHelp = certutilInstallHelp(s.SysFS)
@@ -53,15 +57,19 @@ func (s *Platform) init() {
 		switch {
 		case pathExists(s.DataFS, "/etc/pki/ca-trust/source/anchors/"):
 			s.trustFilenamePattern = "/etc/pki/ca-trust/source/anchors/%s.pem"
+			s.caBundleFileName = "/etc/pki/tls/certs/ca-bundle.crt"
 			s.trustCommand = []string{"update-ca-trust", "extract"}
 		case pathExists(s.DataFS, "/usr/local/share/ca-certificates/"):
 			s.trustFilenamePattern = "/usr/local/share/ca-certificates/%s.crt"
+			s.caBundleFileName = "/etc/ssl/certs/ca-certificates.crt"
 			s.trustCommand = []string{"update-ca-certificates"}
 		case pathExists(s.DataFS, "/etc/ca-certificates/trust-source/anchors/"):
 			s.trustFilenamePattern = "/etc/ca-certificates/trust-source/anchors/%s.crt"
+			s.caBundleFileName = "/etc/ssl/certs/ca-certificates.crt"
 			s.trustCommand = []string{"trust", "extract-compat"}
 		case pathExists(s.DataFS, "/usr/share/pki/trust/anchors"):
 			s.trustFilenamePattern = "/usr/share/pki/trust/anchors/%s.pem"
+			s.caBundleFileName = "/etc/ssl/ca-bundle.pem"
 			s.trustCommand = []string{"update-ca-certificates"}
 		}
 	})
@@ -120,6 +128,36 @@ func (s *Platform) installCA(ca *CA) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (s *Platform) listCAs() ([]*CA, error) {
+	if ok, err := s.check(); !ok {
+		return nil, err
+	}
+
+	data, err := s.DataFS.ReadFile(s.caBundleFileName)
+	if err != nil {
+		if errors.Is(err, syscall.ENOENT) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var cas []*CA
+	for p, buf := pem.Decode(data); p != nil; p, buf = pem.Decode(buf) {
+		cert, err := x509.ParseCertificate(p.Bytes)
+		if err != nil {
+			return nil, err
+		}
+
+		ca := &CA{
+			Certificate: cert,
+			UniqueName:  cert.SerialNumber.Text(16),
+		}
+
+		cas = append(cas, ca)
+	}
+	return cas, nil
 }
 
 func (s *Platform) uninstallCA(ca *CA) (bool, error) {

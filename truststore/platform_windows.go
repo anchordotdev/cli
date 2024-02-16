@@ -3,6 +3,7 @@ package truststore
 import (
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
@@ -41,6 +42,8 @@ type Platform struct {
 	SysFS  CmdFS
 }
 
+func (s *Platform) Description() string { return "System (Windows)" }
+
 func (s *Platform) check() (bool, error) {
 	return true, nil
 }
@@ -72,6 +75,12 @@ func (s *Platform) installCA(ca *CA) (bool, error) {
 		return false, fatalErr(store.addCert(cert), "add cert")
 	}
 	return true, nil
+}
+
+func (s *Platform) listCAs() ([]*CA, error) {
+	// https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certenumcertificatesinstore
+
+	return nil, fatalErr(errors.New("unsupported"), "enumerate certs")
 }
 
 func (s *Platform) uninstallCA(ca *CA) (bool, error) {

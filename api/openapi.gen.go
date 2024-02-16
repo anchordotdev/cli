@@ -14,11 +14,31 @@ const (
 	Pat_bearerScopes = "pat_bearer.Scopes"
 )
 
+// Defines values for ClientType.
+const (
+	ClientTypeCustom     ClientType = "custom"
+	ClientTypeGo         ClientType = "go"
+	ClientTypeJavascript ClientType = "javascript"
+	ClientTypePython     ClientType = "python"
+	ClientTypeRuby       ClientType = "ruby"
+)
+
 // Defines values for CredentialStatus.
 const (
 	Expired CredentialStatus = "expired"
 	Online  CredentialStatus = "online"
 	Revoked CredentialStatus = "revoked"
+)
+
+// Defines values for ServiceServerType.
+const (
+	ServiceServerTypeCaddy      ServiceServerType = "caddy"
+	ServiceServerTypeCustom     ServiceServerType = "custom"
+	ServiceServerTypeDiagnostic ServiceServerType = "diagnostic"
+	ServiceServerTypeGo         ServiceServerType = "go"
+	ServiceServerTypeJavascript ServiceServerType = "javascript"
+	ServiceServerTypePython     ServiceServerType = "python"
+	ServiceServerTypeRuby       ServiceServerType = "ruby"
 )
 
 // AuthCliCodesResponse defines model for auth_cli_codes_response.
@@ -45,6 +65,50 @@ type AuthCliPatTokensResponse struct {
 	PatToken string `json:"pat_token"`
 }
 
+// Chain defines model for chain.
+type Chain struct {
+	// Name The name of the chain.
+	Name          string `json:"name"`
+	Relationships struct {
+		Org struct {
+			// Slug A value used as a parameter when referencing this org.
+			Slug string `json:"slug"`
+		} `json:"org"`
+		Realm struct {
+			// Slug A value used as a parameter when referencing this realm.
+			Slug string `json:"slug"`
+		} `json:"realm"`
+	} `json:"relationships"`
+
+	// Slug A value used as a parameter when referencing this chain.
+	Slug string `json:"slug"`
+}
+
+// Client defines model for client.
+type Client struct {
+	// Name A name for the client.
+	Name          string `json:"name"`
+	Relationships *struct {
+		Organization *struct {
+			// Slug A value used as a parameter when referencing this organization.
+			Slug string `json:"slug"`
+		} `json:"organization,omitempty"`
+		Service *struct {
+			// Slug A value used as a parameter when referencing this service.
+			Slug string `json:"slug"`
+		} `json:"service,omitempty"`
+	} `json:"relationships,omitempty"`
+
+	// Slug A value used as a parameter when referencing this client.
+	Slug string `json:"slug"`
+
+	// Type A type for the client.
+	Type ClientType `json:"type"`
+}
+
+// ClientType A type for the client.
+type ClientType string
+
 // Credential defines model for credential.
 type Credential struct {
 	// CreatedAt UTC time when credential was created.
@@ -59,7 +123,7 @@ type Credential struct {
 	// RevokedAt UTC time after which credential will be revoked
 	RevokedAt *time.Time `json:"revoked_at"`
 
-	// Serial serial id for credetial
+	// Serial serial id for credential
 	Serial string `json:"serial"`
 
 	// SignatureAlgorithm Algorithm used to sign credential
@@ -84,13 +148,40 @@ type Credential struct {
 // CredentialStatus current status of credential
 type CredentialStatus string
 
+// Credentials defines model for credentials.
+type Credentials struct {
+	Items []Credential `json:"items"`
+}
+
 // Eab defines model for eab.
 type Eab struct {
 	// HmacKey EAB HMAC key
 	HmacKey string `json:"hmac_key"`
 
 	// Kid EAB key identifier
-	Kid string `json:"kid"`
+	Kid           string `json:"kid"`
+	Relationships struct {
+		Chain struct {
+			// Slug A value used as a parameter when referencing this chain.
+			Slug string `json:"slug"`
+		} `json:"chain"`
+		Organization struct {
+			// Slug A value used as a parameter when referencing this organization.
+			Slug string `json:"slug"`
+		} `json:"organization"`
+		Realm struct {
+			// Slug A value used as a parameter when referencing this realm.
+			Slug string `json:"slug"`
+		} `json:"realm"`
+		Service struct {
+			// Slug A value used as a parameter when referencing this service.
+			Slug string `json:"slug"`
+		} `json:"service"`
+		SubCa struct {
+			// Slug A value used as a parameter when referencing this sub_ca.
+			Slug string `json:"slug"`
+		} `json:"sub_ca"`
+	} `json:"relationships"`
 }
 
 // Error defines model for error.
@@ -111,9 +202,35 @@ type Error struct {
 // Root defines model for root.
 type Root struct {
 	PersonalOrg struct {
-		Slug *string `json:"slug,omitempty"`
+		Slug string `json:"slug"`
 	} `json:"personal_org"`
 	Whoami string `json:"whoami"`
+}
+
+// Service defines model for service.
+type Service struct {
+	// Name A name for the service.
+	Name          string `json:"name"`
+	Relationships *struct {
+		Organization struct {
+			// Slug A value used as a parameter when referencing this organization.
+			Slug string `json:"slug"`
+		} `json:"organization"`
+	} `json:"relationships,omitempty"`
+
+	// ServerType A server type for the service.
+	ServerType ServiceServerType `json:"server_type"`
+
+	// Slug A value used as a parameter when referencing this service.
+	Slug string `json:"slug"`
+}
+
+// ServiceServerType A server type for the service.
+type ServiceServerType string
+
+// Services defines model for services.
+type Services struct {
+	Items []Service `json:"items"`
 }
 
 // PathOrgParam defines model for path_org_param.
@@ -122,19 +239,80 @@ type PathOrgParam = string
 // PathRealmParam defines model for path_realm_param.
 type PathRealmParam = string
 
+// PathServiceParam defines model for path_service_param.
+type PathServiceParam = string
+
 // QueryCaParam defines model for query_ca_param.
 type QueryCaParam = string
 
+// ServicesXtach200 defines model for services_xtach_200.
+type ServicesXtach200 struct {
+	// Domains A list of domains for this attachment.
+	Domains       []string `json:"domains"`
+	Relationships struct {
+		Chain struct {
+			// Slug A value used as a parameter when referencing this chain.
+			Slug string `json:"slug"`
+		} `json:"chain"`
+		Organization struct {
+			// Slug A value used as a parameter when referencing this organization.
+			Slug string `json:"slug"`
+		} `json:"organization"`
+		Realm *struct {
+			// Slug A value used as a parameter when referencing this realm.
+			Slug string `json:"slug"`
+		} `json:"realm,omitempty"`
+		Service struct {
+			// Slug A value used as a parameter when referencing this services
+			Slug string `json:"slug"`
+		} `json:"service"`
+		SubCa struct {
+			// Slug A value used as a parameter when referencing this sub_ca
+			Slug string `json:"slug"`
+		} `json:"sub_ca"`
+	} `json:"relationships"`
+}
+
+// ServicesXtach defines model for services_xtach.
+type ServicesXtach struct {
+	// Domains A list of domains for this attachment.
+	Domains       []string `json:"domains"`
+	Relationships struct {
+		Chain struct {
+			// Slug A value used as a parameter when referencing this chain.
+			Slug string `json:"slug"`
+		} `json:"chain"`
+		Realm struct {
+			// Slug A value used as a parameter when referencing this realm.
+			Slug string `json:"slug"`
+		} `json:"realm"`
+	} `json:"relationships"`
+}
+
 // CreateEabTokenJSONBody defines parameters for CreateEabToken.
 type CreateEabTokenJSONBody struct {
-	Organization struct {
-		// Name unique name of organization to create EAB tokens within
-		Name string `json:"name"`
-	} `json:"organization"`
-	Realm struct {
-		// Name unique name of realm to create EAB tokens within
-		Name string `json:"name"`
-	} `json:"realm"`
+	Relationships struct {
+		Chain struct {
+			// Slug A value used as a parameter when referencing this chain.
+			Slug string `json:"slug"`
+		} `json:"chain"`
+		Organization struct {
+			// Slug A value used as a parameter when referencing this organization.
+			Slug string `json:"slug"`
+		} `json:"organization"`
+		Realm struct {
+			// Slug A value used as a parameter when referencing this realm.
+			Slug string `json:"slug"`
+		} `json:"realm"`
+		Service struct {
+			// Slug A value used as a parameter when referencing this service.
+			Slug *string `json:"slug,omitempty"`
+		} `json:"service,omitempty"`
+		SubCa struct {
+			// Slug A value used as a parameter when referencing this sub_ca.
+			Slug string `json:"slug"`
+		} `json:"sub_ca"`
+	} `json:"relationships"`
 }
 
 // CreateCliTokenJSONBody defines parameters for CreateCliToken.
@@ -143,10 +321,68 @@ type CreateCliTokenJSONBody struct {
 	DeviceCode string `json:"device_code"`
 }
 
+// CreateClientJSONBody defines parameters for CreateClient.
+type CreateClientJSONBody struct {
+	Relationships *struct {
+		Organization *struct {
+			Slug string `json:"slug"`
+		} `json:"organization,omitempty"`
+		Service *struct {
+			Slug string `json:"slug"`
+		} `json:"service,omitempty"`
+	} `json:"relationships,omitempty"`
+	ServerType *string `json:"server_type,omitempty"`
+	Type       *string `json:"type,omitempty"`
+}
+
 // GetCredentialsParams defines parameters for GetCredentials.
 type GetCredentialsParams struct {
 	// CaParam ca for operation
 	CaParam *QueryCaParam `form:"ca_param,omitempty" json:"ca_param,omitempty"`
+}
+
+// AttachOrgServiceJSONBody defines parameters for AttachOrgService.
+type AttachOrgServiceJSONBody struct {
+	// Domains A list of domains for this attachment.
+	Domains       []string `json:"domains"`
+	Relationships struct {
+		Chain struct {
+			// Slug A value used as a parameter when referencing this chain.
+			Slug string `json:"slug"`
+		} `json:"chain"`
+		Realm struct {
+			// Slug A value used as a parameter when referencing this realm.
+			Slug string `json:"slug"`
+		} `json:"realm"`
+	} `json:"relationships"`
+}
+
+// DetachOrgServiceJSONBody defines parameters for DetachOrgService.
+type DetachOrgServiceJSONBody struct {
+	// Domains A list of domains for this attachment.
+	Domains       []string `json:"domains"`
+	Relationships struct {
+		Chain struct {
+			// Slug A value used as a parameter when referencing this chain.
+			Slug string `json:"slug"`
+		} `json:"chain"`
+		Realm struct {
+			// Slug A value used as a parameter when referencing this realm.
+			Slug string `json:"slug"`
+		} `json:"realm"`
+	} `json:"relationships"`
+}
+
+// CreateServiceJSONBody defines parameters for CreateService.
+type CreateServiceJSONBody struct {
+	Name          string `json:"name"`
+	Relationships struct {
+		Organization struct {
+			// Slug A value used as a parameter when referencing this organization.
+			Slug string `json:"slug"`
+		} `json:"organization"`
+	} `json:"relationships"`
+	ServerType string `json:"server_type"`
 }
 
 // CreateEabTokenJSONRequestBody defines body for CreateEabToken for application/json ContentType.
@@ -154,3 +390,15 @@ type CreateEabTokenJSONRequestBody CreateEabTokenJSONBody
 
 // CreateCliTokenJSONRequestBody defines body for CreateCliToken for application/json ContentType.
 type CreateCliTokenJSONRequestBody CreateCliTokenJSONBody
+
+// CreateClientJSONRequestBody defines body for CreateClient for application/json ContentType.
+type CreateClientJSONRequestBody CreateClientJSONBody
+
+// AttachOrgServiceJSONRequestBody defines body for AttachOrgService for application/json ContentType.
+type AttachOrgServiceJSONRequestBody AttachOrgServiceJSONBody
+
+// DetachOrgServiceJSONRequestBody defines body for DetachOrgService for application/json ContentType.
+type DetachOrgServiceJSONRequestBody DetachOrgServiceJSONBody
+
+// CreateServiceJSONRequestBody defines body for CreateService for application/json ContentType.
+type CreateServiceJSONRequestBody CreateServiceJSONBody
