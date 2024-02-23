@@ -32,6 +32,8 @@ type Platform struct {
 func firefoxProfiles(homeDir string) []string {
 	return []string{
 		filepath.Join(homeDir, "/.mozilla/firefox/*"),
+		filepath.Join(homeDir, "/.mozilla/firefox-esr/*"),
+		filepath.Join(homeDir, "/.mozilla/firefox-trunk/*"),
 		filepath.Join(homeDir, "/snap/firefox/common/.mozilla/firefox/*"),
 	}
 }

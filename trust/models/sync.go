@@ -89,78 +89,70 @@ func (m *SyncPreflight) View() string {
 	return b.String()
 }
 
-type SyncInstallCA struct {
-	CA *truststore.CA
+type SyncUpdateStore struct {
+	Store truststore.Store
 
-	stores    []truststore.Store
-	installed map[truststore.Store]struct{}
+	installing *truststore.CA
+	installed  map[string][]string
 
 	spinner spinner.Model
 }
 
-func (m *SyncInstallCA) Init() tea.Cmd {
+func (m *SyncUpdateStore) Init() tea.Cmd {
+	m.installed = make(map[string][]string)
 	m.spinner = ui.Spinner()
 
 	return m.spinner.Tick
 }
 
 type (
-	SyncInstallingCAMsg struct {
-		truststore.Store
+	SyncStoreInstallingCAMsg struct {
+		truststore.CA
 	}
 
-	SyncInstalledCAMsg struct {
-		truststore.Store
+	SyncStoreInstalledCAMsg struct {
+		truststore.CA
 	}
 )
 
-func (m *SyncInstallCA) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *SyncUpdateStore) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case SyncInstalledCAMsg:
-		if m.installed == nil {
-			m.installed = map[truststore.Store]struct{}{}
-		}
-		m.installed[msg.Store] = struct{}{}
+	case SyncStoreInstallingCAMsg:
+		m.installing = &msg.CA
 		return m, nil
-	case SyncInstallingCAMsg:
-		m.stores = append(m.stores, msg.Store)
+	case SyncStoreInstalledCAMsg:
+		m.installing = nil
+		m.installed[msg.CA.Subject.CommonName] = append(m.installed[msg.CA.Subject.CommonName], msg.CA.PublicKeyAlgorithm.String())
 		return m, nil
 	}
-
 	var cmd tea.Cmd
 	m.spinner, cmd = m.spinner.Update(msg)
 	return m, cmd
 }
 
-func (m *SyncInstallCA) View() string {
-	commonName := m.CA.Subject.CommonName
-	algo := m.CA.PublicKeyAlgorithm
-
+func (m *SyncUpdateStore) View() string {
 	var b strings.Builder
 
-	var installed []string
-	var installing []string
-
-	for _, store := range m.stores {
-		if _, ok := m.installed[store]; ok {
-			installed = append(installed, ui.Emphasize(store.Description()))
-		} else {
-			installing = append(installing, ui.Emphasize(store.Description()))
-		}
-	}
-
-	if len(installed) > 0 {
-		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Installed \"%s\" %s in %s.",
-			ui.Underline(commonName),
-			algo,
-			strings.Join(installed, ", "),
+	if m.installing != nil {
+		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Updating %s: installing %s %s.",
+			ui.Emphasize(m.Store.Description()),
+			ui.Underline(m.installing.Subject.CommonName),
+			ui.Whisper(m.installing.PublicKeyAlgorithm.String()),
 		)))
 	}
-	if len(installing) > 0 {
-		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Installing \"%s\" %s in %s.",
-			ui.Underline(commonName),
-			algo,
-			strings.Join(installing, ", "),
+	if len(m.installed) > 0 {
+		var styledCAs []string
+
+		for subjectCommonName, algorithms := range m.installed {
+			styledCAs = append(styledCAs, fmt.Sprintf("%s [%s]",
+				ui.Underline(subjectCommonName),
+				ui.Whisper(strings.Join(algorithms, ", ")),
+			))
+		}
+
+		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Updated %s: installed %s",
+			ui.Emphasize(m.Store.Description()),
+			strings.Join(styledCAs, ", "),
 		)))
 	}
 

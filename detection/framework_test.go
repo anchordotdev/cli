@@ -1,108 +1,188 @@
 package detection
 
 import (
-	"path/filepath"
+	"encoding/json"
+	"io/fs"
+	"reflect"
+	"slices"
 	"testing"
 	"testing/fstest"
+	"time"
+
+	"github.com/anchordotdev/cli/anchorcli"
 )
 
-func TestRailsDetector_Detect(t *testing.T) {
-	fakeFS := fstest.MapFS{}
-	for _, file := range RailsFiles {
-		fakeFS[filepath.Join("rails-app", file)] = &fstest.MapFile{Data: []byte(""), Mode: 0644}
+func TestDetectorsDetect(t *testing.T) {
+	tests := []struct {
+		name string
+
+		detector Detector
+		fs       FS
+
+		match Match
+		err   error
+	}{
+		{
+			name: "rails-happy-path",
+
+			detector: Rails,
+			fs: fstest.MapFS{
+				"Gemfile":   emptyFile,
+				"Rakefile":  emptyFile,
+				"config.ru": emptyFile,
+				"app":       emptyDir,
+				"config":    emptyDir,
+				"db":        emptyDir,
+				"lib":       emptyDir,
+				"public":    emptyDir,
+				"vendor":    emptyDir,
+			},
+
+			match: Match{
+				Detector:       Rails,
+				Detected:       true,
+				Confidence:     High,
+				AnchorCategory: anchorcli.CategoryRuby,
+			},
+		},
+
+		{
+			name: "sinatra-happy-path",
+
+			detector: Sinatra,
+			fs: fstest.MapFS{
+				"Gemfile":   emptyFile,
+				"config.ru": emptyFile,
+				"app.rb":    emptyFile,
+			},
+
+			match: Match{
+				Detector:       Sinatra,
+				Detected:       true,
+				Confidence:     High,
+				AnchorCategory: anchorcli.CategoryRuby,
+			},
+		},
+
+		{
+			name: "django-happy-path",
+
+			detector: Django,
+			fs: fstest.MapFS{
+				"requirements.txt": emptyFile,
+				"manage.py":        emptyFile,
+			},
+
+			match: Match{
+				Detector:       Django,
+				Detected:       true,
+				Confidence:     High,
+				AnchorCategory: anchorcli.CategoryPython,
+			},
+		},
+
+		{
+			name: "flask-happy-path",
+
+			detector: Flask,
+			fs: fstest.MapFS{
+				"requirements.txt": emptyFile,
+				"app.py":           emptyFile,
+			},
+
+			match: Match{
+				Detector:       Flask,
+				Detected:       true,
+				Confidence:     High,
+				AnchorCategory: anchorcli.CategoryPython,
+			},
+		},
+
+		{
+			name: "nextjs-happy-path",
+
+			detector: NextJS,
+			fs: fstest.MapFS{
+				"package.json": jsonFragment{
+					"dependencies": map[string]any{
+						"next": "latest",
+					},
+				}.mapFile(0644),
+				"pages": emptyDir,
+			},
+
+			match: Match{
+				Detector:       NextJS,
+				Detected:       true,
+				Confidence:     High,
+				AnchorCategory: anchorcli.CategoryJavascript,
+			},
+		},
 	}
 
-	detector := RailsDetector
-	detector.FileSystem = fakeFS
+	for _, test := range tests {
+		test := test
 
-	match, err := detector.Detect("rails-app")
+		t.Run(test.name, func(t *testing.T) {
+			match, err := test.detector.Detect(test.fs)
+			if err != nil {
+				if want, got := test.err, err; want != got {
+					t.Fatalf("%s: want error %q, but got %q", test.detector.GetTitle(), want, got)
+				}
+			}
 
-	if err != nil {
-		t.Fatalf("Unexpected error during detection: %v", err)
-	}
-
-	if !match.Detected {
-		t.Errorf("Expected detection result to be true, but got false")
-	}
-
-	if match.Confidence != High {
-		t.Errorf("Expected confidence score to be High, but got %s", match.Confidence)
+			if want, got := test.match.Detected, match.Detected; want != got {
+				t.Errorf("%s: want match detection %t, got %t", test.detector.GetTitle(), want, got)
+			}
+			if want, got := test.match.Confidence, match.Confidence; want != got {
+				t.Errorf("%s: want match confidence score %s, got %s", test.detector.GetTitle(), want, got)
+			}
+			if want, got := len(test.match.FollowUpDetectors), len(match.FollowUpDetectors); want != got {
+				t.Errorf("%s: want %d follow-up detectors, got %d", test.detector.GetTitle(), want, got)
+			}
+			if want, got := test.match.FollowUpDetectors, match.FollowUpDetectors; !reflect.DeepEqual(want, got) {
+				t.Errorf("%s: want %+v follow-up detectors, got %+v", test.detector.GetTitle(), want, got)
+			}
+			if want, got := test.match.AnchorCategory, match.AnchorCategory; want != got {
+				t.Errorf("%s: want AnchorCategory %s, got %s", test.detector.GetTitle(), want, got)
+			}
+			if want, got := test.match.MissingRequiredFiles, match.MissingRequiredFiles; slices.Compare(want, got) != 0 {
+				t.Errorf("%s: want missing required files %+v, got %+v", test.detector.GetTitle(), want, got)
+			}
+		})
 	}
 }
 
-func TestSinatraDetector_Detect(t *testing.T) {
-	fakeFS := fstest.MapFS{}
-	for _, file := range SinatraFiles {
-		fakeFS[filepath.Join("sinatra-app", file)] = &fstest.MapFile{Data: []byte(""), Mode: 0644}
+var (
+	emptyFile = textFile("", 0644)
+
+	emptyDir = &fstest.MapFile{
+		Mode:    0755 | fs.ModeDir,
+		ModTime: mtime,
 	}
 
-	detector := SinatraDetector
-	detector.FileSystem = fakeFS
+	mtime = time.Now()
+)
 
-	match, err := detector.Detect("sinatra-app")
-
-	if err != nil {
-		t.Fatalf("Unexpected error during detection: %v", err)
-	}
-
-	// Verify the detection result
-	if !match.Detected {
-		t.Errorf("Expected detection result to be true, but got false")
-	}
-
-	if match.Confidence != High {
-		t.Errorf("Expected confidence score to be High, but got %s", match.Confidence)
+func textFile(data string, mode fs.FileMode) *fstest.MapFile {
+	return &fstest.MapFile{
+		Data:    []byte(data),
+		Mode:    mode,
+		ModTime: mtime,
 	}
 }
 
-func TestDjangoDetector_Detect(t *testing.T) {
-	fakeFS := fstest.MapFS{}
-	for _, file := range DjangoFiles {
-		fakeFS[filepath.Join("django-app", file)] = &fstest.MapFile{Data: []byte(""), Mode: 0644}
-	}
-
-	detector := DjangoDetector
-	detector.FileSystem = fakeFS
-
-	match, err := detector.Detect("django-app")
-
+func jsonFile(v map[string]any, mode fs.FileMode) *fstest.MapFile {
+	data, err := json.Marshal(v)
 	if err != nil {
-		t.Fatalf("Unexpected error during detection: %v", err)
+		panic(err)
 	}
 
-	// Verify the detection result
-	if !match.Detected {
-		t.Errorf("Expected detection result to be true, but got false")
-	}
-
-	if match.Confidence != High {
-		t.Errorf("Expected confidence score to be High, but got %s", match.Confidence)
-	}
+	return textFile(string(data), mode)
 }
 
-func TestFlaskDetector_Detect(t *testing.T) {
-	fakeFS := fstest.MapFS{}
+type jsonFragment map[string]any
 
-	for _, file := range FlaskFiles {
-		fakeFS[filepath.Join("flask-app", file)] = &fstest.MapFile{Data: []byte(""), Mode: 0644}
-	}
-
-	detector := FlaskDetector
-	detector.FileSystem = fakeFS
-
-	// Perform the detection
-	match, err := detector.Detect("flask-app")
-
-	if err != nil {
-		t.Fatalf("Unexpected error during detection: %v", err)
-	}
-
-	// Verify the detection result
-	if !match.Detected {
-		t.Errorf("Expected detection result to be true, but got false")
-	}
-
-	if match.Confidence != High {
-		t.Errorf("Expected confidence score to be High, but got %s", match.Confidence)
-	}
+func (f jsonFragment) mapFile(mode fs.FileMode) *fstest.MapFile {
+	return jsonFile((map[string]any)(f), mode)
 }

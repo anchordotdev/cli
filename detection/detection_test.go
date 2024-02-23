@@ -41,21 +41,21 @@ func TestDefaultDetectors(t *testing.T) {
 	}
 
 	fakeFS := fstest.MapFS{
-		"app/Gemfile":          &fstest.MapFile{Data: []byte(""), Mode: 0644},
-		"app/Gemfile.lock":     &fstest.MapFile{Data: []byte(""), Mode: 0644},
-		"app/package.json":     &fstest.MapFile{Data: []byte(""), Mode: 0644},
-		"app/requirements.txt": &fstest.MapFile{Data: []byte(""), Mode: 0644},
-		"app/main.go":          &fstest.MapFile{Data: []byte(""), Mode: 0644},
-		"app/index.js":         &fstest.MapFile{Data: []byte(""), Mode: 0644},
-		"app/app.py":           &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"Gemfile":          &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"Gemfile.lock":     &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"package.json":     &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"requirements.txt": &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"main.go":          &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"index.js":         &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"app.py":           &fstest.MapFile{Data: []byte(""), Mode: 0644},
 	}
 
 	for _, detector := range DefaultDetectors {
 		t.Run(detector.GetTitle(), func(t *testing.T) {
 			// Assume all detectors are FileDetectors right now
 			det := detector.(*FileDetector)
-			det.FileSystem = fakeFS
-			match, err := det.Detect("app")
+
+			match, err := det.Detect(fakeFS)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"slices"
 
 	"github.com/anchordotdev/cli/anchorcli"
@@ -16,7 +15,6 @@ type FileDetector struct {
 	Paths             []string
 	RequiredFiles     []string
 	FollowUpDetectors []Detector
-	FileSystem        fs.StatFS
 	AnchorCategory    *anchorcli.Category
 }
 
@@ -26,16 +24,11 @@ func (fd FileDetector) GetTitle() string {
 }
 
 // Detect checks if the directory contains any of the specified files
-func (fd FileDetector) Detect(directory string) (Match, error) {
-	if fd.FileSystem == nil {
-		fd.FileSystem = &osFS{}
-	}
-
+func (fd FileDetector) Detect(dirFS FS) (Match, error) {
 	var matchedPaths []string
 
 	for _, path := range fd.Paths {
-		fullPath := filepath.Join(directory, path)
-		if _, err := fd.FileSystem.Stat(fullPath); err == nil {
+		if _, err := dirFS.Stat(path); err == nil {
 			matchedPaths = append(matchedPaths, path)
 		} else if !os.IsNotExist(err) {
 			return Match{}, errors.Join(err, errors.New("project file detection failure"))

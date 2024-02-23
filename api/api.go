@@ -178,6 +178,7 @@ func (s *Session) FetchCredentials(ctx context.Context, orgSlug, realmSlug strin
 	var creds struct {
 		Items []Credential `json:"items,omitempty"`
 	}
+
 	if err := s.get(ctx, fetchCredentialsPath(orgSlug, realmSlug), &creds); err != nil {
 		return nil, err
 	}

@@ -89,11 +89,11 @@ func List[T any](items []ListItem[T]) list.Model {
 }
 
 func Domains(domains []string) string {
-	var styled_domains []string
+	var styledDomains []string
 
 	for _, domain := range domains {
-		styled_domains = append(styled_domains, URL(domain))
+		styledDomains = append(styledDomains, URL(domain))
 	}
 
-	return strings.Join(styled_domains, ", ")
+	return strings.Join(styledDomains, ", ")
 }

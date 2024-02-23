@@ -37,6 +37,7 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 	if err != nil {
 		return err
 	}
+	dirFS := os.DirFS(path).(detection.FS)
 
 	detectors := detection.DefaultDetectors
 	if d.Config.Lcl.Detect.Language != "" {
@@ -47,7 +48,7 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 		}
 	}
 
-	results, err := detection.Perform(detectors, path)
+	results, err := detection.Perform(detectors, dirFS)
 	if err != nil {
 		return err
 	}

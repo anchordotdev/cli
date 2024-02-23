@@ -2,6 +2,7 @@ package detection
 
 import (
 	"os"
+	"reflect"
 	"slices"
 	"testing"
 	"testing/fstest"
@@ -10,136 +11,160 @@ import (
 )
 
 func TestFileDetector_Detect(t *testing.T) {
-	emptyFile := &fstest.MapFile{Data: []byte(""), Mode: 0644}
-
 	testCases := []struct {
-		name        string
-		detector    FileDetector
-		directory   string
-		expected    Match
-		expectError bool
+		name string
+
+		detector FileDetector
+		fs       FS
+
+		match Match
+		err   error
 	}{
 		{
 			name: "Mock Exact Match",
+
 			detector: FileDetector{
-				Title: "Test Detector",
-				Paths: []string{"1.txt", "2.txt", "3.txt", "4.txt", "5.txt"},
-				FileSystem: fstest.MapFS{
-					"app/1.txt": emptyFile,
-					"app/2.txt": emptyFile,
-					"app/3.txt": emptyFile,
-					"app/4.txt": emptyFile,
-					"app/5.txt": emptyFile,
-				},
+				Title:          "Test Detector",
+				Paths:          []string{"1.txt", "2.txt", "3.txt", "4.txt", "5.txt"},
 				AnchorCategory: anchorcli.CategoryCustom,
 			},
-			directory:   "app/",
-			expected:    Match{Detected: true, Confidence: High, FollowUpDetectors: nil, AnchorCategory: anchorcli.CategoryCustom},
-			expectError: false,
+			fs: fstest.MapFS{
+				"1.txt": emptyFile,
+				"2.txt": emptyFile,
+				"3.txt": emptyFile,
+				"4.txt": emptyFile,
+				"5.txt": emptyFile,
+			},
+
+			match: Match{
+				Detected:       true,
+				Confidence:     High,
+				AnchorCategory: anchorcli.CategoryCustom,
+			},
 		},
 		{
 			name: "Mock Strong Match",
+
 			detector: FileDetector{
 				Title: "Test Detector",
 				Paths: []string{"1.txt", "2.txt", "3.txt", "4.txt", "5.txt"},
-				FileSystem: fstest.MapFS{
-					"app/1.txt": emptyFile,
-					"app/2.txt": emptyFile,
-					"app/3.txt": emptyFile,
-				},
 			},
-			directory:   "app/",
-			expected:    Match{Detected: true, Confidence: Medium, FollowUpDetectors: nil, AnchorCategory: anchorcli.CategoryCustom},
-			expectError: false,
+			fs: fstest.MapFS{
+				"1.txt": emptyFile,
+				"2.txt": emptyFile,
+				"3.txt": emptyFile,
+			},
+
+			match: Match{
+				Detected:       true,
+				Confidence:     Medium,
+				AnchorCategory: anchorcli.CategoryCustom,
+			},
 		},
 		{
 			name: "Mock Possible Match",
+
 			detector: FileDetector{
 				Title: "Test Detector",
 				Paths: []string{"1.txt", "2.txt", "3.txt", "4.txt", "5.txt"},
-				FileSystem: fstest.MapFS{
-					"app/1.txt": emptyFile,
-					"app/2.txt": emptyFile,
-				},
 			},
-			directory:   "app/",
-			expected:    Match{Detected: true, Confidence: Low, FollowUpDetectors: nil, AnchorCategory: anchorcli.CategoryCustom},
-			expectError: false,
+			fs: fstest.MapFS{
+				"1.txt": emptyFile,
+				"2.txt": emptyFile,
+			},
+
+			match: Match{
+				Detected:       true,
+				Confidence:     Low,
+				AnchorCategory: anchorcli.CategoryCustom,
+			},
 		},
 		{
 			name: "Mock None Match",
+
 			detector: FileDetector{
-				Title:      "Test Detector",
-				Paths:      []string{"1.txt", "2.txt", "3.txt", "4.txt", "5.txt"},
-				FileSystem: fstest.MapFS{},
+				Title: "Test Detector",
+				Paths: []string{"1.txt", "2.txt", "3.txt", "4.txt", "5.txt"},
 			},
-			directory:   "app/",
-			expected:    Match{Detected: false, Confidence: None, FollowUpDetectors: nil, AnchorCategory: anchorcli.CategoryCustom},
-			expectError: false,
+			fs: fstest.MapFS{},
+
+			match: Match{
+				Detected:       false,
+				Confidence:     None,
+				AnchorCategory: anchorcli.CategoryCustom,
+			},
 		},
 		{
 			name: "Missing RequiredFiles forces match to Low",
+
 			detector: FileDetector{
 				Title:         "Test Detector",
 				Paths:         []string{"1.txt", "2.txt", "3.txt", "4.txt", "5.txt"},
 				RequiredFiles: []string{"1.txt"},
-				FileSystem: fstest.MapFS{
-					"app/2.txt": emptyFile,
-					"app/3.txt": emptyFile,
-					"app/4.txt": emptyFile,
-					"app/5.txt": emptyFile,
-				},
 			},
-			directory:   "app/",
-			expected:    Match{Detected: true, Confidence: Low, FollowUpDetectors: nil, AnchorCategory: anchorcli.CategoryCustom, MissingRequiredFiles: []string{"1.txt"}},
-			expectError: false,
+			fs: fstest.MapFS{
+				"2.txt": emptyFile,
+				"3.txt": emptyFile,
+				"4.txt": emptyFile,
+				"5.txt": emptyFile,
+			},
+
+			match: Match{
+				Detected:             true,
+				Confidence:           Low,
+				AnchorCategory:       anchorcli.CategoryCustom,
+				MissingRequiredFiles: []string{"1.txt"},
+			},
 		},
 		{
 			name: "Missing Required Files never forces None match to Low",
+
 			detector: FileDetector{
 				Title:         "Test Detector",
 				Paths:         []string{"20.txt", "40.txt", "60.txt", "80.txt", "100.txt"},
 				RequiredFiles: []string{"1.txt"},
-				FileSystem: fstest.MapFS{
-					"app/20.txt": emptyFile,
-				},
 			},
-			directory:   "app/",
-			expected:    Match{Detected: true, Confidence: None, FollowUpDetectors: nil, AnchorCategory: anchorcli.CategoryCustom, MissingRequiredFiles: []string{"1.txt"}},
-			expectError: false,
+			fs: fstest.MapFS{
+				"20.txt": emptyFile,
+			},
+
+			match: Match{
+				Detected:             true,
+				Confidence:           None,
+				AnchorCategory:       anchorcli.CategoryCustom,
+				MissingRequiredFiles: []string{"1.txt"},
+			},
 		},
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			match, err := testCase.detector.Detect(testCase.directory)
+	for _, test := range testCases {
+		test := test
 
-			if testCase.expectError && err == nil {
-				t.Errorf("Expected an error, but got none")
+		t.Run(test.name, func(t *testing.T) {
+			match, err := test.detector.Detect(test.fs)
+			if err != nil {
+				if want, got := test.err, err; want != got {
+					t.Fatalf("want error %q, but got %q", want, got)
+				}
 			}
 
-			if !testCase.expectError && err != nil {
-				t.Errorf("Unexpected error: %v", err)
+			if want, got := test.match.Detected, match.Detected; want != got {
+				t.Errorf("want match detection %t, got %t", want, got)
 			}
-
-			if match.Detected != testCase.expected.Detected {
-				t.Errorf("Expected detection result %t, but got %t", testCase.expected.Detected, match.Detected)
+			if want, got := test.match.Confidence, match.Confidence; want != got {
+				t.Errorf("want match confidence score %s, got %s", want, got)
 			}
-
-			if match.Confidence != testCase.expected.Confidence {
-				t.Errorf("Expected confidence score %s, but got %s", testCase.expected.Confidence, match.Confidence)
+			if want, got := len(test.match.FollowUpDetectors), len(match.FollowUpDetectors); want != got {
+				t.Errorf("want %d follow-up detectors, got %d", want, got)
 			}
-
-			if len(match.FollowUpDetectors) != len(testCase.expected.FollowUpDetectors) {
-				t.Errorf("Expected %d follow-up detectors, but got %d", len(testCase.expected.FollowUpDetectors), len(match.FollowUpDetectors))
+			if want, got := test.match.FollowUpDetectors, match.FollowUpDetectors; !reflect.DeepEqual(want, got) {
+				t.Errorf("want %+v follow-up detectors, got %+v", want, got)
 			}
-
-			if match.AnchorCategory != testCase.expected.AnchorCategory {
-				t.Errorf("Expected AnchorCategory %s, but got %s", testCase.expected.AnchorCategory, match.AnchorCategory)
+			if want, got := test.match.AnchorCategory, match.AnchorCategory; want != got {
+				t.Errorf("want AnchorCategory %s, got %s", want, got)
 			}
-
-			if testCase.expected.MissingRequiredFiles != nil && slices.Compare(match.MissingRequiredFiles, testCase.expected.MissingRequiredFiles) != 0 {
-				t.Errorf("Expected missing required files %v, but got %v", testCase.expected.MissingRequiredFiles, match.MissingRequiredFiles)
+			if want, got := test.match.MissingRequiredFiles, match.MissingRequiredFiles; slices.Compare(want, got) != 0 {
+				t.Errorf("want missing required files %+v, got %+v", want, got)
 			}
 		})
 	}
@@ -151,6 +176,7 @@ func TestFileDetector_DetectWithoutMockFS(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected Getwd error: %v", err)
 	}
+	dirFS := os.DirFS(directory).(FS)
 
 	files, err := os.ReadDir(directory)
 	if err != nil {
@@ -168,7 +194,7 @@ func TestFileDetector_DetectWithoutMockFS(t *testing.T) {
 	}
 
 	// Perform the detection
-	match, err := detector.Detect(directory)
+	match, err := detector.Detect(dirFS)
 
 	if err != nil {
 		t.Fatalf("Unexpected error during detection: %v", err)

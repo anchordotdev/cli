@@ -1,6 +1,8 @@
 package detection
 
 import (
+	"io/fs"
+
 	"github.com/anchordotdev/cli/anchorcli"
 )
 
@@ -33,25 +35,31 @@ func (s Confidence) String() string {
 
 var (
 	DefaultDetectors = []Detector{
-		RubyDetector,
-		GoDetector,
-		JavascriptDetector,
-		PythonDetector,
+		Ruby,
+		Go,
+		Javascript,
+		Python,
 	}
 
 	DetectorsByFlag = map[string]Detector{
-		"django":     DjangoDetector,
-		"flask":      FlaskDetector,
-		"go":         GoDetector,
-		"javascript": JavascriptDetector,
-		"python":     PythonDetector,
-		"rails":      RailsDetector,
-		"ruby":       RubyDetector,
-		"sinatra":    SinatraDetector,
+		"django":     Django,
+		"flask":      Flask,
+		"go":         Go,
+		"javascript": Javascript,
+		"nextjs":     NextJS,
+		"python":     Python,
+		"rails":      Rails,
+		"ruby":       Ruby,
+		"sinatra":    Sinatra,
 	}
 
 	PositiveDetectionMessage = "%s project detected with confidence level %s!\n"
 )
+
+type FS interface {
+	fs.ReadFileFS
+	fs.StatFS
+}
 
 // Match holds the detection result, confidence, and follow-up detectors
 type Match struct {
@@ -68,14 +76,14 @@ type Match struct {
 // Detector interface represents a project detector
 type Detector interface {
 	GetTitle() string
-	Detect(directory string) (Match, error)
+	Detect(FS) (Match, error)
 	FollowUp() []Detector
 }
 
-func Perform(detectors []Detector, dir string) (Results, error) {
+func Perform(detectors []Detector, dirFS FS) (Results, error) {
 	res := make(Results)
 	for _, detector := range detectors {
-		match, err := detector.Detect(dir)
+		match, err := detector.Detect(dirFS)
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +94,7 @@ func Perform(detectors []Detector, dir string) (Results, error) {
 
 		res[match.Confidence] = append(res[match.Confidence], match)
 
-		if followupResults, err := Perform(match.FollowUpDetectors, dir); err == nil {
+		if followupResults, err := Perform(match.FollowUpDetectors, dirFS); err == nil {
 			res.merge(followupResults)
 		} else {
 			return nil, err

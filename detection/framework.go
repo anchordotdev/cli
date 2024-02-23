@@ -4,38 +4,40 @@ import (
 	"github.com/anchordotdev/cli/anchorcli"
 )
 
-// Ruby Frameworks
-var RailsFiles []string = []string{"Gemfile", "Rakefile", "config.ru", "app", "config", "db", "lib", "public", "vendor"}
-var SinatraFiles []string = []string{"Gemfile", "config.ru", "app.rb"}
+var (
 
-// Python Frameworks
-var DjangoFiles []string = []string{"requirements.txt", "manage.py"}
-var FlaskFiles []string = []string{"requirements.txt", "app.py"}
+	// Python Frameworks
 
-var RailsDetector = &FileDetector{
-	Title:             "rails",
-	Paths:             RailsFiles,
-	FollowUpDetectors: nil,
-	AnchorCategory:    anchorcli.CategoryRuby,
-}
+	Django = &FileDetector{
+		Title:             "Django",
+		Paths:             []string{"manage.py"},
+		FollowUpDetectors: nil,
+		AnchorCategory:    anchorcli.CategoryPython,
+	}
+	Flask = &FileDetector{
+		Title:             "Flask",
+		Paths:             []string{"app.py"},
+		FollowUpDetectors: nil,
+		AnchorCategory:    anchorcli.CategoryPython,
+	}
 
-var SinatraDetector = &FileDetector{
-	Title:             "sinatra",
-	Paths:             SinatraFiles,
-	FollowUpDetectors: nil,
-	AnchorCategory:    anchorcli.CategoryRuby,
-	RequiredFiles:     []string{"app.rb"},
-}
+	// Ruby Frameworks
 
-var DjangoDetector = &FileDetector{
-	Title:             "django",
-	Paths:             DjangoFiles,
-	FollowUpDetectors: nil,
-	AnchorCategory:    anchorcli.CategoryPython,
-}
-var FlaskDetector = &FileDetector{
-	Title:             "flask",
-	Paths:             FlaskFiles,
-	FollowUpDetectors: nil,
-	AnchorCategory:    anchorcli.CategoryPython,
-}
+	Rails = &FileDetector{
+		Title: "Ruby on Rails",
+		Paths: []string{
+			"config.ru", "app", "config", "db", "lib", "public", "vendor",
+		},
+		FollowUpDetectors: nil,
+		AnchorCategory:    anchorcli.CategoryRuby,
+	}
+	Sinatra = &FileDetector{
+		Title: "Sinatra",
+		Paths: []string{
+			"app.rb",
+		},
+		FollowUpDetectors: nil,
+		AnchorCategory:    anchorcli.CategoryRuby,
+		RequiredFiles:     []string{"app.rb"},
+	}
+)
