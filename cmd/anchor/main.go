@@ -90,7 +90,7 @@ var (
 				},
 			},
 			{
-				UI: trust.Sync{Config: cfg}.UI(),
+				UI: trust.Command{Config: cfg}.UI(),
 
 				Name:  "trust",
 				Use:   "trust [org[/realm[/ca]]]",

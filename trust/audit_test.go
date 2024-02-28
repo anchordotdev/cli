@@ -25,7 +25,7 @@ func TestAudit(t *testing.T) {
 	cfg.Trust.Stores = []string{"mock"}
 
 	var err error
-	if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
+	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
 

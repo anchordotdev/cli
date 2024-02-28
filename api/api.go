@@ -228,7 +228,7 @@ func getServicePath(orgSlug, serviceSlug string) string {
 func (s *Session) GetService(ctx context.Context, orgSlug, serviceSlug string) (*Service, error) {
 	var svc Service
 	if err := s.get(ctx, getServicePath(orgSlug, serviceSlug), &svc); err != nil {
-		if err == NotFoundErr {
+		if errors.Is(err, NotFoundErr) {
 			return nil, nil
 		}
 		return nil, err
@@ -248,7 +248,11 @@ func (s *Session) get(ctx context.Context, path string, out any) error {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return StatusCodeError(res.StatusCode)
+		var errorsRes *Error
+		if err = json.NewDecoder(res.Body).Decode(&errorsRes); err != nil {
+			return err
+		}
+		return fmt.Errorf("%w: %s", StatusCodeError(res.StatusCode), errorsRes.Title)
 	}
 	return json.NewDecoder(res.Body).Decode(out)
 }
@@ -274,7 +278,11 @@ func (s *Session) post(ctx context.Context, path string, in, out any) error {
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected response code: %d", res.StatusCode)
+		var errorsRes *Error
+		if err = json.NewDecoder(res.Body).Decode(&errorsRes); err != nil {
+			return err
+		}
+		return fmt.Errorf("%w: %s", StatusCodeError(res.StatusCode), errorsRes.Title)
 	}
 	return json.NewDecoder(res.Body).Decode(out)
 }
@@ -351,4 +359,4 @@ type StatusCodeError int
 const NotFoundErr = StatusCodeError(http.StatusNotFound)
 
 func (err StatusCodeError) StatusCode() int { return int(err) }
-func (err StatusCodeError) Error() string   { return fmt.Sprintf("unexpected response code: %d", err) }
+func (err StatusCodeError) Error() string   { return fmt.Sprintf("unexpected %d status response", err) }

@@ -18,7 +18,7 @@ type Provision struct {
 }
 
 func (m *Provision) Init() tea.Cmd {
-	m.spinner = ui.Spinner()
+	m.spinner = ui.WaitingSpinner()
 
 	return m.spinner.Tick
 }

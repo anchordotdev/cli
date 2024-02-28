@@ -10,6 +10,7 @@ import (
 var (
 	_ = flag.Bool("prism-verbose", false, "ignored")
 	_ = flag.Bool("prism-proxy", false, "ignored")
+	_ = flag.Bool("update", false, "ignored")
 )
 
 func TestScore_String(t *testing.T) {

@@ -23,13 +23,13 @@ func TestProvision(t *testing.T) {
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
 	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
-	cfg.Lcl.Service = "hi-example"
-	cfg.Lcl.Subdomain = "hi-example"
+	cfg.Lcl.Service = "hi-ankydotdev"
+	cfg.Lcl.Subdomain = "hi-ankydotdev"
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 
 	var err error
-	if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
+	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
 

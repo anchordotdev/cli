@@ -77,7 +77,7 @@ type SignInChecker struct {
 }
 
 func (m *SignInChecker) Init() tea.Cmd {
-	m.spinner = ui.Spinner()
+	m.spinner = ui.WaitingSpinner()
 
 	return m.spinner.Tick
 }

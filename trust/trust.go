@@ -3,169 +3,163 @@ package trust
 import (
 	"context"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
-	"fmt"
 	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	"github.com/muesli/termenv"
+	"time"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
+	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/ext509"
 	"github.com/anchordotdev/cli/ext509/oid"
+	"github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/truststore"
-)
-
-const (
-	sudoWarning = "Anchor needs sudo access to install certificates in your local trust stores."
+	"github.com/anchordotdev/cli/ui"
 )
 
 type Command struct {
 	Config *cli.Config
+
+	Anc                *api.Session
+	OrgSlug, RealmSlug string
 }
 
 func (c Command) UI() cli.UI {
 	return cli.UI{
-		RunTTY: c.run,
+		RunTUI: c.runTUI,
 	}
 }
 
-func (c *Command) run(ctx context.Context, tty termenv.File) error {
-	output := termenv.DefaultOutput()
-	cp := output.ColorProfile()
+func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
+	anc := c.Anc
+	if anc == nil {
+		var err error
+		if anc, err = c.apiClient(ctx, drv); err != nil {
+			return err
+		}
+	}
 
-	fmt.Fprintln(tty,
-		output.String("# Run `anchor trust`").Bold(),
-	)
+	orgSlug, realmSlug := c.OrgSlug, c.RealmSlug
+	if orgSlug == "" || realmSlug == "" {
+		if orgSlug != "" || realmSlug != "" {
+			panic("trust: OrgSlug & RealmSlug must be initialized together")
+		}
 
-	anc, err := api.NewClient(c.Config)
+		var err error
+		if orgSlug, realmSlug, err = fetchOrgAndRealm(ctx, c.Config, anc); err != nil {
+			return err
+		}
+	}
+
+	confirmc := make(chan struct{})
+	drv.Activate(ctx, &models.TrustPreflight{
+		Config:    c.Config,
+		ConfirmCh: confirmc,
+	})
+
+	cas, err := fetchExpectedCAs(ctx, anc, orgSlug, realmSlug)
 	if err != nil {
 		return err
 	}
 
-	org, realm, err := fetchOrgAndRealm(ctx, c.Config, anc)
+	stores, sudoMgr, err := loadStores(c.Config)
 	if err != nil {
 		return err
 	}
 
-	res, err := anc.Get("/orgs/" + url.QueryEscape(org) + "/realms/" + url.QueryEscape(realm) + "/x509/credentials")
+	// TODO: handle nosudo
+
+	sudoMgr.AroundSudo = func(sudo func()) {
+		unpausec := drv.Pause()
+		defer close(unpausec)
+
+		sudo()
+	}
+
+	audit := &truststore.Audit{
+		Expected: cas,
+		Stores:   stores,
+		SelectFn: checkAnchorCert,
+	}
+
+	info, err := audit.Perform()
 	if err != nil {
 		return err
 	}
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected response code: %d", res.StatusCode)
+	drv.Send(models.AuditInfoMsg(info))
+
+	if len(info.Missing) == 0 {
+		drv.Send(models.PreflightFinishedMsg{})
+
+		return nil
 	}
 
-	var certs *api.Credentials
-	if err := json.NewDecoder(res.Body).Decode(&certs); err != nil {
-		return err
+	if !c.Config.NonInteractive {
+		select {
+		case <-confirmc:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 
-	rootDir, err := os.MkdirTemp("", "add-cert")
+	tmpDir, err := os.MkdirTemp("", "anchor-trust")
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(rootDir)
+	defer os.RemoveAll(tmpDir)
 
-	fmt.Fprintln(tty,
-		" ",
-		output.String("!").Background(cp.Color("#7000ff")),
-		sudoWarning,
-	)
-
-	stores, _, err := loadStores(c.Config)
-	if err != nil {
-		return err
+	// FIXME: this write is required for the InstallCAs to work, feels like a leaky abstraction
+	for _, ca := range info.Missing {
+		if err := writeCAFile(ca, tmpDir); err != nil {
+			return err
+		}
 	}
 
-	for _, cert := range certs.Items {
-		blk, _ := pem.Decode([]byte(cert.TextualEncoding))
-
-		cert, err := x509.ParseCertificate(blk.Bytes)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		uniqueName := cert.SerialNumber.Text(16)
-		fileName := filepath.Join(uniqueName + ".pem")
-		file, err := os.Create(filepath.Join(rootDir, fileName))
-		if err != nil {
-			log.Fatal(err)
-		}
-		if err := pem.Encode(file, blk); err != nil {
-			log.Fatal(err)
-		}
-		if err := file.Close(); err != nil {
-			log.Fatal(err)
-		}
-
-		ca := &truststore.CA{
-			Certificate: cert,
-
-			FilePath:   file.Name(),
-			UniqueName: uniqueName,
-		}
-
-		fmt.Fprintln(tty,
-			" ",
-			"# Installing",
-			"\""+output.String(ca.Subject.CommonName).Underline().String()+"\"",
-			ca.PublicKeyAlgorithm,
-			output.String("("+uniqueName+")").Faint(),
-			"certificate",
-		)
-
-		if ca.SignatureAlgorithm == x509.PureEd25519 {
-			fmt.Fprintf(tty, "    - skipped awaiting broader support.\n")
-			continue
-		}
-
-		if c.Config.Trust.MockMode {
-			fmt.Fprintf(tty, "    - installed in the mock store.\n")
-			continue
-		}
-
-		for _, store := range stores {
-			if err := install(tty, ca, store); err != nil {
-				return err
+	for _, store := range stores {
+		drv.Activate(ctx, &models.TrustUpdateStore{
+			Store: store,
+		})
+		for _, ca := range info.Missing {
+			if info.IsPresent(ca, store) {
+				continue
 			}
+			drv.Send(models.TrustStoreInstallingCAMsg{CA: *ca})
+			if ok, err := store.InstallCA(ca); err != nil {
+				return err
+			} else if !ok {
+				panic("impossible")
+			}
+			drv.Send(models.TrustStoreInstalledCAMsg{CA: *ca})
 		}
 	}
 
 	return nil
 }
 
-func install(tty termenv.File, ca *truststore.CA, store truststore.Store) error {
-	if ok, err := store.Check(); !ok {
-		if err != nil {
-			fmt.Fprintf(tty, "    - skipping the %s store: %s\n", store.Description(), err)
-		} else {
-			fmt.Fprintf(tty, "    - skipping the %s store\n", store.Description())
+func (c *Command) apiClient(ctx context.Context, drv *ui.Driver) (*api.Session, error) {
+	anc, err := api.NewClient(c.Config)
+	if errors.Is(err, api.ErrSignedOut) {
+		if err := c.runSignIn(ctx, drv); err != nil {
+			return nil, err
 		}
-		return nil
+		if anc, err = api.NewClient(c.Config); err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
 	}
+	return anc, nil
+}
 
-	if ok, err := store.CheckCA(ca); err != nil {
-		fmt.Fprintf(tty, "    - skipping the %s store: %s\n", store.Description(), err)
-		return nil
-	} else if ok {
-		fmt.Fprintf(tty, "    - already installed in the %s store.\n", store.Description())
-		return nil
+func (c *Command) runSignIn(ctx context.Context, drv *ui.Driver) error {
+	cmdSignIn := &auth.SignIn{
+		Preamble: ui.StepHint("You need to signin first, so we can track the CAs to trust."),
 	}
-
-	if installed, err := store.InstallCA(ca); err != nil {
-		return err
-	} else if installed {
-		fmt.Fprintf(tty, "    - installed in the %s store.\n", store.Description())
-	}
-	return nil
+	return cmdSignIn.RunTUI(ctx, drv)
 }
 
 func fetchOrgAndRealm(ctx context.Context, cfg *cli.Config, anc *api.Session) (string, string, error) {
@@ -209,6 +203,8 @@ func PerformAudit(ctx context.Context, cfg *cli.Config, anc *api.Session, org st
 		return nil, err
 	}
 
+	time.Sleep(1 * time.Second)
+
 	return auditInfo, nil
 }
 
@@ -242,14 +238,6 @@ func fetchExpectedCAs(ctx context.Context, anc *api.Session, org, realm string) 
 		cas = append(cas, ca)
 	}
 	return cas, nil
-}
-
-func getHandle(ctx context.Context, anc *api.Session) (string, error) {
-	userInfo, err := anc.UserInfo(ctx)
-	if err != nil {
-		return "", err
-	}
-	return userInfo.Whoami, nil
 }
 
 func loadStores(cfg *cli.Config) ([]truststore.Store, *SudoManager, error) {

@@ -34,7 +34,7 @@ func TestWhoAmI(t *testing.T) {
 		cfg.Keyring.MockMode = true
 
 		var err error
-		if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
+		if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 			t.Fatal(err)
 		}
 
@@ -47,7 +47,7 @@ func TestWhoAmI(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if want, got := "Hello example@example.com!\n", buf.String(); want != got {
+		if want, got := "Hello anky@anchor.dev!\n", buf.String(); want != got {
 			t.Errorf("want output %q, got %q", want, got)
 		}
 	})

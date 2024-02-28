@@ -59,17 +59,20 @@ func TestLcl(t *testing.T) {
 	cfg.API.URL = srv.URL
 	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort + "/"
 	cfg.Lcl.DiagnosticAddr = diagAddr
-	cfg.Lcl.Service = "hi-example"
-	cfg.Lcl.Subdomain = "hi-example"
+	cfg.Lcl.Service = "hi-ankydotdev"
+	cfg.Lcl.Subdomain = "hi-ankydotdev"
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
 
-	if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
+	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
 
 	t.Run("basics", func(t *testing.T) {
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
 		drv, tm := uitest.TestTUI(ctx, t)
 
 		cmd := Command{
@@ -77,7 +80,11 @@ func TestLcl(t *testing.T) {
 		}
 
 		errc := make(chan error, 1)
-		go func() { errc <- cmd.UI().RunTUI(ctx, drv) }()
+		go func() {
+			errc <- cmd.UI().RunTUI(ctx, drv)
+
+			tm.Quit()
+		}()
 
 		// wait for prompt
 
@@ -100,7 +107,7 @@ func TestLcl(t *testing.T) {
 		})
 
 		if !srv.IsProxy() {
-			t.Skip("diagnostic unsupported in non-mock mode")
+			t.Skip("diagnostic unsupported in mock mode")
 		}
 
 		teatest.WaitFor(

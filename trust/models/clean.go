@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
 )
@@ -23,15 +24,15 @@ type CleanPreflight struct {
 }
 
 func (c *CleanPreflight) Init() tea.Cmd {
-	c.spinner = ui.Spinner()
+	c.spinner = ui.WaitingSpinner()
 
 	return c.spinner.Tick
 }
 
 func (c *CleanPreflight) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-  var cmd tea.Cmd
-  c.spinner, cmd = c.spinner.Update(msg)
-  return c, cmd
+	var cmd tea.Cmd
+	c.spinner, cmd = c.spinner.Update(msg)
+	return c, cmd
 }
 
 func (c *CleanPreflight) View() string {
@@ -53,6 +54,8 @@ const (
 )
 
 type CleanCA struct {
+	Config *cli.Config
+
 	CA        *truststore.CA
 	ConfirmCh chan<- struct{}
 
@@ -65,7 +68,7 @@ type CleanCA struct {
 }
 
 func (c *CleanCA) Init() tea.Cmd {
-	c.spinner = ui.Spinner()
+	c.spinner = ui.WaitingSpinner()
 
 	c.cleaned = make(map[truststore.Store]struct{})
 

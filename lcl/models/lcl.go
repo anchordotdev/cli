@@ -35,7 +35,7 @@ type LclScan struct {
 }
 
 func (m *LclScan) Init() tea.Cmd {
-	m.spinner = ui.Spinner()
+	m.spinner = ui.WaitingSpinner()
 
 	return m.spinner.Tick
 }
@@ -54,7 +54,7 @@ func (m *LclScan) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *LclScan) View() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header("Set Up lcl.host Local HTTPS Diagnostic"))
+	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Set Up lcl.host Local HTTPS Diagnostic %s", ui.Whisper("`anchor lcl`"))))
 	fmt.Fprintln(&b, ui.StepHint("We will start by determining your system's starting point for setup."))
 
 	if !m.finished {
@@ -149,7 +149,7 @@ type ProvisionService struct {
 }
 
 func (m *ProvisionService) Init() tea.Cmd {
-	m.spinner = ui.Spinner()
+	m.spinner = ui.WaitingSpinner()
 
 	return m.spinner.Tick
 }

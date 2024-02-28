@@ -38,11 +38,13 @@ var (
 	colorBrandSecondary = lipgloss.Color("#7000ff")
 
 	Prompt = lipgloss.NewStyle().Foreground(colorBrandPrimary)
+
+	Waiting = spinner.MiniDot
 )
 
-func Spinner() spinner.Model {
+func WaitingSpinner() spinner.Model {
 	return spinner.New(
-		spinner.WithSpinner(spinner.MiniDot),
+		spinner.WithSpinner(Waiting),
 		spinner.WithStyle(lipgloss.NewStyle().Foreground(colorBrandSecondary)),
 	)
 }

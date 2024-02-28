@@ -32,11 +32,11 @@ func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	handle, err := getHandle(ctx, anc)
+	userInfo, err := anc.UserInfo(ctx)
 	if err != nil {
 		return err
 	}
-	drv.Send(models.HandleMsg(handle))
+	drv.Send(models.HandleMsg(userInfo.PersonalOrg.Slug))
 
 	org, realm, err := fetchOrgAndRealm(ctx, c.Config, anc)
 	if err != nil {

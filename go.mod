@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbles v0.17.2-0.20240108170749-ec883029c8e6
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1
-	github.com/charmbracelet/x/exp/teatest v0.0.0-20240202113029-6ff29cf0473e
+	github.com/charmbracelet/x/exp/teatest v0.0.0-20240222131549-03ee51df8bea
 	github.com/cli/browser v1.3.0
 	github.com/creack/pty v1.1.21
 	github.com/deepmap/oapi-codegen v1.16.2
@@ -34,6 +34,7 @@ require (
 	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymanbagabas/go-udiff v0.2.0 // indirect
+	github.com/charmbracelet/x/exp/golden v0.0.0-20240222125807-0344fda748f8 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/containerd/console v1.0.4-0.20230313162750-1ae8d489ac81 // indirect
 	github.com/danieljoos/wincred v1.2.0 // indirect
@@ -65,7 +66,7 @@ require (
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/oauth2 v0.13.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/term v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.16.0 // indirect

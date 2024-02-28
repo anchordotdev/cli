@@ -110,7 +110,8 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	cmdCert := cert.Provision{
-		Cert: tlsCert,
+		Cert:   tlsCert,
+		Config: d.Config,
 	}
 
 	if err := cmdCert.RunTUI(ctx, drv, domains...); err != nil {

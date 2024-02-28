@@ -95,14 +95,14 @@ func (d *Diagnostic) runTUI(ctx context.Context, drv *ui.Driver, cert *tls.Certi
 			return nil
 		}
 
-		cmdTrustSync := &trust.Sync{
+		cmdTrust := &trust.Command{
 			Config:    d.Config,
 			Anc:       d.anc,
 			OrgSlug:   d.orgSlug,
 			RealmSlug: d.realmSlug,
 		}
 
-		if err := cmdTrustSync.UI().RunTUI(ctx, drv); err != nil {
+		if err := cmdTrust.UI().RunTUI(ctx, drv); err != nil {
 			return err
 		}
 	}

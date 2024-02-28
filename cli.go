@@ -25,7 +25,7 @@ type Config struct {
 		Subdomain string `desc:"Subdomain for lcl.host diagnostic service." flag:"subdomain" env:"SUBDOMAIN" json:"subdomain" toml:"subdomain"`
 
 		DiagnosticAddr string `default:":4433" desc:"Local server address" flag:"addr,a" env:"ADDR" json:"address" toml:"address"`
-		LclHostURL     string `default:"https://lcl.host" env:"LCL_HOST_URL"`
+		LclHostURL     string `default:"https://lcl.anchor.systems" env:"LCL_HOST_URL"`
 
 		Detect struct {
 			PackageManager string `desc:"Package manager to use for integrating Anchor." flag:"package-manager" env:"PACKAGE_MANAGER" json:"package_manager" toml:"package-manager"`

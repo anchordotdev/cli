@@ -11,6 +11,7 @@ import (
 var (
 	_ = flag.Bool("prism-verbose", false, "ignored")
 	_ = flag.Bool("prism-proxy", false, "ignored")
+	_ = flag.Bool("update", false, "ignored")
 )
 
 func TestKeyring(t *testing.T) {

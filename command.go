@@ -53,11 +53,12 @@ func (c *Command) Execute(ctx context.Context, cfg *Config) error {
 
 func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     c.Use,
-		Short:   c.Short,
-		Long:    c.Long,
-		GroupID: c.Group,
-		Hidden:  c.Hidden,
+		Use:          c.Use,
+		Short:        c.Short,
+		Long:         c.Long,
+		GroupID:      c.Group,
+		Hidden:       c.Hidden,
+		SilenceUsage: true,
 	}
 
 	if c.Preflight != nil {

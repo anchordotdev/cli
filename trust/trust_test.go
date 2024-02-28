@@ -1,18 +1,18 @@
 package trust
 
 import (
-	"bufio"
+	"bytes"
 	"context"
-	"encoding/json"
 	"flag"
 	"os"
-	"regexp"
 	"testing"
+	"time"
+
+	"github.com/charmbracelet/x/exp/teatest"
 
 	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/api/apitest"
-	"github.com/anchordotdev/cli/truststore"
+	"github.com/anchordotdev/cli/ui/uitest"
 )
 
 var srv = &apitest.Server{
@@ -38,121 +38,70 @@ func TestTrust(t *testing.T) {
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.Trust.Stores = []string{"mock"}
+	cfg.NonInteractive = true
+	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
+	cfg.Trust.Stores = []string{"mock"}
 
 	var err error
-	if cfg.API.Token, err = srv.GeneratePAT("example@example.com"); err != nil {
+	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
 
-	header := "# Run `anchor trust`"
-	subheaderPattern := regexp.MustCompile(`  # Installing "[^"]+ - AnchorCA" \w+ \([a-z0-9]+\) certificate$`)
-	installPattern := regexp.MustCompile(`    - installed in the Mock store.$`)
-	skipPattern := regexp.MustCompile(`    - skipped awaiting broader support.$`)
+	t.Run("iterative basics", func(t *testing.T) {
+		if !srv.IsProxy() {
+			t.Skip("trust unsupported in mock mode")
+		}
 
-	t.Run("default to personal org and localhost realm", func(t *testing.T) {
-		defer func() { truststore.MockCAs = nil }()
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
 
-		cmd := &Command{
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		cmd := Command{
 			Config: cfg,
 		}
 
-		buf, err := apitest.RunTTY(ctx, cmd.UI())
-		if err != nil {
+		if err := cmd.UI().RunTUI(ctx, drv); err != nil {
 			t.Fatal(err)
 		}
+		defer tm.Quit()
 
-		scanner := bufio.NewScanner(buf)
-		if !scanner.Scan() {
-			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
-		}
-		if line := scanner.Text(); line != header {
-			t.Errorf("want output %q to match %q", line, header)
-		}
+		teatest.WaitFor(
+			t, tm.Output(),
+			func(bts []byte) bool {
+				return bytes.Contains(bts, []byte("* Comparing local stores to expected CA certificates…*"))
+			},
+			teatest.WithCheckInterval(time.Millisecond*100),
+			teatest.WithDuration(time.Second*3),
+		)
 
-		if !scanner.Scan() {
-			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
-		}
-		if line := scanner.Text(); line != "  ! "+sudoWarning {
-			t.Errorf("want output %q to match %q", line, "  ! "+sudoWarning)
-		}
-
-		for scanner.Scan() {
-			if line := scanner.Text(); !subheaderPattern.MatchString(line) {
-				t.Errorf("want output %q to match %q", line, subheaderPattern)
-			}
-
-			if !scanner.Scan() {
-				t.Fatalf("want detail line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
-			}
-
-			if line := scanner.Text(); !(installPattern.MatchString(line) || skipPattern.MatchString(line)) {
-				t.Errorf("want output %q to match %q or %q", line, installPattern, skipPattern)
-			}
-		}
+		teatest.WaitFor(
+			t, tm.Output(),
+			func(bts []byte) bool {
+				return bytes.Contains(bts, []byte("- Compared local stores to expected CA certificates: need to install 2 missing certificates.")) &&
+					bytes.Contains(bts, []byte("! Installing 2 missing certificates. (requires sudo)")) &&
+					bytes.Contains(bts, []byte("- Updated Mock: installed ankydotdev/localhost - AnchorCA [RSA, ECDSA]"))
+			},
+			teatest.WithCheckInterval(time.Millisecond*100),
+			teatest.WithDuration(time.Second*3),
+		)
 	})
 
-	t.Run("specified org and realm", func(t *testing.T) {
-		defer func() { truststore.MockCAs = nil }()
+	t.Run("basics", func(t *testing.T) {
+		t.Skip("pending fixing golden file based tests issues with resizing on CI")
 
-		cfg.Trust.Org = mustFetchPersonalOrgSlug(cfg)
-		cfg.Trust.Realm = "localhost"
+		if !srv.IsProxy() {
+			t.Skip("trust unsupported in mock mode")
+		}
 
-		cmd := &Command{
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		cmd := Command{
 			Config: cfg,
 		}
 
-		buf, err := apitest.RunTTY(ctx, cmd.UI())
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		scanner := bufio.NewScanner(buf)
-		if !scanner.Scan() {
-			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
-		}
-		if line := scanner.Text(); line != header {
-			t.Errorf("want output %q to match %q", line, header)
-		}
-
-		if !scanner.Scan() {
-			t.Fatalf("want sudo warning line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
-		}
-		if line := scanner.Text(); line != "  ! "+sudoWarning {
-			t.Errorf("want output %q to match %q", line, "  ! "+sudoWarning)
-		}
-		for scanner.Scan() {
-			if line := scanner.Text(); !subheaderPattern.MatchString(line) {
-				t.Errorf("want output %q to match %q", line, subheaderPattern)
-			}
-
-			if !scanner.Scan() {
-				t.Fatalf("want detail line got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
-			}
-
-			if line := scanner.Text(); !(installPattern.MatchString(line) || skipPattern.MatchString(line)) {
-				t.Errorf("want output %q to match %q or %q", line, installPattern, skipPattern)
-			}
-		}
+		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})
-}
-
-func mustFetchPersonalOrgSlug(cfg *cli.Config) string {
-	anc, err := api.NewClient(cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	res, err := anc.Get("")
-	if err != nil {
-		panic(err)
-	}
-
-	var userInfo *api.Root
-	if err = json.NewDecoder(res.Body).Decode(&userInfo); err != nil {
-		panic(err)
-	}
-
-	return userInfo.PersonalOrg.Slug
 }

@@ -8,6 +8,10 @@ import (
 	"github.com/anchordotdev/cli/api/apitest"
 )
 
+var (
+	_ = flag.Bool("update", false, "ignored")
+)
+
 var srv = &apitest.Server{
 	Host:    "api.anchor.lcl.host",
 	RootDir: "../..",
