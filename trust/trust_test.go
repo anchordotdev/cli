@@ -70,7 +70,7 @@ func TestTrust(t *testing.T) {
 		teatest.WaitFor(
 			t, tm.Output(),
 			func(bts []byte) bool {
-				return bytes.Contains(bts, []byte("* Comparing local stores to expected CA certificates…*"))
+				return bytes.Contains(bts, []byte("* Comparing local and expected CA certificates…*"))
 			},
 			teatest.WithCheckInterval(time.Millisecond*100),
 			teatest.WithDuration(time.Second*3),
@@ -79,7 +79,7 @@ func TestTrust(t *testing.T) {
 		teatest.WaitFor(
 			t, tm.Output(),
 			func(bts []byte) bool {
-				return bytes.Contains(bts, []byte("- Compared local stores to expected CA certificates: need to install 2 missing certificates.")) &&
+				return bytes.Contains(bts, []byte("- Compared local and expected CA certificates: need to install 2 missing certificates.")) &&
 					bytes.Contains(bts, []byte("! Installing 2 missing certificates. (requires sudo)")) &&
 					bytes.Contains(bts, []byte("- Updated Mock: installed ankydotdev/localhost - AnchorCA [RSA, ECDSA]"))
 			},

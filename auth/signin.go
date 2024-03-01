@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/atotto/clipboard"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cli/browser"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
@@ -27,8 +28,9 @@ var (
 type SignIn struct {
 	Config *cli.Config
 
-	Preamble string
-	Source   string
+	Source string
+
+	Hint tea.Model
 }
 
 func (s SignIn) UI() cli.UI {
@@ -135,9 +137,12 @@ func (s *SignIn) runTTY(ctx context.Context, tty termenv.File) error {
 }
 
 func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
-	drv.Activate(ctx, models.SignInPreamble{
-		Message: s.Preamble,
-	})
+	drv.Activate(ctx, &models.SignInHeader{})
+
+	if s.Hint == nil {
+		s.Hint = &models.SignInHint{}
+	}
+	drv.Activate(ctx, s.Hint)
 
 	anc, err := api.NewClient(s.Config)
 	if err != nil && err != api.ErrSignedOut {

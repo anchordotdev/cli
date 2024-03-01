@@ -25,15 +25,21 @@ type Config struct {
 		Subdomain string `desc:"Subdomain for lcl.host diagnostic service." flag:"subdomain" env:"SUBDOMAIN" json:"subdomain" toml:"subdomain"`
 
 		DiagnosticAddr string `default:":4433" desc:"Local server address" flag:"addr,a" env:"ADDR" json:"address" toml:"address"`
-		LclHostURL     string `default:"https://lcl.anchor.systems" env:"LCL_HOST_URL"`
+		LclHostURL     string `default:"https://lcl.host" env:"LCL_HOST_URL"`
 
-		Detect struct {
+		Audit struct {
+		} `cmd:"audit"`
+
+		Config struct {
+		} `cmd:"config"`
+
+		Setup struct {
 			PackageManager string `desc:"Package manager to use for integrating Anchor." flag:"package-manager" env:"PACKAGE_MANAGER" json:"package_manager" toml:"package-manager"`
 			Service        string `desc:"Name for lcl.host service." flag:"service" env:"SERVICE" json:"service" toml:"service"`
 			Subdomain      string `desc:"Subdomain for lcl.host service." flag:"subdomain" env:"SUBDOMAIN" json:"subdomain" toml:"subdomain"`
 			File           string `desc:"File Anchor should use to detect package manager." flag:"file" env:"PACKAGE_MANAGER_FILE" json:"file" toml:"file"`
 			Language       string `desc:"Language to use for integrating Anchor." flag:"language" json:"language" toml:"language"`
-		} `cmd:"detect"`
+		} `cmd:"setup"`
 	} `cmd:"lcl"`
 
 	Trust struct {

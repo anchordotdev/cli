@@ -7,10 +7,24 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
-
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+type TrustSignInHint struct{}
+
+func (TrustSignInHint) Init() tea.Cmd { return nil }
+
+func (m *TrustSignInHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *TrustSignInHint) View() string {
+	var b strings.Builder
+	// FIXME: first line duplicated from SignInHint, should dedup somehow
+	fmt.Fprintln(&b, ui.StepHint("Please sign up or sign in with your Anchor account."))
+	fmt.Fprintln(&b, ui.StepHint(""))
+	fmt.Fprintln(&b, ui.StepHint("Once authenticated, we can lookup the CAs to trust."))
+	return b.String()
+}
 
 type preflightStep int
 
@@ -88,13 +102,13 @@ func (m *TrustPreflight) View() string {
 	var b strings.Builder
 
 	if m.step == diff {
-		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Comparing local stores to expected CA certificates…%s", m.spinner.View())))
+		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Comparing local and expected CA certificates…%s", m.spinner.View())))
 		return b.String()
 	}
 
 	switch m.step {
 	case confirmSync:
-		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Compared local stores to expected CA certificates: need to install %d missing certificates.", len(m.auditInfo.Missing))))
+		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Compared local and expected CA certificates: need to install %d missing certificates.", len(m.auditInfo.Missing))))
 
 		if m.Config.NonInteractive {
 			fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("Installing %d missing certificates. (%s)", len(m.auditInfo.Missing), ui.Accentuate("requires sudo"))))
@@ -102,7 +116,7 @@ func (m *TrustPreflight) View() string {
 			fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to install %d missing certificates. (%s)", ui.Action("Press Enter"), len(m.auditInfo.Missing), ui.Accentuate("requires sudo"))))
 		}
 	case noSync:
-		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Compared local stores to expected CA certificates: no changes needed.")))
+		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Compared local and expected CA certificates: found matching certificates.")))
 	default:
 		panic("impossible")
 	}

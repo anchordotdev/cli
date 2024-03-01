@@ -157,7 +157,7 @@ func (c *Command) apiClient(ctx context.Context, drv *ui.Driver) (*api.Session, 
 
 func (c *Command) runSignIn(ctx context.Context, drv *ui.Driver) error {
 	cmdSignIn := &auth.SignIn{
-		Preamble: ui.StepHint("You need to signin first, so we can track the CAs to trust."),
+		Hint: &models.TrustSignInHint{},
 	}
 	return cmdSignIn.RunTUI(ctx, drv)
 }

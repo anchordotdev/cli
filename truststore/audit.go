@@ -73,7 +73,9 @@ func (a *Audit) Perform() (*AuditInfo, error) {
 			}
 
 			casByName[ca.UniqueName] = ca
-			storesByCA[ca.UniqueName] = append(storesByCA[ca.UniqueName], store)
+			if !slices.Contains(storesByCA[ca.UniqueName], store) {
+				storesByCA[ca.UniqueName] = append(storesByCA[ca.UniqueName], store)
+			}
 
 			set, ok := info.casByStore[store]
 			if !ok {

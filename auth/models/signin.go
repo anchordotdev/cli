@@ -9,21 +9,27 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type SignInPreamble struct {
-	Message string
-}
+type SignInHeader struct{}
 
-func (SignInPreamble) Init() tea.Cmd { return nil }
+func (SignInHeader) Init() tea.Cmd { return nil }
 
-func (m SignInPreamble) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+func (m *SignInHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 
-func (m SignInPreamble) View() string {
+func (m *SignInHeader) View() string {
 	var b strings.Builder
 	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Signin to Anchor.dev %s", ui.Whisper("`anchor auth signin`"))))
-	if m.Message != "" {
-		fmt.Fprintln(&b, m.Message)
-	}
+	return b.String()
+}
 
+type SignInHint struct{}
+
+func (SignInHint) Init() tea.Cmd { return nil }
+
+func (m SignInHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m SignInHint) View() string {
+	var b strings.Builder
+	fmt.Fprintln(&b, ui.StepHint("Please sign up or sign in with your Anchor account."))
 	return b.String()
 }
 
@@ -64,7 +70,7 @@ func (m *SignInPrompt) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Copied your user code to your clipboard.")))
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Copied your user code %s to your clipboard.", ui.Emphasize(m.UserCode))))
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Opened %s in your browser", ui.URL(m.VerificationURL))))
 
 	return b.String()

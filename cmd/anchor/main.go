@@ -81,11 +81,25 @@ var (
 
 				SubCommands: []*cli.Command{
 					{
-						UI: lcl.Detect{Config: cfg}.UI(),
+						UI: lcl.Audit{Config: cfg}.UI(),
 
-						Name:  "detect",
-						Use:   "detect",
-						Short: "Detect Framework/Language",
+						Name:  "audit",
+						Use:   "audit",
+						Short: "Audit lcl.host HTTPS Local Development Environment",
+					},
+					{
+						UI: lcl.LclConfig{Config: cfg}.UI(),
+
+						Name:  "config",
+						Use:   "config",
+						Short: "Configure System for lcl.host Local Development",
+					},
+					{
+						UI: lcl.Setup{Config: cfg}.UI(),
+
+						Name:  "setup",
+						Use:   "setup",
+						Short: "Setup lcl.host Application",
 					},
 				},
 			},

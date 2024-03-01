@@ -11,27 +11,59 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
+	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/cert"
 	"github.com/anchordotdev/cli/detection"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
-type Detect struct {
+type Setup struct {
 	Config *cli.Config
 
 	anc     *api.Session
 	orgSlug string
 }
 
-func (d Detect) UI() cli.UI {
+func (c Setup) UI() cli.UI {
 	return cli.UI{
-		RunTUI: d.run,
+		RunTUI: c.run,
 	}
 }
 
-func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
-	drv.Activate(ctx, new(models.DetectPreamble))
+func (c Setup) run(ctx context.Context, drv *ui.Driver) error {
+	var err error
+	cmd := &auth.Client{
+		Config: c.Config,
+		Anc:    c.anc,
+		Source: "lclhost",
+	}
+	c.anc, err = cmd.Perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+
+	drv.Activate(ctx, new(models.SetupHeader))
+	drv.Activate(ctx, new(models.SetupHint))
+
+	err = c.perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
+	drv.Activate(ctx, &models.SetupScan{})
+
+	if c.orgSlug == "" {
+		userInfo, err := c.anc.UserInfo(ctx)
+		if err != nil {
+			return nil
+		}
+		c.orgSlug = userInfo.PersonalOrg.Slug
+	}
 
 	path, err := os.Getwd()
 	if err != nil {
@@ -40,8 +72,8 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 	dirFS := os.DirFS(path).(detection.FS)
 
 	detectors := detection.DefaultDetectors
-	if d.Config.Lcl.Detect.Language != "" {
-		if langDetector, ok := detection.DetectorsByFlag[d.Config.Lcl.Detect.Language]; !ok {
+	if c.Config.Lcl.Setup.Language != "" {
+		if langDetector, ok := detection.DetectorsByFlag[c.Config.Lcl.Setup.Language]; !ok {
 			return errors.New("invalid language specified")
 		} else {
 			detectors = []detection.Detector{langDetector}
@@ -55,7 +87,7 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 	drv.Send(results)
 
 	choicec := make(chan string)
-	drv.Activate(ctx, &models.DetectCategory{
+	drv.Activate(ctx, &models.SetupCategory{
 		ChoiceCh: choicec,
 		Results:  results,
 	})
@@ -68,7 +100,7 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	inputc := make(chan string)
-	drv.Activate(ctx, &models.DetectName{
+	drv.Activate(ctx, &models.SetupName{
 		InputCh: inputc,
 		Default: filepath.Base(path), // TODO: use detected name recommendation
 	})
@@ -81,11 +113,10 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	inputc = make(chan string)
-	drv.Activate(ctx, &models.DomainInput{
-		InputCh:    inputc,
-		Default:    serviceName,
-		TLD:        "lcl.host",
-		SkipHeader: true,
+	drv.Activate(ctx, &models.SetupDomain{
+		InputCh: inputc,
+		Default: serviceName,
+		TLD:     "lcl.host",
 	})
 
 	var serviceSubdomain string
@@ -98,27 +129,27 @@ func (d Detect) run(ctx context.Context, drv *ui.Driver) error {
 	domains := []string{serviceSubdomain + ".lcl.host", serviceSubdomain + ".localhost"}
 
 	cmdProvision := &Provision{
-		Config:    d.Config,
+		Config:    c.Config,
 		Domains:   domains,
-		orgSlug:   d.orgSlug,
+		orgSlug:   c.orgSlug,
 		realmSlug: "localhost",
 	}
 
-	service, _, _, tlsCert, err := cmdProvision.run(ctx, drv, d.anc, serviceName, serviceCategory)
+	service, _, _, tlsCert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, serviceCategory)
 	if err != nil {
 		return err
 	}
 
 	cmdCert := cert.Provision{
 		Cert:   tlsCert,
-		Config: d.Config,
+		Config: c.Config,
 	}
 
 	if err := cmdCert.RunTUI(ctx, drv, domains...); err != nil {
 		return err
 	}
 
-	setupGuideURL := d.Config.AnchorURL + "/" + url.QueryEscape(d.orgSlug) + "/services/" + url.QueryEscape(service.Slug) + "/guide"
+	setupGuideURL := c.Config.AnchorURL + "/" + url.QueryEscape(c.orgSlug) + "/services/" + url.QueryEscape(service.Slug) + "/guide"
 	setupGuideConfirmCh := make(chan struct{})
 
 	drv.Activate(ctx, &models.SetupGuidePrompt{

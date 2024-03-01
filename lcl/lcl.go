@@ -17,12 +17,13 @@ import (
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/lcl/models"
-	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/ui"
 )
 
 type Command struct {
 	Config *cli.Config
+
+	anc *api.Session
 }
 
 func (c Command) UI() cli.UI {
@@ -34,117 +35,80 @@ func (c Command) UI() cli.UI {
 func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, &models.LclPreamble{})
 
-	anc, err := api.NewClient(c.Config)
-	if errors.Is(err, api.ErrSignedOut) {
-		if err := c.runSignIn(ctx, drv); err != nil {
-			return err
-		}
-		if anc, err = api.NewClient(c.Config); err != nil {
-			return err
-		}
+	var err error
+	cmd := &auth.Client{
+		Config: c.Config,
+		Anc:    c.anc,
+		Hint:   &models.LclSignInHint{},
+		Source: "lclhost",
+	}
+	c.anc, err = cmd.Perform(ctx, drv)
+	if err != nil {
+		return err
 	}
 
-	userInfo, err := anc.UserInfo(ctx)
-	if errors.Is(err, api.ErrSignedOut) {
-		if err := c.runSignIn(ctx, drv); err != nil {
-			return err
-		}
-		if anc, err = api.NewClient(c.Config); err != nil {
-			return err
-		}
-		if userInfo, err = anc.UserInfo(ctx); err != nil {
-			return err
-		}
-	} else if err != nil {
+	drv.Activate(ctx, &models.LclHeader{})
+	drv.Activate(ctx, &models.LclHint{})
+
+	userInfo, err := c.anc.UserInfo(ctx)
+	if err != nil {
 		return err
 	}
 
 	orgSlug := userInfo.PersonalOrg.Slug
 	realmSlug := "localhost"
 
-	drv.Activate(ctx, &models.LclScan{})
+	// run audit command
+	drv.Activate(ctx, &models.AuditHeader{})
+	drv.Activate(ctx, &models.AuditHint{})
 
-	auditInfo, err := trust.PerformAudit(ctx, c.Config, anc, orgSlug, realmSlug)
+	cmdAudit := &Audit{
+		Config:    c.Config,
+		anc:       c.anc,
+		orgSlug:   orgSlug,
+		realmSlug: realmSlug,
+	}
+
+	lclAuditResult, err := cmdAudit.perform(ctx, drv)
 	if err != nil {
 		return err
 	}
 
-	var diagnosticService *api.Service
-	services, err := anc.GetOrgServices(ctx, orgSlug)
-	if err != nil {
-		return err
-	}
-	for _, service := range services {
-		if service.ServerType == "diagnostic" {
-			diagnosticService = &service
-		}
-	}
+	if lclAuditResult.diagnosticServiceExists && lclAuditResult.trusted {
+		drv.Activate(ctx, &models.LclConfigSkip{})
+	} else {
+		// run config command
+		drv.Activate(ctx, &models.LclConfigHeader{})
+		drv.Activate(ctx, &models.LclConfigHint{})
 
-	drv.Send(models.ScanFinishedMsg{})
-
-	if diagnosticService == nil || len(auditInfo.Missing) != 0 {
-		inputc := make(chan string)
-		drv.Activate(ctx, &models.DomainInput{
-			InputCh: inputc,
-			Default: "hi-" + orgSlug,
-			TLD:     "lcl.host",
-		})
-
-		var serviceName string
-		select {
-		case serviceName = <-inputc:
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-
-		domains := []string{serviceName + ".lcl.host", serviceName + ".localhost"}
-
-		cmdProvision := &Provision{
+		cmdConfig := &LclConfig{
 			Config:    c.Config,
-			Domains:   domains,
+			anc:       c.anc,
 			orgSlug:   orgSlug,
 			realmSlug: realmSlug,
 		}
 
-		_, _, _, cert, err := cmdProvision.run(ctx, drv, anc, serviceName, "diagnostic")
-		if err != nil {
-			return err
-		}
-
-		cmdDiagnostic := &Diagnostic{
-			Config:    c.Config,
-			anc:       anc,
-			orgSlug:   orgSlug,
-			realmSlug: realmSlug,
-		}
-
-		if err := cmdDiagnostic.runTUI(ctx, drv, cert); err != nil {
+		if err := cmdConfig.perform(ctx, drv); err != nil {
 			return err
 		}
 	}
 
-	// run detect command
+	// run setup command
+	drv.Activate(ctx, &models.SetupHeader{})
+	drv.Activate(ctx, &models.SetupHint{})
 
-	cmdDetect := &Detect{
+	cmdSetup := &Setup{
 		Config:  c.Config,
-		anc:     anc,
+		anc:     c.anc,
 		orgSlug: orgSlug,
 	}
 
-	if err := cmdDetect.run(ctx, drv); err != nil {
+	err = cmdSetup.perform(ctx, drv)
+	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (c *Command) runSignIn(ctx context.Context, drv *ui.Driver) error {
-	cmdSignIn := &auth.SignIn{
-		Config:   c.Config,
-		Preamble: ui.StepHint("You need to signin first, so we can track resources for you."),
-		Source:   "lclhost",
-	}
-	return cmdSignIn.RunTUI(ctx, drv)
 }
 
 func provisionCert(eab *api.Eab, domains []string, acmeURL string) (*tls.Certificate, error) {

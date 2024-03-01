@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"flag"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -132,7 +133,7 @@ func TestLcl(t *testing.T) {
 					t.Fatal(<-errc)
 				}
 
-				expect := "! Press Enter to test " + httpURL + ". (without HTTPS)"
+				expect := fmt.Sprintf("! Press Enter to open %s in your browser.", httpURL)
 				return bytes.Contains(bts, []byte(expect))
 			},
 			teatest.WithCheckInterval(time.Millisecond*100),
@@ -172,7 +173,7 @@ func TestLcl(t *testing.T) {
 					t.Fatal(<-errc)
 				}
 
-				expect := "! Press Enter to test " + httpsURL + ". (with HTTPS)"
+				expect := fmt.Sprintf("! Press Enter to open %s in your browser.", httpsURL)
 				return bytes.Contains(bts, []byte(expect))
 			},
 			teatest.WithCheckInterval(time.Millisecond*100),

@@ -2,6 +2,7 @@ package ui
 
 import (
 	"context"
+	"io"
 	"reflect"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -110,6 +111,10 @@ func (d *Driver) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	_, cmd := d.active.Update(msg)
+	if isExit(cmd) {
+		d.active = nil
+		return d, tea.Quit
+	}
 	if isQuit(cmd) {
 		d.active = nil
 		return d, nil
@@ -125,8 +130,17 @@ func (d *Driver) View() string {
 	return out
 }
 
-var quitPtr = reflect.ValueOf(tea.Quit).Pointer()
+var (
+	quitPtr = reflect.ValueOf(tea.Quit).Pointer()
+	exitPtr = reflect.ValueOf(Exit).Pointer()
+)
 
 func isQuit(cmd tea.Cmd) bool {
 	return reflect.ValueOf(cmd).Pointer() == quitPtr
 }
+
+func isExit(cmd tea.Cmd) bool {
+	return reflect.ValueOf(cmd).Pointer() == exitPtr
+}
+
+func Exit() tea.Msg { return io.EOF }

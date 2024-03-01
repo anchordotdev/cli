@@ -12,9 +12,11 @@ import (
 )
 
 var (
-	hint = lipgloss.NewStyle().Faint(true).SetString("|")
+	header = lipgloss.NewStyle().Bold(true)
+	hint   = lipgloss.NewStyle().Faint(true).SetString("|")
 
-	Header    = lipgloss.NewStyle().Bold(true).SetString("#").Render
+	Header    = header.Copy().SetString("#").Render
+	Skip      = header.Copy().Faint(true).SetString("# Skipped:").Render
 	Hint      = hint.Copy().Render
 	Underline = lipgloss.NewStyle().Underline(true).Render
 

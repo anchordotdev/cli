@@ -42,8 +42,7 @@ func (m *Provision) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Provision) View() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header("Provision Certificate"))
-	fmt.Fprintln(&b, ui.StepHint("You can manually use these certificate files or automate your certificates by following our setup guide."))
+	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Provision Certificate %s", ui.Whisper("`anchor lcl mkcert`"))))
 
 	if m.certFile == "" {
 		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Provisioning certificate for [%s]… %s",
@@ -55,7 +54,9 @@ func (m *Provision) View() string {
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Provisioned certificate for [%s].", ui.Domains(m.Domains))))
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote certificate to %s", ui.Emphasize(m.certFile))))
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote chain to %s", ui.Emphasize(m.chainFile))))
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote key to %s", ui.Emphasize(m.chainFile))))
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote key to %s", ui.Emphasize(m.keyFile))))
+	fmt.Fprintln(&b, ui.StepHint("You can use these certificate files to manually configure your application and"))
+	fmt.Fprintln(&b, ui.StepHint("start using HTTPS in your development environment."))
 
 	return b.String()
 }

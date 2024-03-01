@@ -13,20 +13,49 @@ import (
 	"github.com/anchordotdev/cli/ui"
 )
 
-type DetectPreamble struct {
+type SetupHeader struct{}
+
+func (m *SetupHeader) Init() tea.Cmd { return nil }
+
+func (m *SetupHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *SetupHeader) View() string {
+	var b strings.Builder
+
+	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Setup lcl.host Application %s", ui.Whisper("`anchor lcl setup`"))))
+
+	return b.String()
+}
+
+type SetupHint struct{}
+
+func (m *SetupHint) Init() tea.Cmd { return nil }
+
+func (m *SetupHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *SetupHint) View() string {
+	var b strings.Builder
+
+	fmt.Fprintln(&b, ui.StepHint("We'll start by scanning your current directory, then ask you questions about"))
+	fmt.Fprintln(&b, ui.StepHint("your local application so that we can generate setup instructions for you."))
+
+	return b.String()
+}
+
+type SetupScan struct {
 	results detection.Results
 
 	spinner  spinner.Model
 	finished bool
 }
 
-func (m *DetectPreamble) Init() tea.Cmd {
+func (m *SetupScan) Init() tea.Cmd {
 	m.spinner = ui.WaitingSpinner()
 
 	return m.spinner.Tick
 }
 
-func (m *DetectPreamble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *SetupScan) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case detection.Results:
 		m.finished = true
@@ -39,21 +68,20 @@ func (m *DetectPreamble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m *DetectPreamble) View() string {
+func (m *SetupScan) View() string {
 	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header("Configure lcl.host Integration"))
-	fmt.Fprintln(&b, ui.StepHint("We will integrate your application with the help of educated guesses about the current directory."))
 
 	if !m.finished {
-		fmt.Fprintln(&b, ui.StepInProgress("Scanning current directory..."+m.spinner.View()))
+		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Scanning current directory for local application…%s", m.spinner.View())))
 		return b.String()
 	}
+
 	fmt.Fprintln(&b, ui.StepDone("Scanned current directory."))
 
 	return b.String()
 }
 
-type DetectCategory struct {
+type SetupCategory struct {
 	ChoiceCh chan<- string
 	Results  detection.Results
 
@@ -61,7 +89,7 @@ type DetectCategory struct {
 	choice string
 }
 
-func (m *DetectCategory) Init() tea.Cmd {
+func (m *SetupCategory) Init() tea.Cmd {
 	var items []ui.ListItem[string]
 	for _, match := range m.Results[detection.High] {
 		item := ui.ListItem[string]{
@@ -94,7 +122,7 @@ func (m *DetectCategory) Init() tea.Cmd {
 	return nil
 }
 
-func (m *DetectCategory) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *SetupCategory) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -112,6 +140,8 @@ func (m *DetectCategory) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			return m, cmd
+		case tea.KeyEsc:
+			return m, ui.Exit
 		}
 	}
 
@@ -120,22 +150,22 @@ func (m *DetectCategory) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *DetectCategory) View() string {
+func (m *SetupCategory) View() string {
 	var b strings.Builder
 
 	if m.ChoiceCh != nil {
-		fmt.Fprintln(&b, ui.StepPrompt("What is your application server type?"))
+		fmt.Fprintln(&b, ui.StepPrompt("What application server type?"))
 		fmt.Fprintln(&b, m.list.View())
 
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s application server type.", ui.Emphasize(m.choice))))
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s application server type", ui.Emphasize(m.choice))))
 
 	return b.String()
 }
 
-type DetectName struct {
+type SetupName struct {
 	InputCh chan<- string
 
 	Default string
@@ -144,7 +174,7 @@ type DetectName struct {
 	choice string
 }
 
-func (m *DetectName) Init() tea.Cmd {
+func (m *SetupName) Init() tea.Cmd {
 	ti := textinput.New()
 	ti.Prompt = ""
 	ti.Cursor.Style = ui.Prompt
@@ -159,7 +189,7 @@ func (m *DetectName) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m *DetectName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *SetupName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -175,8 +205,8 @@ func (m *DetectName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.InputCh = nil
 			}
 			return m, nil
-		case tea.KeyCtrlC, tea.KeyEsc:
-			return m, tea.Quit
+		case tea.KeyEsc:
+			return m, ui.Exit
 		}
 	}
 
@@ -185,16 +215,81 @@ func (m *DetectName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *DetectName) View() string {
+func (m *SetupName) View() string {
 	var b strings.Builder
 
 	if m.InputCh != nil {
-		fmt.Fprintln(&b, ui.StepPrompt("What is your application name?"))
+		fmt.Fprintln(&b, ui.StepPrompt("What is the application name?"))
 		fmt.Fprintln(&b, ui.StepPrompt(m.input.View()))
 		return b.String()
 	}
 
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s application name.", ui.Emphasize(m.choice))))
+
+	return b.String()
+}
+
+type SetupDomain struct {
+	InputCh chan<- string
+
+	Default string
+	TLD     string
+
+	input  *textinput.Model
+	choice string
+}
+
+func (m *SetupDomain) Init() tea.Cmd {
+	ti := textinput.New()
+	ti.Prompt = ""
+	ti.Cursor.Style = ui.Prompt
+	ti.Focus()
+
+	if len(m.Default) > 0 {
+		ti.Placeholder = m.Default + "." + m.TLD
+	}
+
+	m.input = &ti
+
+	return textinput.Blink
+}
+
+func (m *SetupDomain) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			if m.InputCh != nil {
+				value := m.input.Value()
+				if value == "" {
+					value = m.Default
+				}
+
+				m.choice = value
+				m.InputCh <- value
+				m.InputCh = nil
+			}
+			return m, nil
+		case tea.KeyEsc:
+			return m, ui.Exit
+		}
+	}
+
+	ti, cmd := m.input.Update(msg)
+	m.input = &ti
+	return m, cmd
+}
+
+func (m *SetupDomain) View() string {
+	var b strings.Builder
+
+	if m.InputCh != nil {
+		fmt.Fprintln(&b, ui.StepPrompt("What lcl.host domain would you like to use for local application development?"))
+		fmt.Fprintln(&b, ui.StepPrompt(m.input.View()))
+		return b.String()
+	}
+
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s domain for local application development", ui.Emphasize(m.choice))))
 
 	return b.String()
 }
@@ -236,6 +331,13 @@ func (m SetupGuidePrompt) View() string {
 	if m.url == "" {
 		return b.String()
 	}
+
+	fmt.Fprintln(&b, ui.Header("Next Steps"))
+	fmt.Fprintln(&b, ui.StepHint("Now that you have local HTTPS setup, let's automate certificate provisioning"))
+	fmt.Fprintln(&b, ui.StepHint("so you never have to manually provision future certificates again."))
+	fmt.Fprintln(&b, ui.StepHint(""))
+	fmt.Fprintln(&b, ui.StepHint("We've generated an Anchor.dev setup guide for your application with"))
+	fmt.Fprintln(&b, ui.StepHint("instructions for automating certificate provisioning inside your application."))
 
 	if m.confirmCh != nil {
 		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to open %s.",
