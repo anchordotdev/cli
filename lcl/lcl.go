@@ -1,13 +1,9 @@
 package lcl
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/base64"
-	"encoding/json"
-	"errors"
-	"net/http"
 	"time"
 
 	"golang.org/x/crypto/acme"
@@ -137,30 +133,4 @@ func provisionCert(eab *api.Eab, domains []string, acmeURL string) (*tls.Certifi
 	}
 
 	return mgr.GetCertificate(clientHello)
-}
-
-func createEAB(anc *http.Client, chainParam string, orgParam string, realmParam string, serviceParam string, subCaParam string) (*api.Eab, error) {
-	eabBody := new(bytes.Buffer)
-	eabReq := api.CreateEabTokenJSONRequestBody{}
-	eabReq.Relationships.Chain.Slug = chainParam
-	eabReq.Relationships.Organization.Slug = orgParam
-	eabReq.Relationships.Realm.Slug = realmParam
-	eabReq.Relationships.Service.Slug = &serviceParam
-	eabReq.Relationships.SubCa.Slug = subCaParam
-
-	if err := json.NewEncoder(eabBody).Encode(eabReq); err != nil {
-		return nil, err
-	}
-	eabRes, err := anc.Post("/acme/eab-tokens", "application/json", eabBody)
-	if err != nil {
-		return nil, err
-	}
-	if eabRes.StatusCode != http.StatusOK {
-		return nil, errors.New("unexpected response")
-	}
-	var eab api.Eab
-	if err := json.NewDecoder(eabRes.Body).Decode(&eab); err != nil {
-		return nil, err
-	}
-	return &eab, nil
 }

@@ -33,6 +33,11 @@ type Config struct {
 		Config struct {
 		} `cmd:"config"`
 
+		MkCert struct {
+			Domains string `flag:"domains"`
+			SubCa   string `flag:"subca"`
+		} `cmd:"mkcert"`
+
 		Setup struct {
 			PackageManager string `desc:"Package manager to use for integrating Anchor." flag:"package-manager" env:"PACKAGE_MANAGER" json:"package_manager" toml:"package-manager"`
 			Service        string `desc:"Name for lcl.host service." flag:"service" env:"SERVICE" json:"service" toml:"service"`

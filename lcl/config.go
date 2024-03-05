@@ -94,7 +94,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		realmSlug: c.realmSlug,
 	}
 
-	_, _, _, cert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, "diagnostic")
+	_, cert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, "diagnostic")
 	if err != nil {
 		return err
 	}

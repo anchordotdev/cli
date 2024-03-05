@@ -5,6 +5,13 @@ import (
 )
 
 var (
+	Custom = &FileDetector{
+		Title:             "Custom",
+		Paths:             []string{},
+		FollowUpDetectors: nil,
+		AnchorCategory:    anchorcli.CategoryCustom,
+	}
+
 	Go = &FileDetector{
 		Title:             "Go",
 		Paths:             []string{"main.go", "go.mod", "go.sum"},

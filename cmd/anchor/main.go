@@ -95,6 +95,13 @@ var (
 						Short: "Configure System for lcl.host Local Development",
 					},
 					{
+						UI: lcl.MkCert{Config: cfg}.UI(),
+
+						Name:  "mkcert",
+						Use:   "mkcert",
+						Short: "Provision Certificate for lcl.host Local Development",
+					},
+					{
 						UI: lcl.Setup{Config: cfg}.UI(),
 
 						Name:  "setup",

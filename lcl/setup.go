@@ -127,15 +127,16 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	domains := []string{serviceSubdomain + ".lcl.host", serviceSubdomain + ".localhost"}
+	realmSlug := "localhost"
 
 	cmdProvision := &Provision{
 		Config:    c.Config,
 		Domains:   domains,
 		orgSlug:   c.orgSlug,
-		realmSlug: "localhost",
+		realmSlug: realmSlug,
 	}
 
-	service, _, _, tlsCert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, serviceCategory)
+	service, tlsCert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, serviceCategory)
 	if err != nil {
 		return err
 	}

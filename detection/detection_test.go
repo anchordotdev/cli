@@ -61,11 +61,7 @@ func TestDefaultDetectors(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if !match.Detected {
-				t.Errorf("Expected detection result to be true, but got false")
-			}
-
-			if !slices.Contains([]Confidence{High, Medium, Low}, match.Confidence) {
+			if !slices.Contains([]Confidence{High, Medium, Low, None}, match.Confidence) {
 				t.Errorf("Expected confidence to be High, Medium or Low, but got %s", match.Confidence)
 			}
 		})

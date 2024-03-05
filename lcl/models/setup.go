@@ -117,6 +117,15 @@ func (m *SetupCategory) Init() tea.Cmd {
 		items = append(items, item)
 	}
 
+	for _, match := range m.Results[detection.None] {
+		item := ui.ListItem[string]{
+			Key:   match.AnchorCategory.Key,
+			Value: ui.Whisper(match.Detector.GetTitle()),
+		}
+
+		items = append(items, item)
+	}
+
 	m.list = ui.List(items)
 
 	return nil

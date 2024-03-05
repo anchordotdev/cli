@@ -35,10 +35,11 @@ func (s Confidence) String() string {
 
 var (
 	DefaultDetectors = []Detector{
-		Ruby,
 		Go,
 		Javascript,
 		Python,
+		Ruby,
+		Custom,
 	}
 
 	DetectorsByFlag = map[string]Detector{
@@ -82,6 +83,7 @@ type Detector interface {
 
 func Perform(detectors []Detector, dirFS FS) (Results, error) {
 	res := make(Results)
+
 	for _, detector := range detectors {
 		match, err := detector.Detect(dirFS)
 		if err != nil {
@@ -89,6 +91,7 @@ func Perform(detectors []Detector, dirFS FS) (Results, error) {
 		}
 
 		if !match.Detected {
+			res[None] = append(res[None], match)
 			continue
 		}
 

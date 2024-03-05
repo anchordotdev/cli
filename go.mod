@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/atotto/clipboard v0.1.4
-	github.com/charmbracelet/bubbles v0.17.2-0.20240108170749-ec883029c8e6
+	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/charmbracelet/x/exp/teatest v0.0.0-20240222131549-03ee51df8bea
@@ -23,7 +23,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/zalando/go-keyring v0.2.3
-	golang.org/x/crypto v0.18.0
+	golang.org/x/crypto v0.20.0
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/sync v0.6.0
 	howett.net/plist v1.0.1
@@ -60,14 +60,14 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.4 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.6 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1-0.20230530133925-c48e322e2a8f // indirect
-	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/mod v0.16.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.13.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/term v0.16.0 // indirect
+	golang.org/x/term v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.16.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect

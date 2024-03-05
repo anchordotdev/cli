@@ -48,7 +48,7 @@ func TestProvision(t *testing.T) {
 
 		errc := make(chan error, 1)
 		go func() {
-			_, _, _, _, err := cmd.run(ctx, drv, anc, "test-service", "diagnostic")
+			_, _, err := cmd.run(ctx, drv, anc, "test-service", "diagnostic")
 			errc <- err
 		}()
 
