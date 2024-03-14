@@ -2,11 +2,9 @@ package models
 
 import (
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/anchordotdev/cli/ui"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -46,97 +44,6 @@ func (m LclConfigHint) View() string {
 	fmt.Fprintln(&b, ui.StepHint("configure your browsers and OS to trust your personal certificates. "))
 	fmt.Fprintln(&b, ui.StepHint(""))
 	fmt.Fprintln(&b, ui.StepHint("We'll start a local diagnostic web server to guide you through the process."))
-	return b.String()
-}
-
-type DomainInput struct {
-	InputCh chan<- string
-
-	Default    string
-	Domain     string
-	TLD        string
-	SkipHeader bool
-
-	input *textinput.Model
-}
-
-func (m *DomainInput) Init() tea.Cmd {
-	ti := textinput.New()
-	ti.Prompt = ""
-	ti.Cursor.Style = ui.Prompt
-	ti.Focus()
-	ti.ShowSuggestions = true
-
-	if len(m.Default) > 0 {
-		ti.Placeholder = m.Default + "." + m.TLD
-	}
-
-	m.input = &ti
-
-	return textinput.Blink
-}
-
-func (m *DomainInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEnter:
-			if m.InputCh != nil {
-				value := m.input.Value()
-				if value == "" {
-					value = m.Default
-				}
-
-				m.Domain = value
-				m.InputCh <- value
-				m.InputCh = nil
-			}
-			return m, nil
-		case tea.KeyEsc:
-			return m, ui.Exit
-		default:
-			if m.validDomainInput(msg.Runes) {
-				ti, cmd := m.input.Update(msg)
-				m.input = &ti
-
-				if len(m.input.Value()) > 0 {
-					m.input.SetSuggestions([]string{m.input.Value() + "." + m.TLD})
-				}
-
-				return m, cmd
-			}
-		}
-	}
-	return m, nil
-}
-
-var validDomainRunes = []rune{
-	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-	'-', '.',
-}
-
-func (m *DomainInput) validDomainInput(runes []rune) bool {
-	for _, r := range runes {
-		if !slices.Contains(validDomainRunes, r) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func (m *DomainInput) View() string {
-	var b strings.Builder
-
-	if m.InputCh != nil {
-		fmt.Fprintln(&b, ui.StepPrompt("What lcl.host domain would you like to use for diagnostics?"))
-		fmt.Fprintln(&b, ui.StepPrompt(m.input.View()))
-	} else {
-		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s domain for lcl.host diagnostic certificate.", ui.Emphasize(m.Domain+".lcl.host"))))
-	}
-
 	return b.String()
 }
 

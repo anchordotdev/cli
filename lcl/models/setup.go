@@ -43,10 +43,8 @@ func (m *SetupHint) View() string {
 }
 
 type SetupScan struct {
-	results detection.Results
-
-	spinner  spinner.Model
 	finished bool
+	spinner  spinner.Model
 }
 
 func (m *SetupScan) Init() tea.Cmd {
@@ -234,71 +232,6 @@ func (m *SetupName) View() string {
 	}
 
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s application name.", ui.Emphasize(m.choice))))
-
-	return b.String()
-}
-
-type SetupDomain struct {
-	InputCh chan<- string
-
-	Default string
-	TLD     string
-
-	input  *textinput.Model
-	choice string
-}
-
-func (m *SetupDomain) Init() tea.Cmd {
-	ti := textinput.New()
-	ti.Prompt = ""
-	ti.Cursor.Style = ui.Prompt
-	ti.Focus()
-
-	if len(m.Default) > 0 {
-		ti.Placeholder = m.Default + "." + m.TLD
-	}
-
-	m.input = &ti
-
-	return textinput.Blink
-}
-
-func (m *SetupDomain) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEnter:
-			if m.InputCh != nil {
-				value := m.input.Value()
-				if value == "" {
-					value = m.Default
-				}
-
-				m.choice = value
-				m.InputCh <- value
-				m.InputCh = nil
-			}
-			return m, nil
-		case tea.KeyEsc:
-			return m, ui.Exit
-		}
-	}
-
-	ti, cmd := m.input.Update(msg)
-	m.input = &ti
-	return m, cmd
-}
-
-func (m *SetupDomain) View() string {
-	var b strings.Builder
-
-	if m.InputCh != nil {
-		fmt.Fprintln(&b, ui.StepPrompt("What lcl.host domain would you like to use for local application development?"))
-		fmt.Fprintln(&b, ui.StepPrompt(m.input.View()))
-		return b.String()
-	}
-
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s domain for local application development", ui.Emphasize(m.choice))))
 
 	return b.String()
 }

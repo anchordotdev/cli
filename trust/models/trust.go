@@ -158,11 +158,11 @@ func (m *TrustUpdateStore) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.installing = nil
 		m.installed[msg.CA.Subject.CommonName] = append(m.installed[msg.CA.Subject.CommonName], msg.CA.PublicKeyAlgorithm.String())
 		return m, nil
+	default:
+		var cmd tea.Cmd
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
 	}
-
-	var cmd tea.Cmd
-	m.spinner, cmd = m.spinner.Update(msg)
-	return m, cmd
 }
 
 func (m *TrustUpdateStore) View() string {

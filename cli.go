@@ -30,6 +30,9 @@ type Config struct {
 		Audit struct {
 		} `cmd:"audit"`
 
+		Clean struct {
+		} `cmd:"clean"`
+
 		Config struct {
 		} `cmd:"config"`
 

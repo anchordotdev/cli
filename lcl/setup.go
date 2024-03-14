@@ -3,9 +3,14 @@ package lcl
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net"
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
+	"slices"
+	"strings"
 
 	"github.com/cli/browser"
 
@@ -112,21 +117,45 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		return ctx.Err()
 	}
 
+	defaultDomain := parameterize(serviceName)
+
 	inputc = make(chan string)
-	drv.Activate(ctx, &models.SetupDomain{
+	drv.Activate(ctx, &models.DomainInput{
 		InputCh: inputc,
-		Default: serviceName,
+		Default: defaultDomain,
 		TLD:     "lcl.host",
+		Prompt:  "What lcl.host domain would you like to use for local application development?",
+		Done:    "Entered %s domain for local application development",
 	})
 
-	var serviceSubdomain string
+	var lclDomain string
 	select {
-	case serviceSubdomain = <-inputc:
+	case lclDomain = <-inputc:
 	case <-ctx.Done():
 		return ctx.Err()
 	}
 
-	domains := []string{serviceSubdomain + ".lcl.host", serviceSubdomain + ".localhost"}
+	drv.Activate(ctx, &models.DomainResolver{
+		Domain: lclDomain,
+	})
+
+	addrs, err := new(net.Resolver).LookupHost(ctx, lclDomain)
+	if err != nil {
+		drv.Send(models.DomainStatusMsg(false))
+		return err
+	}
+
+	for _, addr := range addrs {
+		if !slices.Contains(loopbackAddrs, addr) {
+			drv.Send(models.DomainStatusMsg(false))
+
+			return fmt.Errorf("%s domain resolved to non-loopback interface address: %s", lclDomain, addr)
+		}
+	}
+	drv.Send(models.DomainStatusMsg(true))
+
+	subdomain := strings.TrimSuffix(lclDomain, ".lcl.host")
+	domains := []string{lclDomain, subdomain + ".localhost"}
 	realmSlug := "localhost"
 
 	cmdProvision := &Provision{
@@ -136,7 +165,7 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		realmSlug: realmSlug,
 	}
 
-	service, tlsCert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, serviceCategory)
+	service, tlsCert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, serviceCategory, nil)
 	if err != nil {
 		return err
 	}
@@ -170,4 +199,20 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	return nil
+}
+
+var (
+	parameterizeUnwantedRegex           = regexp.MustCompile(`[^a-z0-9\-_]+`)
+	parameterizeDuplicateSeparatorRegex = regexp.MustCompile(`-{2,}`)
+	parameterizeLeadingTrailingRegex    = regexp.MustCompile(`^-|-$`)
+)
+
+// based on: https://apidock.com/rails/ActiveSupport/Inflector/parameterize
+func parameterize(value string) string {
+	value = parameterizeUnwantedRegex.ReplaceAllString(value, "-")
+	value = parameterizeDuplicateSeparatorRegex.ReplaceAllString(value, "-")
+	value = parameterizeLeadingTrailingRegex.ReplaceAllString(value, "")
+	value = strings.ToLower(value) // fwiw: not part of rails parameterize
+
+	return value
 }

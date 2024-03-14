@@ -223,7 +223,7 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 		}
 	}
 
-	var pemData []byte
+	var cas []*CA
 	_, err := s.forEachNSSProfile(func(profile string) error {
 		out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile))
 		if err != nil {
@@ -269,12 +269,25 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 		}
 
 		for _, nick := range nicks {
-			out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile, "-n", nick, "-a"))
+			pemData, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile, "-n", nick, "-a"))
 			if err != nil {
 				return err
 			}
 
-			pemData = append(pemData, out...)
+			for p, buf := pem.Decode(pemData); p != nil; p, buf = pem.Decode(buf) {
+				cert, err := x509.ParseCertificate(p.Bytes)
+				if err != nil {
+					return err
+				}
+
+				ca := &CA{
+					Certificate: cert,
+					NickName:    nick,
+					UniqueName:  cert.SerialNumber.Text(16),
+				}
+
+				cas = append(cas, ca)
+			}
 		}
 
 		return nil
@@ -282,21 +295,6 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 
 	if err != nil {
 		return nil, err
-	}
-
-	var cas []*CA
-	for p, buf := pem.Decode(pemData); p != nil; p, buf = pem.Decode(buf) {
-		cert, err := x509.ParseCertificate(p.Bytes)
-		if err != nil {
-			return nil, err
-		}
-
-		ca := &CA{
-			Certificate: cert,
-			UniqueName:  cert.SerialNumber.Text(16),
-		}
-
-		cas = append(cas, ca)
 	}
 
 	return cas, nil
@@ -331,20 +329,30 @@ func (s *NSS) UninstallCA(ca *CA) (bool, error) {
 		}
 	}
 
+	// if we don't have a nickname value available, fallback to UniqueName
+	nickName := ca.NickName
+	if nickName == "" {
+		nickName = ca.UniqueName
+	}
+
 	_, err := s.forEachNSSProfile(func(profile string) error {
 		args := []string{
 			"-V", "-d", profile,
 			"-u", "L",
-			"-n", ca.UniqueName,
+			"-n", nickName,
 		}
 
-		if _, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, args...)); err != nil {
-			return nil
+		if out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, args...)); err != nil {
+			// continue if this profile does not have a ca with this nickname
+			if strings.Contains(string(out), "PR_FILE_NOT_FOUND_ERROR") {
+				return nil
+			}
 		}
 
+		// TODO: ensure the certificate has our extension before removal
 		args = []string{
 			"-D", "-d", profile,
-			"-n", ca.UniqueName,
+			"-n", nickName,
 		}
 
 		if out, err := s.execCertutil(s.certutilPath, args...); err != nil {

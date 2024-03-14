@@ -6,6 +6,7 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
+	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
@@ -13,6 +14,9 @@ import (
 
 type Clean struct {
 	Config *cli.Config
+
+	Anc                *api.Session
+	OrgSlug, RealmSlug string
 }
 
 func (c Clean) UI() cli.UI {
@@ -22,32 +26,45 @@ func (c Clean) UI() cli.UI {
 }
 
 func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
-	drv.Activate(ctx, &models.CleanPreflight{
+	var err error
+	cmd := &auth.Client{
+		Config: c.Config,
+		Anc:    c.Anc,
+	}
+	c.Anc, err = cmd.Perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+
+	drv.Activate(ctx, &models.TrustCleanHeader{})
+	drv.Activate(ctx, &models.TrustCleanHint{
 		CertStates:  c.Config.Trust.Clean.States,
 		TrustStores: c.Config.Trust.Stores,
 	})
 
-	anc, err := api.NewClient(c.Config)
+	err = c.Perform(ctx, drv)
 	if err != nil {
 		return err
 	}
 
-	userInfo, err := anc.UserInfo(ctx)
-	if err != nil {
-		return err
-	}
-	drv.Send(models.HandleMsg(userInfo.PersonalOrg.Slug))
+	return nil
+}
 
-	org, realm, err := fetchOrgAndRealm(ctx, c.Config, anc)
-	if err != nil {
-		return err
+func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
+	var err error
+	if c.OrgSlug == "" && c.RealmSlug == "" {
+		c.OrgSlug, c.RealmSlug, err = fetchOrgAndRealm(ctx, c.Config, c.Anc)
+		if err != nil {
+			return err
+		}
 	}
 
-	expectedCAs, err := fetchExpectedCAs(ctx, anc, org, realm)
+	drv.Activate(ctx, &models.TrustCleanAudit{})
+
+	expectedCAs, err := fetchExpectedCAs(ctx, c.Anc, c.OrgSlug, c.RealmSlug)
 	if err != nil {
 		return err
 	}
-	drv.Send(models.ExpectedCAsMsg(expectedCAs))
 
 	stores, sudoMgr, err := loadStores(c.Config)
 	if err != nil {
@@ -73,7 +90,7 @@ func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	targetCAs := info.AllCAs(c.Config.Trust.Clean.States...)
-	drv.Send(models.TargetCAsMsg(targetCAs))
+	drv.Send(targetCAs)
 
 	tmpDir, err := os.MkdirTemp("", "anchor-trust-clean")
 	if err != nil {
@@ -82,23 +99,25 @@ func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
 	defer os.RemoveAll(tmpDir)
 
 	for _, ca := range targetCAs {
+		confirmc := make(chan struct{})
+		drv.Activate(ctx, &models.TrustCleanCA{
+			CA:        ca,
+			Config:    c.Config,
+			ConfirmCh: confirmc,
+		})
+
+		if !c.Config.NonInteractive {
+			select {
+			case <-confirmc:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+
 		if ca.FilePath == "" {
 			if err := writeCAFile(ca, tmpDir); err != nil {
 				return err
 			}
-		}
-
-		confirmc := make(chan struct{})
-
-		drv.Activate(ctx, &models.CleanCA{
-			CA:        ca,
-			ConfirmCh: confirmc,
-		})
-
-		select {
-		case <-confirmc:
-		case <-ctx.Done():
-			return ctx.Err()
 		}
 
 		for _, store := range stores {
@@ -106,19 +125,15 @@ func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
 				continue
 			}
 
-			drv.Send(models.CleaningStoreMsg{Store: store})
+			drv.Send(models.CACleaningMsg{Store: store})
 
 			if _, err := store.UninstallCA(ca); err != nil {
 				return err
 			}
 
-			drv.Send(models.CleanedStoreMsg{Store: store})
+			drv.Send(models.CACleanedMsg{Store: store})
 		}
 	}
-
-	drv.Activate(ctx, &models.CleanEpilogue{
-		Count: len(targetCAs),
-	})
 
 	return nil
 }

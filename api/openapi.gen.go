@@ -209,14 +209,17 @@ type Root struct {
 
 // Service defines model for service.
 type Service struct {
+	// LocalhostPort A port number for use on localhost or null.
+	LocalhostPort *int `json:"localhost_port"`
+
 	// Name A name for the service.
 	Name          string `json:"name"`
-	Relationships *struct {
+	Relationships struct {
 		Organization struct {
 			// Slug A value used as a parameter when referencing this organization.
 			Slug string `json:"slug"`
 		} `json:"organization"`
-	} `json:"relationships,omitempty"`
+	} `json:"relationships"`
 
 	// ServerType A server type for the service.
 	ServerType ServiceServerType `json:"server_type"`
@@ -375,6 +378,7 @@ type DetachOrgServiceJSONBody struct {
 
 // CreateServiceJSONBody defines parameters for CreateService.
 type CreateServiceJSONBody struct {
+	LocalhostPort *int   `json:"localhost_port,omitempty"`
 	Name          string `json:"name"`
 	Relationships struct {
 		Organization struct {

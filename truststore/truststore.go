@@ -23,6 +23,7 @@ type CA struct {
 	*x509.Certificate
 
 	FilePath   string
+	NickName   string // only used by nss
 	UniqueName string
 }
 

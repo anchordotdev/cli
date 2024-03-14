@@ -3,8 +3,12 @@ package lcl
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/url"
+	"slices"
+	"strconv"
+	"strings"
 
 	"github.com/cli/browser"
 
@@ -16,6 +20,8 @@ import (
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/ui"
 )
+
+var loopbackAddrs = []string{"127.0.0.1", "::1"}
 
 type LclConfig struct {
 	Config *cli.Config
@@ -76,14 +82,37 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		InputCh: inputc,
 		Default: "hi-" + c.orgSlug,
 		TLD:     "lcl.host",
+		Prompt:  "What lcl.host domain would you like to use for diagnostics?",
+		Done:    "Entered %s domain for lcl.host diagnostic certificate.",
 	})
 
-	var serviceName string
+	var lclDomain string
 	select {
-	case serviceName = <-inputc:
+	case lclDomain = <-inputc:
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+
+	serviceName := strings.TrimSuffix(lclDomain, ".lcl.host")
+
+	drv.Activate(ctx, &models.DomainResolver{
+		Domain: lclDomain,
+	})
+
+	addrs, err := new(net.Resolver).LookupHost(ctx, lclDomain)
+	if err != nil {
+		drv.Send(models.DomainStatusMsg(false))
+		return err
+	}
+
+	for _, addr := range addrs {
+		if !slices.Contains(loopbackAddrs, addr) {
+			drv.Send(models.DomainStatusMsg(false))
+
+			return fmt.Errorf("%s domain resolved to non-loopback interface address: %s", lclDomain, addr)
+		}
+	}
+	drv.Send(models.DomainStatusMsg(true))
 
 	domains := []string{serviceName + ".lcl.host", serviceName + ".localhost"}
 
@@ -94,7 +123,13 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		realmSlug: c.realmSlug,
 	}
 
-	_, cert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, "diagnostic")
+	var localhostPort int
+	localhostPort, err = strconv.Atoi(diagPort)
+	if err != nil {
+		return err
+	}
+
+	_, cert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, "diagnostic", &localhostPort)
 	if err != nil {
 		return err
 	}

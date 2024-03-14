@@ -28,13 +28,14 @@ var (
 	StepInProgress = lipgloss.NewStyle().SetString("    *").Render
 	StepPrompt     = lipgloss.NewStyle().SetString("    " + Prompt.Render("?")).Render
 
-	Accentuate = lipgloss.NewStyle().Italic(true).Render
-	Action     = lipgloss.NewStyle().Bold(true).Foreground(colorBrandPrimary).Render
-	Announce   = lipgloss.NewStyle().Background(colorBrandSecondary).Render
-	Emphasize  = lipgloss.NewStyle().Bold(true).Render
-	Titlize    = lipgloss.NewStyle().Bold(true).Render
-	URL        = lipgloss.NewStyle().Faint(true).Underline(true).Render
-	Whisper    = lipgloss.NewStyle().Faint(true).Render
+	Accentuate         = lipgloss.NewStyle().Italic(true).Render
+	Action             = lipgloss.NewStyle().Bold(true).Foreground(colorBrandPrimary).Render
+	Announce           = lipgloss.NewStyle().Background(colorBrandSecondary).Render
+	Emphasize          = lipgloss.NewStyle().Bold(true).Render
+	EmphasizeUnderline = lipgloss.NewStyle().Bold(true).Underline(true).Render
+	Titlize            = lipgloss.NewStyle().Bold(true).Render
+	URL                = lipgloss.NewStyle().Faint(true).Underline(true).Render
+	Whisper            = lipgloss.NewStyle().Faint(true).Render
 
 	colorBrandPrimary   = lipgloss.Color("#ff6000")
 	colorBrandSecondary = lipgloss.Color("#7000ff")

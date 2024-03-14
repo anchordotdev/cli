@@ -6,12 +6,14 @@ import (
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/atotto/clipboard"
 	"github.com/google/go-github/v54/github"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/lcl"
 	"github.com/anchordotdev/cli/trust"
+	"github.com/anchordotdev/cli/ui"
 )
 
 var (
@@ -88,6 +90,13 @@ var (
 						Short: "Audit lcl.host HTTPS Local Development Environment",
 					},
 					{
+						UI: lcl.LclClean{Config: cfg}.UI(),
+
+						Name:  "clean",
+						Use:   "clean",
+						Short: "Clean lcl.host CA Certificates from the Local Trust Store(s)",
+					},
+					{
 						UI: lcl.LclConfig{Config: cfg}.UI(),
 
 						Name:  "config",
@@ -152,12 +161,8 @@ var (
 
 						Name:   "clean",
 						Use:    "clean TODO",
-						Short:  "clean the Local trust store(s)",
+						Short:  "Clean CA Certificates from the Local Trust Store(s)",
 						Hidden: true,
-
-						Long: heredoc.Doc(`
-						TODO
-						`),
 					},
 				},
 			},
@@ -194,7 +199,13 @@ func versionCheck(ctx context.Context) error {
 		return err
 	}
 	if release.TagName == nil || *release.TagName != "v"+version {
-		return fmt.Errorf("anchor CLI v%s is out of date, run `brew upgrade anchordotdev/tap/anchor` to install the latest", version)
+		fmt.Println(ui.StepHint(fmt.Sprintf("Your anchor CLI v%s is out of date, please update before running other commands.", version)))
+		if err := clipboard.WriteAll("brew upgrade anchordotdev/tap/anchor"); err == nil {
+			fmt.Println(ui.StepAlert(fmt.Sprintf("Copied %s to your clipboard.", ui.Announce("brew upgrade anchordotdev/tap/anchor"))))
+		}
+		fmt.Println(ui.StepAlert(fmt.Sprintf("%s `%s` to update to the latest version.", ui.Action("Run"), ui.Emphasize("brew upgrade anchordotdev/tap/anchor"))))
+		fmt.Println(ui.StepHint(fmt.Sprintf("Not using homebrew? Explore other options here: %s", ui.URL("https://github.com/anchordotdev/cli"))))
+		return fmt.Errorf("anchor CLI version update required")
 	}
 	return nil
 }

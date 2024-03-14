@@ -17,7 +17,7 @@ type Provision struct {
 	orgSlug, realmSlug string
 }
 
-func (p *Provision) run(ctx context.Context, drv *ui.Driver, anc *api.Session, serviceName, serverType string) (*api.Service, *tls.Certificate, error) {
+func (p *Provision) run(ctx context.Context, drv *ui.Driver, anc *api.Session, serviceName, serverType string, localhostPort *int) (*api.Service, *tls.Certificate, error) {
 	drv.Activate(ctx, &models.ProvisionService{
 		Name:       serviceName,
 		Domains:    p.Domains,
@@ -39,7 +39,7 @@ func (p *Provision) run(ctx context.Context, drv *ui.Driver, anc *api.Session, s
 		return nil, nil, err
 	}
 	if srv == nil {
-		srv, err = anc.CreateService(ctx, p.orgSlug, serverType, serviceParam)
+		srv, err = anc.CreateService(ctx, p.orgSlug, serviceParam, serverType, localhostPort)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -54,14 +54,14 @@ func (p *Provision) run(ctx context.Context, drv *ui.Driver, anc *api.Session, s
 	}
 
 	cmdMkCert := &MkCert{
-		Config:      p.Config,
-		anc:         anc,
-		chainSlug:   attach.Relationships.Chain.Slug,
-		domains:     p.Domains,
-		orgSlug:     p.orgSlug,
-		realmSlug:   p.realmSlug,
-		serviceSlug: serviceParam,
-		subCaSubjectUID:  attach.Relationships.SubCa.Slug,
+		Config:          p.Config,
+		anc:             anc,
+		chainSlug:       attach.Relationships.Chain.Slug,
+		domains:         p.Domains,
+		orgSlug:         p.orgSlug,
+		realmSlug:       p.realmSlug,
+		serviceSlug:     serviceParam,
+		subCaSubjectUID: attach.Relationships.SubCa.Slug,
 	}
 
 	tlsCert, err := cmdMkCert.perform(ctx, drv)

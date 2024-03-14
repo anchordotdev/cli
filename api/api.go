@@ -156,10 +156,11 @@ func (s *Session) CreateEAB(ctx context.Context, chainSlug, orgSlug, realmSlug, 
 	return &eabOutput, nil
 }
 
-func (s *Session) CreateService(ctx context.Context, orgSlug, serverType, serviceSlug string) (*Service, error) {
+func (s *Session) CreateService(ctx context.Context, orgSlug, serviceSlug, serverType string, localhostPort *int) (*Service, error) {
 	serviceInput := CreateServiceJSONRequestBody{
-		Name:       serviceSlug,
-		ServerType: serverType,
+		Name:          serviceSlug,
+		ServerType:    serverType,
+		LocalhostPort: localhostPort,
 	}
 	serviceInput.Relationships.Organization.Slug = orgSlug
 
