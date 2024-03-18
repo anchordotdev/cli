@@ -89,10 +89,8 @@ func TestTrust(t *testing.T) {
 	})
 
 	t.Run("basics", func(t *testing.T) {
-		t.Skip("pending fixing golden file based tests issues with resizing on CI")
-
-		if !srv.IsProxy() {
-			t.Skip("trust unsupported in mock mode")
+		if srv.IsProxy() {
+			t.Skip("trust unsupported in proxy mode")
 		}
 
 		ctx, cancel := context.WithCancel(ctx)

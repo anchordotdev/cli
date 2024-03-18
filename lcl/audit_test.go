@@ -21,9 +21,6 @@ func TestAudit(t *testing.T) {
 	}
 
 	t.Run("basics", func(t *testing.T) {
-		t.Skip("pending fixing golden file based timing issues on CI")
-		// FIXME: it looks like it's running fast enough that view doesn't get called before transitioning away from initial state
-
 		if srv.IsProxy() {
 			t.Skip("lcl audit unsupported in proxy mode")
 		}

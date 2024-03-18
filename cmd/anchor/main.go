@@ -31,7 +31,7 @@ var (
 			{
 				Name:  "auth",
 				Use:   "auth <subcommand>",
-				Short: "Authentication",
+				Short: "Manage Anchor.dev Authentication",
 				Group: "user",
 
 				SubCommands: []*cli.Command{
@@ -76,10 +76,9 @@ var (
 			{
 				UI: lcl.Command{Config: cfg}.UI(),
 
-				Name:   "lcl",
-				Use:    "lcl <subcommand>",
-				Short:  "lcl.host",
-				Hidden: true,
+				Name:  "lcl",
+				Use:   "lcl <subcommand>",
+				Short: "Manage lcl.host Local Development Environment",
 
 				SubCommands: []*cli.Command{
 					{
@@ -124,7 +123,7 @@ var (
 
 				Name:  "trust",
 				Use:   "trust [org[/realm[/ca]]]",
-				Short: "Trust store",
+				Short: "Manage Local Trust Stores",
 
 				Long: heredoc.Doc(`
 					Install the AnchorCA certificates of a target organization, realm, or CA into

@@ -1,9 +1,12 @@
 package ui
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"reflect"
+	"sync"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
@@ -22,6 +25,28 @@ type Driver struct {
 
 	models []tea.Model
 	active tea.Model
+
+	Out      *bytes.Buffer
+	mutex    sync.RWMutex
+	test     bool
+	lastView string
+}
+
+func NewDriverTest(ctx context.Context) *Driver {
+	drv := new(Driver)
+
+	opts := []tea.ProgramOption{
+		tea.WithInputTTY(),
+		tea.WithContext(ctx),
+		tea.WithoutCatchPanics(), // TODO: remove
+		tea.WithoutRenderer(),
+	}
+	drv.Program = tea.NewProgram(drv, opts...)
+
+	drv.Out = new(bytes.Buffer)
+	drv.test = true
+
+	return drv
 }
 
 func NewDriverTUI(ctx context.Context) (*Driver, Program) {
@@ -126,6 +151,14 @@ func (d *Driver) View() string {
 	var out string
 	for _, mdl := range d.models {
 		out += mdl.View()
+	}
+	if d.test && out != "" && out != d.lastView {
+		d.mutex.Lock()
+		defer d.mutex.Unlock()
+
+		fmt.Fprint(d.Out, out)
+		fmt.Fprintln(d.Out, "────────────────────────────────────────────────────────────────────────────────")
+		d.lastView = out
 	}
 	return out
 }

@@ -1,8 +1,27 @@
-[?25l    * Checking authentication: testing credentials remotely…*
-[128D[2K[1A[128D[2K# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    * Checking authentication: probing credentials locally…*
+────────────────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…*
+────────────────────────────────────────────────────────────────────────────────
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+────────────────────────────────────────────────────────────────────────────────
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll begin by checking your system to determine what you need for your setup.
+────────────────────────────────────────────────────────────────────────────────
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll begin by checking your system to determine what you need for your setup.
+    * Checking resources on Anchor.dev…*
+────────────────────────────────────────────────────────────────────────────────
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll begin by checking your system to determine what you need for your setup.
+    - Checked resources on Anchor.dev: need to provision resources.
+────────────────────────────────────────────────────────────────────────────────
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
     | We'll begin by checking your system to determine what you need for your setup.
     - Checked resources on Anchor.dev: need to provision resources.
     * Scanning local and expected CA certificates…*
-[128D[1A[2K[1A[1A[1A[128D[2K# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
-[1B[1B    - Scanned local and expected CA certificates: need to install 2 missing certificates.
-[128D[2K[?25h[?1002l[?1003l[?1006l
+────────────────────────────────────────────────────────────────────────────────
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll begin by checking your system to determine what you need for your setup.
+    - Checked resources on Anchor.dev: need to provision resources.
+    - Scanned local and expected CA certificates: need to install 2 missing certificates.
+────────────────────────────────────────────────────────────────────────────────

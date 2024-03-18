@@ -168,13 +168,6 @@ func (m *TrustUpdateStore) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *TrustUpdateStore) View() string {
 	var b strings.Builder
 
-	if m.installing != nil {
-		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Updating %s: installing %s %s.",
-			ui.Emphasize(m.Store.Description()),
-			ui.Underline(m.installing.Subject.CommonName),
-			ui.Whisper(m.installing.PublicKeyAlgorithm.String()),
-		)))
-	}
 	if len(m.installed) > 0 {
 		var styledCAs []string
 
@@ -188,6 +181,14 @@ func (m *TrustUpdateStore) View() string {
 		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Updated %s: installed %s",
 			ui.Emphasize(m.Store.Description()),
 			strings.Join(styledCAs, ", "),
+		)))
+	}
+
+	if m.installing != nil {
+		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Updating %s: installing %s %s.",
+			ui.Emphasize(m.Store.Description()),
+			ui.Underline(m.installing.Subject.CommonName),
+			ui.Whisper(m.installing.PublicKeyAlgorithm.String()),
 		)))
 	}
 

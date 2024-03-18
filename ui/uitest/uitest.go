@@ -48,7 +48,7 @@ func (p program) Run() (tea.Model, error) {
 }
 
 func TestTUIOutput(ctx context.Context, t *testing.T, tui cli.UI) {
-	drv := new(ui.Driver)
+	drv := ui.NewDriverTest(ctx)
 	tm := teatest.NewTestModel(t, drv, teatest.WithInitialTermSize(128, 64))
 
 	drv.Program = program{tm}
@@ -61,12 +61,14 @@ func TestTUIOutput(ctx context.Context, t *testing.T, tui cli.UI) {
 		errc <- tui.RunTUI(ctx, drv)
 	}()
 
-	out, err := io.ReadAll(tm.FinalOutput(t, teatest.WithFinalTimeout(time.Second*3)))
+	tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+	out, err := io.ReadAll(drv.Out)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if err := <-errc; err != nil {
 		t.Fatal(err)
 	}
+
 	teatest.RequireEqualOutput(t, out)
 }
