@@ -65,7 +65,7 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	if c.orgSlug == "" {
 		userInfo, err := c.anc.UserInfo(ctx)
 		if err != nil {
-			return nil
+			return err
 		}
 		c.orgSlug = userInfo.PersonalOrg.Slug
 	}
