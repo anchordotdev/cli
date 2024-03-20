@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
@@ -203,8 +202,6 @@ func PerformAudit(ctx context.Context, cfg *cli.Config, anc *api.Session, org st
 		return nil, err
 	}
 
-	time.Sleep(1 * time.Second)
-
 	return auditInfo, nil
 }
 
@@ -272,7 +269,9 @@ func loadStores(cfg *cli.Config) ([]truststore.Store, *SudoManager, error) {
 				SysFS:  sysFS,
 			}
 
-			stores = append(stores, nssStore)
+			if available, _ := nssStore.Check(); available {
+				stores = append(stores, nssStore)
+			}
 		case "homebrew":
 			brewStore := &truststore.Brew{
 				RootDir: "/",
@@ -281,7 +280,9 @@ func loadStores(cfg *cli.Config) ([]truststore.Store, *SudoManager, error) {
 				SysFS:  sysFS,
 			}
 
-			stores = append(stores, brewStore)
+			if available, _ := brewStore.Check(); available {
+				stores = append(stores, brewStore)
+			}
 		case "mock":
 			stores = append(stores, new(truststore.Mock))
 		}
