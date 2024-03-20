@@ -10,9 +10,9 @@
 
 #### Homebrew
 
-| Install:                               | Upgrade:                               |
-| -------------------------------------- | -------------------------------------- |
-| `brew install anchordotdev/tap/anchor` | `brew upgrade anchordotdev/tap/anchor` |
+| Install:                               | Upgrade:                                              |
+| -------------------------------------- | ----------------------------------------------------- |
+| `brew install anchordotdev/tap/anchor` | `brew update && brew upgrade anchordotdev/tap/anchor` |
 
 ### Linux & BSD
 

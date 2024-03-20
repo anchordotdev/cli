@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/atotto/clipboard"
@@ -195,16 +196,21 @@ func versionCheck(ctx context.Context) error {
 
 	release, _, err := github.NewClient(nil).Repositories.GetLatestRelease(ctx, "anchordotdev", "cli")
 	if err != nil {
-		return err
+		return nil
 	}
+	if publishedAt := release.PublishedAt.GetTime(); publishedAt != nil && time.Since(*publishedAt).Hours() < 24 {
+		return nil
+	}
+
 	if release.TagName == nil || *release.TagName != "v"+version {
-		fmt.Println(ui.StepHint(fmt.Sprintf("Your anchor CLI v%s is out of date, please update before running other commands.", version)))
-		if err := clipboard.WriteAll("brew upgrade anchordotdev/tap/anchor"); err == nil {
-			fmt.Println(ui.StepAlert(fmt.Sprintf("Copied %s to your clipboard.", ui.Announce("brew upgrade anchordotdev/tap/anchor"))))
+		fmt.Println(ui.StepHint(fmt.Sprintf("A new release of the anchor CLI is available.")))
+		command := "brew update && brew upgrade anchordotdev/tap/anchor"
+		if err := clipboard.WriteAll(command); err == nil {
+			fmt.Println(ui.StepAlert(fmt.Sprintf("Copied %s to your clipboard.", ui.Announce(command))))
 		}
-		fmt.Println(ui.StepAlert(fmt.Sprintf("%s `%s` to update to the latest version.", ui.Action("Run"), ui.Emphasize("brew upgrade anchordotdev/tap/anchor"))))
+		fmt.Println(ui.StepAlert(fmt.Sprintf("%s `%s` to update to the latest version.", ui.Action("Run"), ui.Emphasize(command))))
 		fmt.Println(ui.StepHint(fmt.Sprintf("Not using homebrew? Explore other options here: %s", ui.URL("https://github.com/anchordotdev/cli"))))
-		return fmt.Errorf("anchor CLI version update required")
+		fmt.Println()
 	}
 	return nil
 }

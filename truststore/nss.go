@@ -111,6 +111,21 @@ func (s *NSS) Check() (bool, error) {
 			},
 		}
 	}
+	count, _ := s.forEachNSSProfile(func(profile string) error {
+		return nil
+	})
+	if count == 0 {
+		return false, Error{
+			Op: OpInstall,
+
+			Warning: NSSError{
+				Err: ErrNoNSSDB,
+
+				CertutilInstallHelp: s.certutilInstallHelp,
+				NSSBrowsers:         nssBrowsers,
+			},
+		}
+	}
 	return true, nil
 }
 
