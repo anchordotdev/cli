@@ -27,6 +27,12 @@ type NSS struct {
 	firefoxProfiles     []string
 }
 
+const (
+	certUtilBadDatabaseOutput    = "SEC_ERROR_BAD_DATABASE"
+	certUtilPRFileNotFoundOutput = "PR_FILE_NOT_FOUND_ERROR"
+	certUtilSecReadOnlyOutput    = "SEC_ERROR_READ_ONLY"
+)
+
 var firefoxPaths = []string{
 	"/usr/bin/firefox",
 	"/usr/bin/firefox-nightly",
@@ -137,8 +143,16 @@ func (s *NSS) CheckCA(ca *CA) (installed bool, err error) {
 	}
 
 	count, err := s.forEachNSSProfile(func(profile string) error {
-		_, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-V", "-d", profile, "-u", "L", "-n", ca.UniqueName))
-		return err
+		out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-V", "-d", profile, "-u", "L", "-n", ca.UniqueName))
+		if err != nil {
+			return NSSError{
+				Err: errors.New(string(out)),
+
+				CertutilInstallHelp: s.certutilInstallHelp,
+				NSSBrowsers:         nssBrowsers,
+			}
+		}
+		return nil
 	})
 
 	if err != nil {
@@ -242,7 +256,18 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 	_, err := s.forEachNSSProfile(func(profile string) error {
 		out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile))
 		if err != nil {
-			return err
+			message := string(out)
+
+			if bytes.Contains(out, []byte(certUtilBadDatabaseOutput)) {
+				message = "certutil bad database `" + profile + "`"
+			}
+
+			return NSSError{
+				Err: errors.New(message),
+
+				CertutilInstallHelp: s.certutilInstallHelp,
+				NSSBrowsers:         nssBrowsers,
+			}
 		}
 
 		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
@@ -284,12 +309,17 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 		}
 
 		for _, nick := range nicks {
-			pemData, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile, "-n", nick, "-a"))
+			out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile, "-n", nick, "-a"))
 			if err != nil {
-				return err
+				return NSSError{
+					Err: errors.New(string(out)),
+
+					CertutilInstallHelp: s.certutilInstallHelp,
+					NSSBrowsers:         nssBrowsers,
+				}
 			}
 
-			for p, buf := pem.Decode(pemData); p != nil; p, buf = pem.Decode(buf) {
+			for p, buf := pem.Decode(out); p != nil; p, buf = pem.Decode(buf) {
 				cert, err := x509.ParseCertificate(p.Bytes)
 				if err != nil {
 					return err
@@ -359,7 +389,7 @@ func (s *NSS) UninstallCA(ca *CA) (bool, error) {
 
 		if out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, args...)); err != nil {
 			// continue if this profile does not have a ca with this nickname
-			if strings.Contains(string(out), "PR_FILE_NOT_FOUND_ERROR") {
+			if bytes.Contains(out, []byte(certUtilPRFileNotFoundOutput)) {
 				return nil
 			}
 		}
@@ -383,7 +413,7 @@ func (s *NSS) UninstallCA(ca *CA) (bool, error) {
 // the command with commandWithSudo to work around file permissions.
 func (s *NSS) execCertutil(path string, arg ...string) ([]byte, error) {
 	out, err := s.SysFS.Exec(s.SysFS.Command(path, arg...))
-	if err != nil && bytes.Contains(out, []byte("SEC_ERROR_READ_ONLY")) && runtime.GOOS != "windows" {
+	if err != nil && bytes.Contains(out, []byte(certUtilSecReadOnlyOutput)) && runtime.GOOS != "windows" {
 		out, err = s.SysFS.SudoExec(s.SysFS.Command(path, arg...))
 	}
 	return out, err
