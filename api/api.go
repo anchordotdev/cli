@@ -15,6 +15,7 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/keyring"
+	"github.com/anchordotdev/cli/version"
 	"golang.org/x/exp/slices"
 )
 
@@ -40,7 +41,9 @@ func NewClient(cfg *cli.Config) (*Session, error) {
 		Client: &http.Client{
 			Transport: urlRewriter{
 				RoundTripper: responseChecker{
-					RoundTripper: new(http.Transport),
+					RoundTripper: userAgentSetter{
+						RoundTripper: new(http.Transport),
+					},
 				},
 				URL: cfg.API.URL,
 			},
@@ -343,6 +346,16 @@ func (r urlRewriter) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.URL = u.JoinPath(req.URL.Path)
 
 	return r.RoundTripper.RoundTrip(req)
+}
+
+type userAgentSetter struct {
+	http.RoundTripper
+}
+
+func (s userAgentSetter) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("User-Agent", version.UserAgent())
+
+	return s.RoundTripper.RoundTrip(req)
 }
 
 type mediaTypes []string

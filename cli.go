@@ -82,6 +82,8 @@ type Config struct {
 	Keyring struct {
 		MockMode bool `env:"ANCHOR_CLI_KEYRING_MOCK_MODE"`
 	}
+
+	Version struct{} `cmd:"version"`
 }
 
 type UI struct {

@@ -15,6 +15,7 @@ import (
 	"github.com/anchordotdev/cli/lcl"
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/ui"
+	versionpkg "github.com/anchordotdev/cli/version"
 )
 
 var (
@@ -166,6 +167,13 @@ var (
 					},
 				},
 			},
+			{
+				UI: versionpkg.Command{}.UI(),
+
+				Name:  "version",
+				Use:   "version",
+				Short: "Show version info",
+			},
 		},
 
 		Preflight: versionCheck,
@@ -175,10 +183,14 @@ var (
 
 	// Version info set by GoReleaser via ldflags
 
-	version = "dev"
-	commit  = "none"    //lint:ignore U1000 set by GoReleaser
-	date    = "unknown" //lint:ignore U1000 set by GoReleaser
+	version, commit, date string
 )
+
+func init() {
+	if version != "" {
+		versionpkg.Set(version, commit, date)
+	}
+}
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -190,7 +202,7 @@ func main() {
 }
 
 func versionCheck(ctx context.Context) error {
-	if version == "dev" {
+	if version == "" {
 		return nil
 	}
 

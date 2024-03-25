@@ -14,6 +14,7 @@ import (
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/ui"
+	"github.com/anchordotdev/cli/version"
 )
 
 type Command struct {
@@ -118,6 +119,7 @@ func provisionCert(eab *api.Eab, domains []string, acmeURL string) (*tls.Certifi
 		HostPolicy: autocert.HostWhitelist(domains...),
 		Client: &acme.Client{
 			DirectoryURL: acmeURL,
+			UserAgent:    version.UserAgent(),
 		},
 		ExternalAccountBinding: &acme.ExternalAccountBinding{
 			KID: eab.Kid,
