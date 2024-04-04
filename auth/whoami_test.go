@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"runtime"
 	"testing"
 
 	"github.com/anchordotdev/cli"
@@ -10,6 +11,10 @@ import (
 )
 
 func TestWhoAmI(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("no pty support on windows")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

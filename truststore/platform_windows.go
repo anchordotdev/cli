@@ -3,7 +3,6 @@ package truststore
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
@@ -45,17 +44,33 @@ type Platform struct {
 func (s *Platform) Description() string { return "System (Windows)" }
 
 func (s *Platform) check() (bool, error) {
+	store, err := openWindowsRootStore()
+	if err != nil {
+		return false, nil
+	}
+	store.close()
+
 	return true, nil
 }
 
 func (s *Platform) checkCA(ca *CA) (bool, error) {
-	return false, nil
+	store, err := openWindowsRootStore()
+	if err != nil {
+		return false, fatalErr(err, "open root store")
+	}
+	defer store.close()
+
+	cert, err := store.findCertWithSerial(ca.Certificate.SerialNumber)
+	if err != nil {
+		return false, fatalErr(err, "find ca")
+	}
+	return (cert != nil), nil
 }
 
 func (s *Platform) installCA(ca *CA) (bool, error) {
 	// Load cert
 	cert, err := ioutil.ReadFile(ca.FilePath)
-	if err == nil {
+	if err != nil {
 		return false, fatalErr(err, "failed to read root certificate")
 	}
 	// Decode PEM
@@ -78,9 +93,27 @@ func (s *Platform) installCA(ca *CA) (bool, error) {
 }
 
 func (s *Platform) listCAs() ([]*CA, error) {
-	// https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-certenumcertificatesinstore
+	store, err := openWindowsRootStore()
+	if err != nil {
+		return nil, fatalErr(err, "open root store")
+	}
+	defer store.close()
 
-	return nil, fatalErr(errors.New("unsupported"), "enumerate certs")
+	certs, err := store.listCerts()
+	if err != nil {
+		return nil, fatalErr(err, "list cas")
+	}
+
+	var cas []*CA
+	for _, cert := range certs {
+		ca := &CA{
+			Certificate: cert,
+			UniqueName:  cert.SerialNumber.Text(16),
+		}
+
+		cas = append(cas, ca)
+	}
+	return cas, nil
 }
 
 func (s *Platform) uninstallCA(ca *CA) (bool, error) {
@@ -170,4 +203,50 @@ func (w windowsRootStore) deleteCertsWithSerial(serial *big.Int) (bool, error) {
 		}
 	}
 	return deletedAny, nil
+}
+
+func (w windowsRootStore) findCertWithSerial(serial *big.Int) (*x509.Certificate, error) {
+	var cert *syscall.CertContext
+	for {
+		// Next enum
+		certPtr, _, err := procCertEnumCertificatesInStore.Call(uintptr(w), uintptr(unsafe.Pointer(cert)))
+		if cert = (*syscall.CertContext)(unsafe.Pointer(certPtr)); cert == nil {
+			if errno, ok := err.(syscall.Errno); ok && errno == 0x80092004 {
+				break
+			}
+			return nil, fmt.Errorf("failed enumerating certs: %v", err)
+		}
+
+		// Parse cert
+		certBytes := (*[1 << 20]byte)(unsafe.Pointer(cert.EncodedCert))[:cert.Length]
+		parsedCert, err := x509.ParseCertificate(certBytes)
+		if err == nil && parsedCert.SerialNumber != nil && parsedCert.SerialNumber.Cmp(serial) == 0 {
+			return parsedCert, nil
+		}
+	}
+	return nil, nil
+}
+
+func (w windowsRootStore) listCerts() ([]*x509.Certificate, error) {
+	var certs []*x509.Certificate
+
+	var cert *syscall.CertContext
+	for {
+		// Next enum
+		certPtr, _, err := procCertEnumCertificatesInStore.Call(uintptr(w), uintptr(unsafe.Pointer(cert)))
+		if cert = (*syscall.CertContext)(unsafe.Pointer(certPtr)); cert == nil {
+			if errno, ok := err.(syscall.Errno); ok && errno == 0x80092004 {
+				break
+			}
+			return nil, fmt.Errorf("failed enumerating certs: %v", err)
+		}
+
+		// Parse cert
+		certBytes := (*[1 << 20]byte)(unsafe.Pointer(cert.EncodedCert))[:cert.Length]
+		if parsedCert, err := x509.ParseCertificate(certBytes); err == nil {
+			// ignore individual cert parsing errors
+			certs = append(certs, parsedCert)
+		}
+	}
+	return certs, nil
 }

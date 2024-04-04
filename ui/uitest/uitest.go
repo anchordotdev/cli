@@ -27,7 +27,7 @@ func init() {
 }
 
 func TestTUI(ctx context.Context, t *testing.T) (*ui.Driver, *teatest.TestModel) {
-	drv := new(ui.Driver)
+	drv := ui.NewDriverTest(ctx)
 	tm := teatest.NewTestModel(t, drv, teatest.WithInitialTermSize(128, 64))
 
 	drv.Program = program{tm}

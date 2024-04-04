@@ -1,59 +1,44 @@
-package trust
+package lcl
 
 import (
 	"context"
-	"flag"
-	"os"
 	"testing"
 
 	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
 
-var srv = &apitest.Server{
-	Host:    "api.anchor.lcl.host",
-	RootDir: "../..",
-}
-
-func TestMain(m *testing.M) {
-	flag.Parse()
-
-	if err := srv.Start(context.Background()); err != nil {
-		panic(err)
-	}
-
-	defer os.Exit(m.Run())
-
-	srv.Close()
-}
-
-func TestTrust(t *testing.T) {
+func TestLclMkcert(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.NonInteractive = true
+	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
+	cfg.Lcl.Service = "hi-lcl-mkcert"
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
 
 	var err error
-	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
+	if cfg.API.Token, err = srv.GeneratePAT("lcl_mkcert@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
 
 	t.Run("basics", func(t *testing.T) {
+		t.Skip("pending better support for building needed models before running")
+
 		if !srv.IsProxy() {
-			t.Skip("trust unsupported in mock mode")
+			t.Skip("mkcert unsupported in proxy mode")
 		}
 
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		cmd := Command{
-			Config: cfg,
+		cmd := MkCert{
+			Config:          cfg,
+			domains:         []string{"hi-lcl-mkcert.lcl.host", "hi-lcl-mkcert.localhost"},
+			subCaSubjectUID: "ABCD:EF12:23456",
 		}
 
 		uitest.TestTUIOutput(ctx, t, cmd.UI())

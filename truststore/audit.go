@@ -1,6 +1,7 @@
 package truststore
 
 import (
+	"cmp"
 	"slices"
 	"time"
 )
@@ -128,6 +129,18 @@ func (a *Audit) Perform() (*AuditInfo, error) {
 			info.Valid = append(info.Valid, ca)
 		}
 	}
+
+	// sort everything for more consistent output
+	for _, slice := range [][]*CA{info.Valid, info.Missing, info.Rotate, info.Expired, info.PreValid, info.Extra} {
+		slices.SortFunc(slice, func(x, y *CA) int {
+			if n := cmp.Compare(x.Subject.CommonName, y.Subject.CommonName); n != 0 {
+				return n
+			}
+			// If names are equal, order by PublicKeyAlgorithm
+			return cmp.Compare(x.PublicKeyAlgorithm.String(), y.PublicKeyAlgorithm.String())
+		})
+	}
+
 	return info, nil
 }
 

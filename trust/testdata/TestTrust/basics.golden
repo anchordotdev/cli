@@ -1,22 +1,22 @@
+─── TrustPreflight ─────────────────────────────────────────────────────────────
     * Comparing local and expected CA certificates…*
-────────────────────────────────────────────────────────────────────────────────
+─── TrustPreflight ─────────────────────────────────────────────────────────────
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     ! Installing 2 missing certificates. (requires sudo)
-────────────────────────────────────────────────────────────────────────────────
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     ! Installing 2 missing certificates. (requires sudo)
-    * Updating Mock: installing oas-examples - AnchorCA ECDSA.
-────────────────────────────────────────────────────────────────────────────────
+    * Updating Mock: installing ankydotdev/localhost - AnchorCA ECDSA.
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     ! Installing 2 missing certificates. (requires sudo)
-    - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
-────────────────────────────────────────────────────────────────────────────────
+    - Updated Mock: installed ankydotdev/localhost - AnchorCA [ECDSA]
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     ! Installing 2 missing certificates. (requires sudo)
-    - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
-    * Updating Mock: installing oas-examples - AnchorCA RSA.
-────────────────────────────────────────────────────────────────────────────────
+    - Updated Mock: installed ankydotdev/localhost - AnchorCA [ECDSA]
+    * Updating Mock: installing ankydotdev/localhost - AnchorCA RSA.
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     ! Installing 2 missing certificates. (requires sudo)
-    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
-────────────────────────────────────────────────────────────────────────────────
+    - Updated Mock: installed ankydotdev/localhost - AnchorCA [ECDSA, RSA]

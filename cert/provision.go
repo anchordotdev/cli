@@ -45,8 +45,10 @@ func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...strin
 		Bytes: cert.Certificate[0],
 	}
 
-	if err := os.WriteFile(certFile, pem.EncodeToMemory(certBlock), 0644); err != nil {
-		return err
+	if !p.Config.Trust.MockMode {
+		if err := os.WriteFile(certFile, pem.EncodeToMemory(certBlock), 0644); err != nil {
+			return err
+		}
 	}
 
 	var chainData []byte
@@ -59,8 +61,10 @@ func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...strin
 		chainData = append(chainData, pem.EncodeToMemory(chainBlock)...)
 	}
 
-	if err := os.WriteFile(chainFile, chainData, 0644); err != nil {
-		return err
+	if !p.Config.Trust.MockMode {
+		if err := os.WriteFile(chainFile, chainData, 0644); err != nil {
+			return err
+		}
 	}
 
 	keyDER, err := x509.MarshalPKCS8PrivateKey(cert.PrivateKey)
@@ -74,8 +78,10 @@ func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...strin
 		Bytes:   keyDER,
 	}
 
-	if err := os.WriteFile(keyFile, pem.EncodeToMemory(keyBlock), 0644); err != nil {
-		return err
+	if !p.Config.Trust.MockMode {
+		if err := os.WriteFile(keyFile, pem.EncodeToMemory(keyBlock), 0644); err != nil {
+			return err
+		}
 	}
 
 	drv.Send(models.ProvisionedFiles{certFile, chainFile, keyFile})

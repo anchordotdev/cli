@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 	"sync"
+	"unicode/utf8"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
@@ -26,8 +28,9 @@ type Driver struct {
 	models []tea.Model
 	active tea.Model
 
-	Out      *bytes.Buffer
-	mutex    sync.RWMutex
+	finalOut bytes.Buffer
+	Out      io.Reader
+	out      io.ReadWriter
 	test     bool
 	lastView string
 }
@@ -38,12 +41,12 @@ func NewDriverTest(ctx context.Context) *Driver {
 	opts := []tea.ProgramOption{
 		tea.WithInputTTY(),
 		tea.WithContext(ctx),
-		tea.WithoutCatchPanics(), // TODO: remove
 		tea.WithoutRenderer(),
 	}
 	drv.Program = tea.NewProgram(drv, opts...)
 
-	drv.Out = new(bytes.Buffer)
+	drv.out = &safeReadWriter{rw: new(bytes.Buffer)}
+	drv.Out = io.TeeReader(drv.out, &drv.finalOut)
 	drv.test = true
 
 	return drv
@@ -55,7 +58,6 @@ func NewDriverTUI(ctx context.Context) (*Driver, Program) {
 	opts := []tea.ProgramOption{
 		tea.WithInputTTY(),
 		tea.WithContext(ctx),
-		tea.WithoutCatchPanics(), // TODO: remove
 	}
 	drv.Program = tea.NewProgram(drv, opts...)
 
@@ -86,6 +88,11 @@ func (d *Driver) Activate(ctx context.Context, model tea.Model) {
 	case <-donec:
 	case <-ctx.Done():
 	}
+}
+
+func (d *Driver) FinalOut() []byte {
+	io.ReadAll(d.Out)
+	return d.finalOut.Bytes()
 }
 
 type stopMsg struct{}
@@ -153,11 +160,10 @@ func (d *Driver) View() string {
 		out += mdl.View()
 	}
 	if d.test && out != "" && out != d.lastView {
-		d.mutex.Lock()
-		defer d.mutex.Unlock()
-
-		fmt.Fprint(d.Out, out)
-		fmt.Fprintln(d.Out, "────────────────────────────────────────────────────────────────────────────────")
+		separator := "─── " + reflect.TypeOf(d.active).Elem().Name() + " "
+		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
+		fmt.Fprintln(d.out, separator)
+		fmt.Fprint(d.out, out)
 		d.lastView = out
 	}
 	return out
@@ -177,3 +183,24 @@ func isExit(cmd tea.Cmd) bool {
 }
 
 func Exit() tea.Msg { return io.EOF }
+
+// safeReadWriter implements io.ReadWriter, but locks reads and writes.
+type safeReadWriter struct {
+	sync.RWMutex
+
+	rw io.ReadWriter
+}
+
+// Read implements io.ReadWriter.
+func (s *safeReadWriter) Read(p []byte) (n int, err error) {
+	s.RLock()
+	defer s.RUnlock()
+	return s.rw.Read(p) //nolint: wrapcheck
+}
+
+// Write implements io.ReadWriter.
+func (s *safeReadWriter) Write(p []byte) (int, error) {
+	s.Lock()
+	defer s.Unlock()
+	return s.rw.Write(p) //nolint: wrapcheck
+}

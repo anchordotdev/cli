@@ -3,7 +3,6 @@ package apitest
 import (
 	"bytes"
 	"context"
-	"errors"
 	"flag"
 	"path/filepath"
 	"strings"
@@ -14,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 
 	"github.com/creack/pty"
@@ -206,10 +204,10 @@ func (s *Server) startMock(ctx context.Context) (string, func() error, error) {
 func (s *Server) startCmd(ctx context.Context, args []string) (func() error, error) {
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 	cmd.Dir = s.RootDir
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	setpgid(cmd)
 	cmd.Cancel = func() error {
-		err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-		if err != nil && !errors.Is(err, syscall.ESRCH) {
+		err := terminateProcess(cmd)
+		if err != nil {
 			return err
 		}
 		return nil
@@ -278,7 +276,7 @@ func (s *Server) waitTCP(addr string) error {
 		if conn, err := net.Dial("tcp4", addr); err == nil {
 			conn.Close()
 			return nil
-		} else if !errors.Is(err, syscall.ECONNREFUSED) {
+		} else if !isConnRefused(err) {
 			return err
 		}
 

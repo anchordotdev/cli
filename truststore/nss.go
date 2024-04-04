@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -144,13 +145,9 @@ func (s *NSS) CheckCA(ca *CA) (installed bool, err error) {
 
 	count, err := s.forEachNSSProfile(func(profile string) error {
 		out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-V", "-d", profile, "-u", "L", "-n", ca.UniqueName))
+		err = s.handleCertUtilResult(profile, out, err)
 		if err != nil {
-			return NSSError{
-				Err: errors.New(string(out)),
-
-				CertutilInstallHelp: s.certutilInstallHelp,
-				NSSBrowsers:         nssBrowsers,
-			}
+			return err
 		}
 		return nil
 	})
@@ -214,8 +211,10 @@ func (s *NSS) InstallCA(ca *CA) (installed bool, err error) {
 			"-i", ca.FilePath,
 		}
 
-		if out, err := s.execCertutil(s.certutilPath, args...); err != nil {
-			return fatalCmdErr(err, "certutil -A -d "+profile, out)
+		out, err := s.execCertutil(s.certutilPath, args...)
+		err = s.handleCertUtilResult(profile, out, err)
+		if err != nil {
+			return err
 		}
 		return nil
 	})
@@ -255,19 +254,9 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 	var cas []*CA
 	_, err := s.forEachNSSProfile(func(profile string) error {
 		out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile))
+		err = s.handleCertUtilResult(profile, out, err)
 		if err != nil {
-			message := string(out)
-
-			if bytes.Contains(out, []byte(certUtilBadDatabaseOutput)) {
-				message = "certutil bad database `" + profile + "`"
-			}
-
-			return NSSError{
-				Err: errors.New(message),
-
-				CertutilInstallHelp: s.certutilInstallHelp,
-				NSSBrowsers:         nssBrowsers,
-			}
+			return err
 		}
 
 		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
@@ -283,7 +272,7 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 		padLen := strings.Index(lines[0], "Trust Attributes")
 		if padLen <= 0 {
 			return NSSError{
-				Err: errors.New("unexpected certutil output format"),
+				Err: errors.New("certutil unexpected output format"),
 
 				CertutilInstallHelp: s.certutilInstallHelp,
 				NSSBrowsers:         nssBrowsers,
@@ -298,7 +287,7 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 		for _, line := range lines[3:] {
 			if len(line) < padLen {
 				return NSSError{
-					Err: errors.New("unexpected certutil line format"),
+					Err: errors.New("certutil unexpected line format"),
 
 					CertutilInstallHelp: s.certutilInstallHelp,
 					NSSBrowsers:         nssBrowsers,
@@ -310,13 +299,9 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 
 		for _, nick := range nicks {
 			out, err := s.SysFS.Exec(s.SysFS.Command(s.certutilPath, "-L", "-d", profile, "-n", nick, "-a"))
+			err = s.handleCertUtilResult(profile, out, err)
 			if err != nil {
-				return NSSError{
-					Err: errors.New(string(out)),
-
-					CertutilInstallHelp: s.certutilInstallHelp,
-					NSSBrowsers:         nssBrowsers,
-				}
+				return err
 			}
 
 			for p, buf := pem.Decode(out); p != nil; p, buf = pem.Decode(buf) {
@@ -400,8 +385,10 @@ func (s *NSS) UninstallCA(ca *CA) (bool, error) {
 			"-n", nickName,
 		}
 
-		if out, err := s.execCertutil(s.certutilPath, args...); err != nil {
-			return fatalCmdErr(err, "certutil -D -d "+profile, out)
+		out, err := s.execCertutil(s.certutilPath, args...)
+		err = s.handleCertUtilResult(profile, out, err)
+		if err != nil {
+			return err
 		}
 		return nil
 	})
@@ -433,15 +420,38 @@ func (s *NSS) forEachNSSProfile(f func(profile string) error) (found int, err er
 		}
 		if pathExists(s.DataFS, filepath.Join(profile, "cert9.db")) {
 			if err := f("sql:" + profile); err != nil {
-				return 0, err
+				return 0, NSSError{
+					Err: errors.New("`sql:" + profile + "` " + err.Error()),
+
+					CertutilInstallHelp: s.certutilInstallHelp,
+					NSSBrowsers:         nssBrowsers,
+				}
 			}
 			found++
 		} else if pathExists(s.DataFS, filepath.Join(profile, "cert8.db")) {
 			if err := f("dbm:" + profile); err != nil {
-				return 0, err
+				return 0, NSSError{
+					Err: errors.New("`dbm:" + profile + "` " + err.Error()),
+
+					CertutilInstallHelp: s.certutilInstallHelp,
+					NSSBrowsers:         nssBrowsers,
+				}
 			}
 			found++
 		}
 	}
 	return
+}
+
+func (s *NSS) handleCertUtilResult(profile string, out []byte, err error) error {
+	if err != nil {
+		return NSSError{
+			Err: fmt.Errorf("`%s` %q", profile, out),
+
+			CertutilInstallHelp: s.certutilInstallHelp,
+			NSSBrowsers:         nssBrowsers,
+		}
+	}
+
+	return nil
 }

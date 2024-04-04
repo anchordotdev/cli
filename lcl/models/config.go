@@ -41,8 +41,8 @@ func (m LclConfigHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 func (m LclConfigHint) View() string {
 	var b strings.Builder
 	fmt.Fprintln(&b, ui.StepHint("Before issuing HTTPS certificates for your local applications, we need to"))
-	fmt.Fprintln(&b, ui.StepHint("configure your browsers and OS to trust your personal certificates. "))
-	fmt.Fprintln(&b, ui.StepHint(""))
+	fmt.Fprintln(&b, ui.StepHint("configure your browsers and OS to trust your personal certificates."))
+	fmt.Fprintln(&b, ui.Whisper("    |")) // whisper instead of stephint to avoid whitespace errors from git + golden
 	fmt.Fprintln(&b, ui.StepHint("We'll start a local diagnostic web server to guide you through the process."))
 	return b.String()
 }

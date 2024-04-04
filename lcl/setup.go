@@ -48,8 +48,8 @@ func (c Setup) run(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	drv.Activate(ctx, new(models.SetupHeader))
-	drv.Activate(ctx, new(models.SetupHint))
+	drv.Activate(ctx, &models.SetupHeader{})
+	drv.Activate(ctx, &models.SetupHint{})
 
 	err = c.perform(ctx, drv)
 	if err != nil {
@@ -194,8 +194,10 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		return ctx.Err()
 	}
 
-	if err := browser.OpenURL(setupGuideURL); err != nil {
-		return err
+	if !c.Config.Trust.MockMode {
+		if err := browser.OpenURL(setupGuideURL); err != nil {
+			return err
+		}
 	}
 
 	return nil

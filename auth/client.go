@@ -34,7 +34,7 @@ func (c Client) Perform(ctx context.Context, drv *ui.Driver) (*api.Session, erro
 	drv.Send(models.ClientProbed(true))
 
 	if newClientErr == nil {
-		_, userInfoErr := c.Anc.UserInfo(ctx)
+		_, userInfoErr = c.Anc.UserInfo(ctx)
 		if userInfoErr != nil && !errors.Is(userInfoErr, api.ErrSignedOut) {
 			return nil, userInfoErr
 		}

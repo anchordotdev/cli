@@ -18,9 +18,14 @@ type MkCert struct {
 	Config *cli.Config
 	anc    *api.Session
 
-	domains                                                []string
-	eab                                                    *api.Eab
-	chainSlug, orgSlug, realmSlug, serviceSlug, subCaSubjectUID string
+	domains []string
+	eab     *api.Eab
+
+	chainSlug       string
+	orgSlug         string
+	realmSlug       string
+	serviceSlug     string
+	subCaSubjectUID string
 }
 
 func (c MkCert) UI() cli.UI {

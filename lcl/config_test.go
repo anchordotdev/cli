@@ -5,11 +5,8 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
-	"net"
 	"net/http"
-	"os"
 	"testing"
 	"time"
 
@@ -17,48 +14,23 @@ import (
 	"github.com/charmbracelet/x/exp/teatest"
 
 	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
 
-var srv = &apitest.Server{
-	Host:    "api.anchor.lcl.host",
-	RootDir: "../..",
-}
-
-func TestMain(m *testing.M) {
-	flag.Parse()
-
-	if err := srv.Start(context.Background()); err != nil {
-		panic(err)
-	}
-
-	defer os.Exit(m.Run())
-
-	srv.Close()
-}
-
-func TestLcl(t *testing.T) {
+func TestLclConfig(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	diagAddr, err := apitest.UnusedPort()
-	if err != nil {
-		t.Fatal(err)
-	}
+	diagPort := "4433"
 
-	_, diagPort, err := net.SplitHostPort(diagAddr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	diagAddr := "0.0.0.0:" + diagPort
 	httpURL := "http://hello-world.lcl.host:" + diagPort
 	httpsURL := "https://hello-world.lcl.host:" + diagPort
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort + "/"
+	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
 	cfg.Lcl.DiagnosticAddr = diagAddr
 	cfg.Lcl.Service = "hi-ankydotdev"
 	cfg.Lcl.Subdomain = "hi-ankydotdev"
@@ -66,9 +38,8 @@ func TestLcl(t *testing.T) {
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
 
-	setupGuideURL := cfg.AnchorURL + "lcl/services/test-app/guide"
-
-	if cfg.API.Token, err = srv.GeneratePAT("lcl@anchor.dev"); err != nil {
+	var err error
+	if cfg.API.Token, err = srv.GeneratePAT("lcl_config@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -78,7 +49,7 @@ func TestLcl(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Command{
+		cmd := LclConfig{
 			Config: cfg,
 		}
 
@@ -98,8 +69,7 @@ func TestLcl(t *testing.T) {
 					t.Fatal(<-errc)
 				}
 
-				expect := "? What lcl.host domain would you like to use for diagnostics?"
-				return bytes.Contains(bts, []byte(expect))
+				return bytes.Contains(bts, []byte("? What lcl.host domain would you like to use for diagnostics?"))
 			},
 			teatest.WithCheckInterval(time.Millisecond*100),
 			teatest.WithDuration(time.Second*3),
@@ -202,85 +172,6 @@ func TestLcl(t *testing.T) {
 		if _, err := httpsClient.Get(httpsURL); err != nil {
 			t.Fatal(err)
 		}
-
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := "? What application server type?"
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
-		)
-
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
-
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := "? What is the application name?"
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*5),
-		)
-
-		tm.Type("test-app")
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
-
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := "? What lcl.host domain would you like to use for local application development?"
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
-		)
-
-		if !srv.IsProxy() {
-			t.Skip("provisioning unsupported in mock mode")
-		}
-
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
-
-		t.Skip("Pending workaround for consistent setup guide port value")
-
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := fmt.Sprintf("! Press Enter to open %s.", setupGuideURL)
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
-		)
-
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
 		teatest.RequireEqualOutput(t, drv.FinalOut())
