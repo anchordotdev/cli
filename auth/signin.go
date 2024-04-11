@@ -13,6 +13,7 @@ import (
 	"github.com/cli/browser"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
@@ -22,12 +23,14 @@ import (
 )
 
 var (
+	CmdAuthSignin = cli.NewCmd[SignIn](CmdAuth, "signin", func(cmd *cobra.Command) {
+		cmd.Args = cobra.NoArgs
+	})
+
 	ErrSigninFailed = errors.New("sign in failed")
 )
 
 type SignIn struct {
-	Config *cli.Config
-
 	Source string
 
 	Hint tea.Model
@@ -41,6 +44,8 @@ func (s SignIn) UI() cli.UI {
 }
 
 func (s *SignIn) runTTY(ctx context.Context, tty termenv.File) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	output := termenv.DefaultOutput()
 	cp := output.ColorProfile()
 
@@ -48,7 +53,7 @@ func (s *SignIn) runTTY(ctx context.Context, tty termenv.File) error {
 		output.String("# Run `anchor auth signin`").Bold(),
 	)
 
-	anc, err := api.NewClient(s.Config)
+	anc, err := api.NewClient(cfg)
 	if err != nil && err != api.ErrSignedOut {
 		return err
 	}
@@ -114,15 +119,15 @@ func (s *SignIn) runTTY(ctx context.Context, tty termenv.File) error {
 			time.Sleep(time.Duration(codes.Interval) * time.Second)
 		}
 	}
-	s.Config.API.Token = patToken
+	cfg.API.Token = patToken
 
-	userInfo, err := fetchUserInfo(s.Config)
+	userInfo, err := fetchUserInfo(cfg)
 	if err != nil {
 		return err
 	}
 
-	kr := keyring.Keyring{Config: s.Config}
-	if err := kr.Set(keyring.APIToken, s.Config.API.Token); err != nil {
+	kr := keyring.Keyring{Config: cfg}
+	if err := kr.Set(keyring.APIToken, cfg.API.Token); err != nil {
 		return err
 	}
 
@@ -136,7 +141,11 @@ func (s *SignIn) runTTY(ctx context.Context, tty termenv.File) error {
 	return nil
 }
 
+// FIXME: dedup mostly identical RunTUI/RunTTY
+
 func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	drv.Activate(ctx, &models.SignInHeader{})
 
 	if s.Hint == nil {
@@ -144,7 +153,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 	drv.Activate(ctx, s.Hint)
 
-	anc, err := api.NewClient(s.Config)
+	anc, err := api.NewClient(cfg)
 	if err != nil && err != api.ErrSignedOut {
 		return err
 	}
@@ -165,7 +174,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 		VerificationURL: codes.VerificationUri,
 	})
 
-	if !s.Config.NonInteractive {
+	if !cfg.NonInteractive {
 		select {
 		case <-confirmc:
 		case <-ctx.Done():
@@ -189,15 +198,15 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 			time.Sleep(time.Duration(codes.Interval) * time.Second)
 		}
 	}
-	s.Config.API.Token = patToken
+	cfg.API.Token = patToken
 
-	userInfo, err := fetchUserInfo(s.Config)
+	userInfo, err := fetchUserInfo(cfg)
 	if err != nil {
 		return err
 	}
 
-	kr := keyring.Keyring{Config: s.Config}
-	if err := kr.Set(keyring.APIToken, s.Config.API.Token); err != nil {
+	kr := keyring.Keyring{Config: cfg}
+	if err := kr.Set(keyring.APIToken, cfg.API.Token); err != nil {
 		return err
 	}
 

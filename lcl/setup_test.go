@@ -25,13 +25,13 @@ func TestSetup(t *testing.T) {
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
-
-	setupGuideURL := cfg.AnchorURL + "lcl_setup/services/test-app/guide"
-
 	var err error
 	if cfg.API.Token, err = srv.GeneratePAT("lcl_setup@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
+	ctx = cli.ContextWithConfig(ctx, cfg)
+
+	setupGuideURL := cfg.AnchorURL + "lcl_setup/services/test-app/guide"
 
 	t.Run("basics", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(ctx)
@@ -39,9 +39,7 @@ func TestSetup(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Setup{
-			Config: cfg,
-		}
+		cmd := Setup{}
 
 		errc := make(chan error, 1)
 		go func() {

@@ -19,11 +19,11 @@ func TestLclMkcert(t *testing.T) {
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
-
 	var err error
 	if cfg.API.Token, err = srv.GeneratePAT("lcl_mkcert@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
+  ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
 		t.Skip("pending better support for building needed models before running")
@@ -36,7 +36,6 @@ func TestLclMkcert(t *testing.T) {
 		defer cancel()
 
 		cmd := MkCert{
-			Config:          cfg,
 			domains:         []string{"hi-lcl-mkcert.lcl.host", "hi-lcl-mkcert.localhost"},
 			subCaSubjectUID: "ABCD:EF12:23456",
 		}

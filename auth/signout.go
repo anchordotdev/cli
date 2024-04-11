@@ -7,11 +7,14 @@ import (
 	"github.com/anchordotdev/cli/auth/models"
 	"github.com/anchordotdev/cli/keyring"
 	"github.com/anchordotdev/cli/ui"
+	"github.com/spf13/cobra"
 )
 
-type SignOut struct {
-	Config *cli.Config
-}
+var CmdAuthSignout = cli.NewCmd[SignOut](CmdAuth, "signout", func(cmd *cobra.Command) {
+	cmd.Args = cobra.NoArgs
+})
+
+type SignOut struct{}
 
 func (s SignOut) UI() cli.UI {
 	return cli.UI{
@@ -20,9 +23,11 @@ func (s SignOut) UI() cli.UI {
 }
 
 func (s *SignOut) runTUI(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	drv.Activate(ctx, &models.SignOutPreamble{})
 
-	kr := keyring.Keyring{Config: s.Config}
+	kr := keyring.Keyring{Config: cfg}
 	err := kr.Delete(keyring.APIToken)
 
 	if err == nil {

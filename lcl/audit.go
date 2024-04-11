@@ -9,11 +9,14 @@ import (
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/ui"
+	"github.com/spf13/cobra"
 )
 
-type Audit struct {
-	Config *cli.Config
+var CmdAuthLclAudit = cli.NewCmd[Audit](CmdLcl, "audit", func(cmd *cobra.Command) {
+	cmd.Args = cobra.NoArgs
+})
 
+type Audit struct {
 	anc                *api.Session
 	orgSlug, realmSlug string
 }
@@ -27,7 +30,6 @@ func (c Audit) UI() cli.UI {
 func (c Audit) run(ctx context.Context, drv *ui.Driver) error {
 	var err error
 	cmd := &auth.Client{
-		Config: c.Config,
 		Anc:    c.anc,
 		Source: "lclhost",
 	}
@@ -89,7 +91,7 @@ func (c Audit) perform(ctx context.Context, drv *ui.Driver) (*LclAuditResult, er
 	drv.Activate(ctx, &models.AuditTrust{})
 
 	// FIXME: use config anc?
-	trustStoreAuditResult, err := trust.PerformAudit(ctx, c.Config, c.anc, c.orgSlug, c.realmSlug)
+	trustStoreAuditResult, err := trust.PerformAudit(ctx, c.anc, c.orgSlug, c.realmSlug)
 	if err != nil {
 		return nil, err
 	}

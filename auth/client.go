@@ -12,20 +12,20 @@ import (
 )
 
 type Client struct {
-	Config *cli.Config
-
 	Anc    *api.Session
 	Hint   tea.Model
 	Source string
 }
 
 func (c Client) Perform(ctx context.Context, drv *ui.Driver) (*api.Session, error) {
+	cfg := cli.ConfigFromContext(ctx)
+
 	var newClientErr, userInfoErr error
 
 	drv.Activate(ctx, &models.Client{})
 
 	if c.Anc == nil {
-		c.Anc, newClientErr = api.NewClient(c.Config)
+		c.Anc, newClientErr = api.NewClient(cfg)
 		if newClientErr != nil && !errors.Is(newClientErr, api.ErrSignedOut) {
 			return nil, newClientErr
 		}
@@ -47,16 +47,16 @@ func (c Client) Perform(ctx context.Context, drv *ui.Driver) (*api.Session, erro
 			c.Hint = &models.SignInHint{}
 		}
 		cmd := &SignIn{
-			Config: c.Config,
 			Hint:   c.Hint,
 			Source: c.Source,
 		}
+		ctx = cli.ContextWithConfig(ctx, cfg)
 		err := cmd.RunTUI(ctx, drv)
 		if err != nil {
 			return nil, err
 		}
 
-		c.Anc, err = api.NewClient(c.Config)
+		c.Anc, err = api.NewClient(cfg)
 		if err != nil {
 			return nil, err
 		}

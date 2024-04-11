@@ -4,15 +4,12 @@ import (
 	"context"
 	"crypto/tls"
 
-	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
 type Provision struct {
-	Config *cli.Config
-
 	Domains            []string
 	orgSlug, realmSlug string
 }
@@ -54,7 +51,6 @@ func (p *Provision) run(ctx context.Context, drv *ui.Driver, anc *api.Session, s
 	}
 
 	cmdMkCert := &MkCert{
-		Config:          p.Config,
 		anc:             anc,
 		chainSlug:       attach.Relationships.Chain.Slug,
 		domains:         p.Domains,

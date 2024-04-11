@@ -1,0 +1,13 @@
+Manage lcl.host Local Development Environment
+
+Usage:
+  anchor lcl <subcommand> [flags]
+  anchor lcl [command]
+
+Available Commands:
+  audit       Audit lcl.host HTTPS Local Development Environment
+
+Flags:
+  -h, --help   help for lcl
+
+Use "anchor lcl [command] --help" for more information about a command.

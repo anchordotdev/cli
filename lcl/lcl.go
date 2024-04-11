@@ -15,11 +15,14 @@ import (
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/anchordotdev/cli/version"
+	"github.com/spf13/cobra"
 )
 
-type Command struct {
-	Config *cli.Config
+var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
+	cmd.Args = cobra.NoArgs
+})
 
+type Command struct {
 	anc *api.Session
 }
 
@@ -34,7 +37,6 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 
 	var err error
 	cmd := &auth.Client{
-		Config: c.Config,
 		Anc:    c.anc,
 		Hint:   &models.LclSignInHint{},
 		Source: "lclhost",
@@ -60,7 +62,6 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, &models.AuditHint{})
 
 	cmdAudit := &Audit{
-		Config:    c.Config,
 		anc:       c.anc,
 		orgSlug:   orgSlug,
 		realmSlug: realmSlug,
@@ -79,7 +80,6 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 		drv.Activate(ctx, &models.LclConfigHint{})
 
 		cmdConfig := &LclConfig{
-			Config:    c.Config,
 			anc:       c.anc,
 			orgSlug:   orgSlug,
 			realmSlug: realmSlug,
@@ -95,7 +95,6 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, &models.SetupHint{})
 
 	cmdSetup := &Setup{
-		Config:  c.Config,
 		anc:     c.anc,
 		orgSlug: orgSlug,
 	}

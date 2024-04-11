@@ -13,8 +13,6 @@ import (
 )
 
 type Clean struct {
-	Config *cli.Config
-
 	Anc                *api.Session
 	OrgSlug, RealmSlug string
 }
@@ -26,10 +24,11 @@ func (c Clean) UI() cli.UI {
 }
 
 func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	var err error
 	cmd := &auth.Client{
-		Config: c.Config,
-		Anc:    c.Anc,
+		Anc: c.Anc,
 	}
 	c.Anc, err = cmd.Perform(ctx, drv)
 	if err != nil {
@@ -38,8 +37,8 @@ func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
 
 	drv.Activate(ctx, &models.TrustCleanHeader{})
 	drv.Activate(ctx, &models.TrustCleanHint{
-		CertStates:  c.Config.Trust.Clean.States,
-		TrustStores: c.Config.Trust.Stores,
+		CertStates:  cfg.Trust.Clean.States,
+		TrustStores: cfg.Trust.Stores,
 	})
 
 	err = c.Perform(ctx, drv)
@@ -51,9 +50,11 @@ func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
 }
 
 func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	var err error
 	if c.OrgSlug == "" && c.RealmSlug == "" {
-		c.OrgSlug, c.RealmSlug, err = fetchOrgAndRealm(ctx, c.Config, c.Anc)
+		c.OrgSlug, c.RealmSlug, err = fetchOrgAndRealm(ctx, c.Anc)
 		if err != nil {
 			return err
 		}
@@ -66,7 +67,7 @@ func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	stores, sudoMgr, err := loadStores(c.Config)
+	stores, sudoMgr, err := loadStores(cfg)
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,7 @@ func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	targetCAs := info.AllCAs(c.Config.Trust.Clean.States...)
+	targetCAs := info.AllCAs(cfg.Trust.Clean.States...)
 	drv.Send(targetCAs)
 
 	tmpDir, err := os.MkdirTemp("", "anchor-trust-clean")
@@ -102,11 +103,11 @@ func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
 		confirmc := make(chan struct{})
 		drv.Activate(ctx, &models.TrustCleanCA{
 			CA:        ca,
-			Config:    c.Config,
+			Config:    cfg,
 			ConfirmCh: confirmc,
 		})
 
-		if !c.Config.NonInteractive {
+		if !cfg.NonInteractive {
 			select {
 			case <-confirmc:
 			case <-ctx.Done():

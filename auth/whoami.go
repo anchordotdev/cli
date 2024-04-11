@@ -8,14 +8,17 @@ import (
 	"net/http"
 
 	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 )
 
-type WhoAmI struct {
-	Config *cli.Config
-}
+var CmdAuthWhoami = cli.NewCmd[WhoAmI](CmdAuth, "whoami", func(cmd *cobra.Command) {
+	cmd.Args = cobra.NoArgs
+})
+
+type WhoAmI struct{}
 
 func (w WhoAmI) UI() cli.UI {
 	return cli.UI{
@@ -24,7 +27,9 @@ func (w WhoAmI) UI() cli.UI {
 }
 
 func (w *WhoAmI) run(ctx context.Context, tty termenv.File) error {
-	anc, err := api.NewClient(w.Config)
+	cfg := cli.ConfigFromContext(ctx)
+
+	anc, err := api.NewClient(cfg)
 	if err != nil {
 		return err
 	}

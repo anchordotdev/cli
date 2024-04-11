@@ -42,7 +42,6 @@ func TestProvision(t *testing.T) {
 		drv, tm := uitest.TestTUI(ctx, t)
 
 		cmd := &Provision{
-			Config:  cfg,
 			Domains: []string{"subdomain.lcl.host", "subdomain.localhost"},
 		}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/teatest"
 	"github.com/muesli/termenv"
+	"github.com/stretchr/testify/require"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/ui"
@@ -47,7 +48,27 @@ func (p program) Run() (tea.Model, error) {
 	panic("TODO")
 }
 
+func TestTUIError(ctx context.Context, t *testing.T, tui cli.UI, msgAndArgs ...interface{}) {
+	_, errc := testTUI(ctx, t, tui)
+	err := <-errc
+	require.Error(t, err, msgAndArgs...)
+}
+
 func TestTUIOutput(ctx context.Context, t *testing.T, tui cli.UI) {
+	drv, errc := testTUI(ctx, t, tui)
+
+	out, err := io.ReadAll(drv.Out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := <-errc; err != nil {
+		t.Fatal(err)
+	}
+
+	teatest.RequireEqualOutput(t, out)
+}
+
+func testTUI(ctx context.Context, t *testing.T, tui cli.UI) (ui.Driver, chan error) {
 	drv := ui.NewDriverTest(ctx)
 	tm := teatest.NewTestModel(t, drv, teatest.WithInitialTermSize(128, 64))
 
@@ -62,13 +83,6 @@ func TestTUIOutput(ctx context.Context, t *testing.T, tui cli.UI) {
 	}()
 
 	tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
-	out, err := io.ReadAll(drv.Out)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := <-errc; err != nil {
-		t.Fatal(err)
-	}
 
-	teatest.RequireEqualOutput(t, out)
+	return *drv, errc
 }

@@ -32,8 +32,10 @@ type Command struct {
 	Preflight func(context.Context) error
 }
 
-func (c *Command) Execute(ctx context.Context, cfg *Config) error {
+func (c *Command) Execute(ctx context.Context) error {
+	cfg := new(Config)
 	defaults.SetDefaults(cfg)
+	ctx = ContextWithConfig(ctx, cfg)
 
 	// enable ANSI processing for Windows, see: https://github.com/muesli/termenv#platform-support
 	restoreConsole, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
@@ -60,6 +62,7 @@ func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.C
 		Hidden:       c.Hidden,
 		SilenceUsage: true,
 	}
+	cmd.SetContext(ctx)
 
 	if c.Preflight != nil {
 		cmd.PersistentPreRunE = func(_ *cobra.Command, _ []string) error {
@@ -69,10 +72,10 @@ func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.C
 
 	switch {
 	case c.RunTUI != nil:
-		cmd.RunE = func(_ *cobra.Command, args []string) error {
+		cmd.RunE = func(cmd *cobra.Command, args []string) error {
 			// TODO: positional args
 
-			ctx, cancel := context.WithCancelCause(ctx)
+			ctx, cancel := context.WithCancelCause(cmd.Context())
 			defer cancel(nil)
 
 			drv, prg := ui.NewDriverTUI(ctx)
@@ -99,8 +102,11 @@ func (c *Command) cobraCommand(ctx context.Context, cfgv reflect.Value) *cobra.C
 			return <-errc // TODO: special handling for a UI error
 		}
 	case c.RunTTY != nil:
-		cmd.RunE = func(_ *cobra.Command, args []string) error {
+		cmd.RunE = func(cmd *cobra.Command, args []string) error {
 			// TODO: positional args
+
+			ctx, cancel := context.WithCancelCause(cmd.Context())
+			defer cancel(nil)
 
 			return c.RunTTY(ctx, termenv.DefaultOutput().TTY())
 		}

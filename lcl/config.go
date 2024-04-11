@@ -24,8 +24,6 @@ import (
 var loopbackAddrs = []string{"127.0.0.1", "::1"}
 
 type LclConfig struct {
-	Config *cli.Config
-
 	anc                *api.Session
 	orgSlug, realmSlug string
 }
@@ -39,7 +37,6 @@ func (c LclConfig) UI() cli.UI {
 func (c LclConfig) runTUI(ctx context.Context, drv *ui.Driver) error {
 	var err error
 	cmd := &auth.Client{
-		Config: c.Config,
 		Anc:    c.anc,
 		Source: "lclhost",
 	}
@@ -60,6 +57,8 @@ func (c LclConfig) runTUI(ctx context.Context, drv *ui.Driver) error {
 }
 
 func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	if c.orgSlug == "" {
 		userInfo, err := c.anc.UserInfo(ctx)
 		if err != nil {
@@ -72,7 +71,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		c.realmSlug = "localhost"
 	}
 
-	_, diagPort, err := net.SplitHostPort(c.Config.Lcl.DiagnosticAddr)
+	_, diagPort, err := net.SplitHostPort(cfg.Lcl.DiagnosticAddr)
 	if err != nil {
 		return err
 	}
@@ -117,7 +116,6 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 	domains := []string{serviceName + ".lcl.host", serviceName + ".localhost"}
 
 	cmdProvision := &Provision{
-		Config:    c.Config,
 		Domains:   domains,
 		orgSlug:   c.orgSlug,
 		realmSlug: c.realmSlug,
@@ -140,8 +138,8 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 
 	// FIXME: ? spinner while booting server, transitioning to server booted message
 	srvDiag := &diagnostic.Server{
-		Addr:       c.Config.Lcl.DiagnosticAddr,
-		LclHostURL: c.Config.Lcl.LclHostURL,
+		Addr:       cfg.Lcl.DiagnosticAddr,
+		LclHostURL: cfg.Lcl.LclHostURL,
 		GetCertificate: func(cii *tls.ClientHelloInfo) (*tls.Certificate, error) {
 			return cert, nil
 		},
@@ -152,7 +150,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 	}
 	requestc := srvDiag.RequestChan()
 
-	auditInfo, err := trust.PerformAudit(ctx, c.Config, c.anc, c.orgSlug, c.realmSlug)
+	auditInfo, err := trust.PerformAudit(ctx, c.anc, c.orgSlug, c.realmSlug)
 	if err != nil {
 		return err
 	}
@@ -182,7 +180,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 			return ctx.Err()
 		}
 
-		if !c.Config.Trust.MockMode {
+		if !cfg.Trust.MockMode {
 			if err := browser.OpenURL(httpURL.String()); err != nil {
 				return err
 			}
@@ -201,7 +199,6 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		}
 
 		cmdTrust := &trust.Command{
-			Config:    c.Config,
 			Anc:       c.anc,
 			OrgSlug:   c.orgSlug,
 			RealmSlug: c.realmSlug,
@@ -235,7 +232,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		return ctx.Err()
 	}
 
-	if !c.Config.Trust.MockMode {
+	if !cfg.Trust.MockMode {
 		if err := browser.OpenURL(httpsURL.String()); err != nil {
 			return err
 		}

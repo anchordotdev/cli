@@ -1,0 +1,18 @@
+anchor is a command line interface for the Anchor certificate management platform.
+
+It provides a developer friendly interface for certificate management.
+
+Usage:
+  anchor <command> <subcommand> [flags]
+  anchor [command]
+
+Available Commands:
+  auth        Manage Anchor.dev Authentication
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  lcl         Manage lcl.host Local Development Environment
+
+Flags:
+  -h, --help   help for anchor
+
+Use "anchor [command] --help" for more information about a command.

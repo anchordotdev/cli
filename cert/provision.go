@@ -15,12 +15,12 @@ import (
 )
 
 type Provision struct {
-	Config *cli.Config
-
 	Cert *tls.Certificate
 }
 
 func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...string) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	drv.Activate(ctx, &models.Provision{
 		Domains: domains,
 	})
@@ -45,7 +45,7 @@ func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...strin
 		Bytes: cert.Certificate[0],
 	}
 
-	if !p.Config.Trust.MockMode {
+	if !cfg.Trust.MockMode {
 		if err := os.WriteFile(certFile, pem.EncodeToMemory(certBlock), 0644); err != nil {
 			return err
 		}
@@ -61,7 +61,7 @@ func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...strin
 		chainData = append(chainData, pem.EncodeToMemory(chainBlock)...)
 	}
 
-	if !p.Config.Trust.MockMode {
+	if !cfg.Trust.MockMode {
 		if err := os.WriteFile(chainFile, chainData, 0644); err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...strin
 		Bytes:   keyDER,
 	}
 
-	if !p.Config.Trust.MockMode {
+	if !cfg.Trust.MockMode {
 		if err := os.WriteFile(keyFile, pem.EncodeToMemory(keyBlock), 0644); err != nil {
 			return err
 		}

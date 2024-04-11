@@ -1,0 +1,10 @@
+Sign into your Anchor account for your local system user.
+
+Generate a new Personal Access Token (PAT) and store it in the system keychain
+for the local system user.
+
+Usage:
+  anchor auth signin [flags]
+
+Flags:
+  -h, --help   help for signin

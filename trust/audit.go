@@ -13,9 +13,7 @@ import (
 	"github.com/anchordotdev/cli/truststore"
 )
 
-type Audit struct {
-	Config *cli.Config
-}
+type Audit struct{}
 
 func (a Audit) UI() cli.UI {
 	return cli.UI{
@@ -24,12 +22,14 @@ func (a Audit) UI() cli.UI {
 }
 
 func (a *Audit) run(ctx context.Context, tty termenv.File) error {
-	anc, err := api.NewClient(a.Config)
+	cfg := cli.ConfigFromContext(ctx)
+
+	anc, err := api.NewClient(cfg)
 	if err != nil {
 		return err
 	}
 
-	org, realm, err := fetchOrgAndRealm(ctx, a.Config, anc)
+	org, realm, err := fetchOrgAndRealm(ctx, anc)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (a *Audit) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	stores, _, err := loadStores(a.Config)
+	stores, _, err := loadStores(cfg)
 	if err != nil {
 		return err
 	}

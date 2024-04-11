@@ -1,0 +1,7 @@
+Print the details of the Anchor account for your local system user.
+
+Usage:
+  anchor auth whoami [flags]
+
+Flags:
+  -h, --help   help for whoami

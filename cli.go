@@ -6,6 +6,7 @@ import (
 	"github.com/muesli/termenv"
 
 	"github.com/anchordotdev/cli/ui"
+	"github.com/spf13/cobra"
 )
 
 type Config struct {
@@ -50,6 +51,10 @@ type Config struct {
 		} `cmd:"setup"`
 	} `cmd:"lcl"`
 
+	Test struct {
+		SkipRunE bool `desc:"skip RunE for testing purposes"`
+	}
+
 	Trust struct {
 		Org   string `desc:"organization" flag:"org,o" env:"ORG" json:"org" toml:"org"`
 		Realm string `desc:"realm" flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
@@ -69,9 +74,7 @@ type Config struct {
 
 	User struct {
 		Auth struct {
-			SignIn struct {
-				Email string `desc:"primary email address" flag:"email,e" env:"EMAIL" toml:"email"`
-			} `cmd:"signin"`
+			SignIn struct{} `cmd:"signin"`
 
 			SignOut struct{} `cmd:"signout"`
 
@@ -89,4 +92,18 @@ type Config struct {
 type UI struct {
 	RunTTY func(context.Context, termenv.File) error
 	RunTUI func(context.Context, *ui.Driver) error
+}
+
+type ContextKey string
+
+func ConfigFromContext(ctx context.Context) *Config {
+	return ctx.Value(ContextKey("Config")).(*Config)
+}
+
+func ConfigFromCmd(cmd *cobra.Command) *Config {
+	return ConfigFromContext(cmd.Context())
+}
+
+func ContextWithConfig(ctx context.Context, cfg *Config) context.Context {
+	return context.WithValue(ctx, ContextKey("Config"), cfg)
 }

@@ -12,8 +12,6 @@ import (
 )
 
 type LclClean struct {
-	Config *cli.Config
-
 	anc                *api.Session
 	orgSlug, realmSlug string
 }
@@ -25,17 +23,18 @@ func (c LclClean) UI() cli.UI {
 }
 
 func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
+  cfg := cli.ConfigFromContext(ctx)
+
 	var err error
 	clientCmd := &auth.Client{
-		Config: c.Config,
-		Anc:    c.anc,
+		Anc: c.anc,
 	}
 	c.anc, err = clientCmd.Perform(ctx, drv)
 	if err != nil {
 		return err
 	}
 
-	c.Config.Trust.Clean.States = []string{"all"}
+	cfg.Trust.Clean.States = []string{"all"}
 
 	if c.orgSlug == "" {
 		userInfo, err := c.anc.UserInfo(ctx)
@@ -51,11 +50,10 @@ func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
 
 	drv.Activate(ctx, &models.LclCleanHeader{})
 	drv.Activate(ctx, &models.LclCleanHint{
-		TrustStores: c.Config.Trust.Stores,
+		TrustStores: cfg.Trust.Stores,
 	})
 
 	cmd := &trust.Clean{
-		Config:    c.Config,
 		Anc:       c.anc,
 		OrgSlug:   c.orgSlug,
 		RealmSlug: c.realmSlug,

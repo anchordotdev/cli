@@ -24,8 +24,6 @@ import (
 )
 
 type Setup struct {
-	Config *cli.Config
-
 	anc     *api.Session
 	orgSlug string
 }
@@ -39,7 +37,6 @@ func (c Setup) UI() cli.UI {
 func (c Setup) run(ctx context.Context, drv *ui.Driver) error {
 	var err error
 	cmd := &auth.Client{
-		Config: c.Config,
 		Anc:    c.anc,
 		Source: "lclhost",
 	}
@@ -60,6 +57,8 @@ func (c Setup) run(ctx context.Context, drv *ui.Driver) error {
 }
 
 func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	drv.Activate(ctx, &models.SetupScan{})
 
 	if c.orgSlug == "" {
@@ -77,8 +76,8 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	dirFS := os.DirFS(path).(detection.FS)
 
 	detectors := detection.DefaultDetectors
-	if c.Config.Lcl.Setup.Language != "" {
-		if langDetector, ok := detection.DetectorsByFlag[c.Config.Lcl.Setup.Language]; !ok {
+	if cfg.Lcl.Setup.Language != "" {
+		if langDetector, ok := detection.DetectorsByFlag[cfg.Lcl.Setup.Language]; !ok {
 			return errors.New("invalid language specified")
 		} else {
 			detectors = []detection.Detector{langDetector}
@@ -159,7 +158,6 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	realmSlug := "localhost"
 
 	cmdProvision := &Provision{
-		Config:    c.Config,
 		Domains:   domains,
 		orgSlug:   c.orgSlug,
 		realmSlug: realmSlug,
@@ -171,15 +169,14 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	cmdCert := cert.Provision{
-		Cert:   tlsCert,
-		Config: c.Config,
+		Cert: tlsCert,
 	}
 
 	if err := cmdCert.RunTUI(ctx, drv, domains...); err != nil {
 		return err
 	}
 
-	setupGuideURL := c.Config.AnchorURL + "/" + url.QueryEscape(c.orgSlug) + "/services/" + url.QueryEscape(service.Slug) + "/guide"
+	setupGuideURL := cfg.AnchorURL + "/" + url.QueryEscape(c.orgSlug) + "/services/" + url.QueryEscape(service.Slug) + "/guide"
 	setupGuideConfirmCh := make(chan struct{})
 
 	drv.Activate(ctx, &models.SetupGuidePrompt{
@@ -194,7 +191,7 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		return ctx.Err()
 	}
 
-	if !c.Config.Trust.MockMode {
+	if !cfg.Trust.MockMode {
 		if err := browser.OpenURL(setupGuideURL); err != nil {
 			return err
 		}

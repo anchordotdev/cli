@@ -17,11 +17,11 @@ func TestClean(t *testing.T) {
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
-
 	var err error
 	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
+  ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
 		if srv.IsProxy() {
@@ -31,9 +31,7 @@ func TestClean(t *testing.T) {
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		cmd := LclClean{
-			Config: cfg,
-		}
+		cmd := LclClean{}
 
 		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})

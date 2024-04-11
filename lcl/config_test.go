@@ -37,11 +37,11 @@ func TestLclConfig(t *testing.T) {
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
-
 	var err error
 	if cfg.API.Token, err = srv.GeneratePAT("lcl_config@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
+  ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(ctx)
@@ -49,9 +49,7 @@ func TestLclConfig(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := LclConfig{
-			Config: cfg,
-		}
+		cmd := LclConfig{}
 
 		errc := make(chan error, 1)
 		go func() {

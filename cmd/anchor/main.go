@@ -38,7 +38,7 @@ var (
 
 				SubCommands: []*cli.Command{
 					{
-						UI: auth.SignIn{Config: cfg}.UI(),
+						UI: auth.SignIn{}.UI(),
 
 						Name:  "signin",
 						Use:   "signin",
@@ -51,7 +51,7 @@ var (
 						`),
 					},
 					{
-						UI: auth.SignOut{Config: cfg}.UI(),
+						UI: auth.SignOut{}.UI(),
 
 						Name:  "signout",
 						Use:   "signout",
@@ -64,7 +64,7 @@ var (
 						`),
 					},
 					{
-						UI: auth.WhoAmI{Config: cfg}.UI(),
+						UI: auth.WhoAmI{}.UI(),
 
 						Name:  "whoami",
 						Use:   "whoami",
@@ -76,7 +76,7 @@ var (
 				},
 			},
 			{
-				UI: lcl.Command{Config: cfg}.UI(),
+				UI: lcl.Command{}.UI(),
 
 				Name:  "lcl",
 				Use:   "lcl <subcommand>",
@@ -84,35 +84,35 @@ var (
 
 				SubCommands: []*cli.Command{
 					{
-						UI: lcl.Audit{Config: cfg}.UI(),
+						UI: lcl.Audit{}.UI(),
 
 						Name:  "audit",
 						Use:   "audit",
 						Short: "Audit lcl.host HTTPS Local Development Environment",
 					},
 					{
-						UI: lcl.LclClean{Config: cfg}.UI(),
+						UI: lcl.LclClean{}.UI(),
 
 						Name:  "clean",
 						Use:   "clean",
 						Short: "Clean lcl.host CA Certificates from the Local Trust Store(s)",
 					},
 					{
-						UI: lcl.LclConfig{Config: cfg}.UI(),
+						UI: lcl.LclConfig{}.UI(),
 
 						Name:  "config",
 						Use:   "config",
 						Short: "Configure System for lcl.host Local Development",
 					},
 					{
-						UI: lcl.MkCert{Config: cfg}.UI(),
+						UI: lcl.MkCert{}.UI(),
 
 						Name:  "mkcert",
 						Use:   "mkcert",
 						Short: "Provision Certificate for lcl.host Local Development",
 					},
 					{
-						UI: lcl.Setup{Config: cfg}.UI(),
+						UI: lcl.Setup{}.UI(),
 
 						Name:  "setup",
 						Use:   "setup",
@@ -121,7 +121,7 @@ var (
 				},
 			},
 			{
-				UI: trust.Command{Config: cfg}.UI(),
+				UI: trust.Command{}.UI(),
 
 				Name:  "trust",
 				Use:   "trust [org[/realm[/ca]]]",
@@ -138,7 +138,7 @@ var (
 
 				SubCommands: []*cli.Command{
 					{
-						UI: trust.Audit{Config: cfg}.UI(),
+						UI: trust.Audit{}.UI(),
 
 						Name:  "audit",
 						Use:   "audit [org[/realm[/ca]]]",
@@ -158,7 +158,7 @@ var (
 						`),
 					},
 					{
-						UI: trust.Clean{Config: cfg}.UI(),
+						UI: trust.Clean{}.UI(),
 
 						Name:   "clean",
 						Use:    "clean TODO",
@@ -179,8 +179,6 @@ var (
 		Preflight: versionCheck,
 	}
 
-	cfg = new(cli.Config)
-
 	// Version info set by GoReleaser via ldflags
 
 	version, commit, date string
@@ -196,7 +194,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	if err := cmd.Execute(ctx, cfg); err != nil {
+	if err := cmd.Execute(ctx); err != nil {
 		os.Exit(1)
 	}
 }
@@ -215,8 +213,8 @@ func versionCheck(ctx context.Context) error {
 	}
 
 	if release.TagName == nil || *release.TagName != "v"+version {
-		fmt.Println(ui.StepHint(fmt.Sprintf("A new release of the anchor CLI is available.")))
-		command := "brew update && brew upgrade anchordotdev/tap/anchor"
+		fmt.Println(ui.StepHint("A new release of the anchor CLI is available."))
+		command := "brew update && brew upgrade anchor"
 		if err := clipboard.WriteAll(command); err == nil {
 			fmt.Println(ui.StepAlert(fmt.Sprintf("Copied %s to your clipboard.", ui.Announce(command))))
 		}

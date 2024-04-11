@@ -6,10 +6,7 @@ import (
 	"testing"
 
 	"github.com/anchordotdev/cli/api/apitest"
-)
-
-var (
-	_ = flag.Bool("update", false, "ignored")
+	"github.com/anchordotdev/cli/cmdtest"
 )
 
 var srv = &apitest.Server{
@@ -26,4 +23,17 @@ func TestMain(m *testing.M) {
 	defer srv.Close()
 
 	m.Run()
+}
+
+func TestCmdAuth(t *testing.T) {
+	cmd := CmdAuth
+	root := cmd.Root()
+
+	t.Run("auth", func(t *testing.T) {
+		cmdtest.TestOutput(t, root, "auth")
+	})
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, root, "auth", "--help")
+	})
 }

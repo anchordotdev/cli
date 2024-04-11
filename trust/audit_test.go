@@ -28,18 +28,18 @@ func TestAudit(t *testing.T) {
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
 	cfg.Trust.Stores = []string{"mock"}
-
 	var err error
 	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
+	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	anc, err := api.NewClient(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	org, realm, err := fetchOrgAndRealm(ctx, cfg, anc)
+	org, realm, err := fetchOrgAndRealm(ctx, anc)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,9 +57,7 @@ func TestAudit(t *testing.T) {
 		}
 		defer func() { truststore.MockCAs = nil }()
 
-		cmd := &Audit{
-			Config: cfg,
-		}
+		cmd := &Audit{}
 
 		buf, err := apitest.RunTTY(ctx, cmd.UI())
 		if err != nil {

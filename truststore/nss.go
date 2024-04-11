@@ -107,7 +107,7 @@ func (s *NSS) Check() (bool, error) {
 		}
 	}
 	if s.certutilPath == "" {
-		return true, Error{
+		return false, Error{
 			Op: OpCheck,
 
 			Warning: NSSError{

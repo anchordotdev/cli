@@ -1,0 +1,10 @@
+Sign out of your Anchor account for your local system user.
+
+Remove your Personal Access Token (PAT) from the system keychain for your local
+system user.
+
+Usage:
+  anchor auth signout [flags]
+
+Flags:
+  -h, --help   help for signout

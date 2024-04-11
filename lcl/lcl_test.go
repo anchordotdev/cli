@@ -18,6 +18,7 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
+	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
@@ -37,6 +38,15 @@ func TestMain(m *testing.M) {
 	defer os.Exit(m.Run())
 
 	srv.Close()
+}
+
+func TestCmdLcl(t *testing.T) {
+	cmd := CmdLcl
+	root := cmd.Root()
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, root, "lcl", "--help")
+	})
 }
 
 func TestLcl(t *testing.T) {
@@ -65,12 +75,12 @@ func TestLcl(t *testing.T) {
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
-
-	setupGuideURL := cfg.AnchorURL + "lcl/services/test-app/guide"
-
 	if cfg.API.Token, err = srv.GeneratePAT("lcl@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
+	ctx = cli.ContextWithConfig(ctx, cfg)
+
+	setupGuideURL := cfg.AnchorURL + "lcl/services/test-app/guide"
 
 	t.Run("basics", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(ctx)
@@ -78,9 +88,7 @@ func TestLcl(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Command{
-			Config: cfg,
-		}
+		cmd := Command{}
 
 		errc := make(chan error, 1)
 		go func() {

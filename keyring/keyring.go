@@ -65,5 +65,6 @@ func (k *Keyring) Set(id label, secret string) error {
 }
 
 func (k *Keyring) service(id label) string {
-	return k.Config.API.URL + " " + string(id)
+	url := k.Config.API.URL
+	return url + " " + string(id)
 }

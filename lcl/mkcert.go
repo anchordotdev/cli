@@ -15,8 +15,7 @@ import (
 )
 
 type MkCert struct {
-	Config *cli.Config
-	anc    *api.Session
+	anc *api.Session
 
 	domains []string
 	eab     *api.Eab
@@ -37,7 +36,6 @@ func (c MkCert) UI() cli.UI {
 func (c *MkCert) run(ctx context.Context, drv *ui.Driver) error {
 	var err error
 	cmd := &auth.Client{
-		Config: c.Config,
 		Anc:    c.anc,
 		Source: "lclhost",
 	}
@@ -52,8 +50,7 @@ func (c *MkCert) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	cmdCert := cert.Provision{
-		Cert:   tlsCert,
-		Config: c.Config,
+		Cert: tlsCert,
 	}
 
 	if err := cmdCert.RunTUI(ctx, drv, c.domains...); err != nil {
@@ -64,6 +61,8 @@ func (c *MkCert) run(ctx context.Context, drv *ui.Driver) error {
 }
 
 func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate, error) {
+	cfg := cli.ConfigFromContext(ctx)
+
 	var err error
 
 	if c.chainSlug == "" {
@@ -71,8 +70,8 @@ func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate,
 	}
 
 	if len(c.domains) == 0 {
-		if c.Config.Lcl.MkCert.Domains != "" {
-			c.domains = strings.Split(c.Config.Lcl.MkCert.Domains, ",")
+		if cfg.Lcl.MkCert.Domains != "" {
+			c.domains = strings.Split(cfg.Lcl.MkCert.Domains, ",")
 		}
 		if len(c.domains) == 0 {
 			return nil, errors.New("domains is required")
@@ -92,14 +91,14 @@ func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate,
 	}
 
 	if c.serviceSlug == "" {
-		c.serviceSlug = c.Config.Lcl.Service
+		c.serviceSlug = cfg.Lcl.Service
 		if c.serviceSlug == "" {
 			return nil, errors.New("service is required")
 		}
 	}
 
 	if c.subCaSubjectUID == "" {
-		c.subCaSubjectUID = c.Config.Lcl.MkCert.SubCa
+		c.subCaSubjectUID = cfg.Lcl.MkCert.SubCa
 		if c.subCaSubjectUID == "" {
 			return nil, errors.New("subca is required")
 		}
@@ -110,7 +109,7 @@ func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate,
 		return nil, err
 	}
 
-	acmeURL := c.Config.AnchorURL + "/" + url.QueryEscape(c.orgSlug) + "/" + url.QueryEscape(c.realmSlug) + "/x509/" + c.chainSlug + "/acme"
+	acmeURL := cfg.AnchorURL + "/" + url.QueryEscape(c.orgSlug) + "/" + url.QueryEscape(c.realmSlug) + "/x509/" + c.chainSlug + "/acme"
 
 	tlsCert, err := provisionCert(c.eab, c.domains, acmeURL)
 	if err != nil {

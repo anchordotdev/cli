@@ -21,8 +21,6 @@ import (
 )
 
 type Command struct {
-	Config *cli.Config
-
 	Anc                *api.Session
 	OrgSlug, RealmSlug string
 }
@@ -34,6 +32,8 @@ func (c Command) UI() cli.UI {
 }
 
 func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+
 	anc := c.Anc
 	if anc == nil {
 		var err error
@@ -49,14 +49,14 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 		}
 
 		var err error
-		if orgSlug, realmSlug, err = fetchOrgAndRealm(ctx, c.Config, anc); err != nil {
+		if orgSlug, realmSlug, err = fetchOrgAndRealm(ctx, anc); err != nil {
 			return err
 		}
 	}
 
 	confirmc := make(chan struct{})
 	drv.Activate(ctx, &models.TrustPreflight{
-		Config:    c.Config,
+		Config:    cfg,
 		ConfirmCh: confirmc,
 	})
 
@@ -65,7 +65,7 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	stores, sudoMgr, err := loadStores(c.Config)
+	stores, sudoMgr, err := loadStores(cfg)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 		return nil
 	}
 
-	if !c.Config.NonInteractive {
+	if !cfg.NonInteractive {
 		select {
 		case <-confirmc:
 		case <-ctx.Done():
@@ -140,12 +140,14 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 }
 
 func (c *Command) apiClient(ctx context.Context, drv *ui.Driver) (*api.Session, error) {
-	anc, err := api.NewClient(c.Config)
+	cfg := cli.ConfigFromContext(ctx)
+
+	anc, err := api.NewClient(cfg)
 	if errors.Is(err, api.ErrSignedOut) {
 		if err := c.runSignIn(ctx, drv); err != nil {
 			return nil, err
 		}
-		if anc, err = api.NewClient(c.Config); err != nil {
+		if anc, err = api.NewClient(cfg); err != nil {
 			return nil, err
 		}
 	} else if err != nil {
@@ -161,7 +163,9 @@ func (c *Command) runSignIn(ctx context.Context, drv *ui.Driver) error {
 	return cmdSignIn.RunTUI(ctx, drv)
 }
 
-func fetchOrgAndRealm(ctx context.Context, cfg *cli.Config, anc *api.Session) (string, string, error) {
+func fetchOrgAndRealm(ctx context.Context, anc *api.Session) (string, string, error) {
+	cfg := cli.ConfigFromContext(ctx)
+
 	org, realm := cfg.Trust.Org, cfg.Trust.Realm
 	if (org == "") != (realm == "") {
 		return "", "", errors.New("--org and --realm flags must both be present or absent")
@@ -181,7 +185,9 @@ func fetchOrgAndRealm(ctx context.Context, cfg *cli.Config, anc *api.Session) (s
 	return org, realm, nil
 }
 
-func PerformAudit(ctx context.Context, cfg *cli.Config, anc *api.Session, org string, realm string) (*truststore.AuditInfo, error) {
+func PerformAudit(ctx context.Context, anc *api.Session, org string, realm string) (*truststore.AuditInfo, error) {
+	cfg := cli.ConfigFromContext(ctx)
+
 	cas, err := fetchExpectedCAs(ctx, anc, org, realm)
 	if err != nil {
 		return nil, err
@@ -244,13 +250,16 @@ func loadStores(cfg *cli.Config) ([]truststore.Store, *SudoManager, error) {
 	}
 	rootFS := truststore.RootFS()
 
+	noSudo := cfg.Trust.NoSudo
 	sysFS := &SudoManager{
 		CmdFS:  rootFS,
-		NoSudo: cfg.Trust.NoSudo,
+		NoSudo: noSudo,
 	}
 
+	trustStores := cfg.Trust.Stores
+
 	var stores []truststore.Store
-	for _, storeName := range cfg.Trust.Stores {
+	for _, storeName := range trustStores {
 		switch storeName {
 		case "system":
 			systemStore := &truststore.Platform{

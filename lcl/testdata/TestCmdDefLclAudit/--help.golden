@@ -1,0 +1,7 @@
+Audit lcl.host HTTPS Local Development Environment
+
+Usage:
+  anchor lcl audit [flags]
+
+Flags:
+  -h, --help   help for audit
