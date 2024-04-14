@@ -128,9 +128,13 @@ jobs:
         with:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
+      - name: Set env
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/v}"
 
       - shell: pwsh
         run: |
-          choco push --source https://push.chocolatey.org/ --api-key "$env:CHOCOLATEY_API_KEY" ./cmd/anchor/dist/windows/anchor.${{ github.ref }}.nupkg
+          choco push --source https://push.chocolatey.org/ --api-key "$env:CHOCOLATEY_API_KEY" cmd\anchor\dist\windows\anchor.${{ env.RELEASE_VERSION }}.nupkg
         env:
           CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
