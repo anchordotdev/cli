@@ -69,8 +69,7 @@ jobs:
       - shell: bash
         if: matrix.os == 'windows-latest'
         run: |
-          cp cmd/anchor/anchor_x64.msi cmd/anchor/dist/windows/anchor_x64.msi
-          cp cmd/anchor/anchor_x86.msi cmd/anchor/dist/windows/anchor_x86.msi
+          find ./cmd/anchor
 
   release:
     runs-on: windows-latest
@@ -104,11 +103,6 @@ jobs:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
           enableCrossOsArchive: true
-
-      - shell: bash
-        run: |
-          cp cmd/anchor/dist/windows/anchor_x64.msi cmd/anchor/anchor_x64.msi
-          cp cmd/anchor/dist/windows/anchor_x86.msi cmd/anchor/anchor_x86.msi
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
