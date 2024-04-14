@@ -35,13 +35,11 @@ jobs:
         with:
           path: cmd/anchor/dist/linux
           key: linux-${{ env.sha_short }}
-          enableCrossOsArchive: true
       - uses: actions/cache@v4
         if: matrix.os == 'macos-latest'
         with:
           path: cmd/anchor/dist/darwin
           key: darwin-${{ env.sha_short }}
-          enableCrossOsArchive: true
       - uses: actions/cache@v4
         if: matrix.os == 'windows-latest'
         with:
@@ -88,12 +86,10 @@ jobs:
         with:
           path: cmd/anchor/dist/linux
           key: linux-${{ env.sha_short }}
-          enableCrossOsArchive: true
       - uses: actions/cache@v4
         with:
           path: cmd/anchor/dist/darwin
           key: darwin-${{ env.sha_short }}
-          enableCrossOsArchive: true
       - uses: actions/cache@v4
         with:
           path: cmd/anchor/dist/windows
@@ -130,6 +126,7 @@ jobs:
         with:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
+          enableCrossOsArchive: true
       - shell: bash
         run: |
           pwd
