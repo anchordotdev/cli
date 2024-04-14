@@ -68,9 +68,9 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
       - shell: bash
         if: matrix.os == 'windows-latest'
-        working-directory: cmd/anchor
         run: |
-          cp "*.msi" ./dist/windows/
+          cp cmd/anchor/anchor_x64.msi cmd/anchor/dist/windows/anchor_x64.msi
+          cp cmd/anchor/anchor_x86.msi cmd/anchor/dist/windows/anchor_x86.msi
 
   release:
     runs-on: windows-latest
@@ -106,9 +106,9 @@ jobs:
           enableCrossOsArchive: true
 
       - shell: bash
-        working-directory: cmd/anchor
         run: |
-          cp "./dist/windows/*.msi" ./
+          cp cmd/anchor/dist/windows/anchor_x64.msi cmd/anchor/anchor_x64.msi
+          cp cmd/anchor/dist/windows/anchor_x86.msi cmd/anchor/anchor_x86.msi
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
