@@ -62,12 +62,15 @@ brews:
 
 msi:
 - id: anchor-msi
+  ids:
+    - windows
   wxs: ./windows/app.wxs
   mod_timestamp: "{{ .CommitTimestamp }}"
 
 chocolateys:
 - name: anchor
   ids:
+    - windows
     - anchor-msi
   package_source_url: https://github.com/anchordotdev/cli
   owners: Anchor Security, Inc.
