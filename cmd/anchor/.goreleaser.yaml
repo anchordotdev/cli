@@ -95,4 +95,3 @@ chocolateys:
   release_notes: "https://github.com/anchordotdev/cli/releases/tag/v{{ .Version }}"
   api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
   source_repo: "https://push.chocolatey.org/"
-  skip_publish: true
