@@ -35,11 +35,13 @@ jobs:
         with:
           path: cmd/anchor/dist/linux
           key: linux-${{ env.sha_short }}
+          enableCrossOsArchive: true
       - uses: actions/cache@v4
         if: matrix.os == 'macos-latest'
         with:
           path: cmd/anchor/dist/darwin
           key: darwin-${{ env.sha_short }}
+          enableCrossOsArchive: true
       - uses: actions/cache@v4
         if: matrix.os == 'windows-latest'
         with:
@@ -66,7 +68,7 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: prepare
     steps:
       - name: Checkout
@@ -86,10 +88,12 @@ jobs:
         with:
           path: cmd/anchor/dist/linux
           key: linux-${{ env.sha_short }}
+          enableCrossOsArchive: true
       - uses: actions/cache@v4
         with:
           path: cmd/anchor/dist/darwin
           key: darwin-${{ env.sha_short }}
+          enableCrossOsArchive: true
       - uses: actions/cache@v4
         with:
           path: cmd/anchor/dist/windows
@@ -102,35 +106,6 @@ jobs:
           distribution: goreleaser-pro
           version: latest
           args: continue --merge
-          workdir: cmd/anchor
-        env:
-          GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
-          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
-
-  publish:
-    runs-on: windows-latest
-    needs: release
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      # Copy Caches
-      - shell: bash
-        run: |
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-      - uses: actions/cache@v4
-        with:
-          path: cmd/anchor/dist/windows
-          key: windows-${{ env.sha_short }}
-
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v4
-        with:
-          distribution: goreleaser-pro
-          version: latest
-          args: publish --merge
           workdir: cmd/anchor
         env:
           GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
