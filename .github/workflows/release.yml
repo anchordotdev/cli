@@ -66,6 +66,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+      - shell: bash
+        if: matrix.os == 'windows-latest'
+        working-directory: cmd/anchor
+        run: |
+          cp "*.msi" ./dist/windows/
 
   release:
     runs-on: windows-latest
@@ -99,6 +104,11 @@ jobs:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
           enableCrossOsArchive: true
+
+      - shell: bash
+        working-directory: cmd/anchor
+        run: |
+          cp "./dist/windows/*.msi" ./
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
