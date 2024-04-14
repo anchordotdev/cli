@@ -18,7 +18,7 @@
         />
         <MediaTemplate EmbedCab="yes" />
 
-        <Icon Id="icon.ico" SourceFile="als2.ico"/>
+        <Icon Id="icon.ico" SourceFile="windows\als2.ico"/>
         <Property Id="ARPPRODUCTICON" Value="icon.ico" />
 
         <Directory Id='TARGETDIR' Name='SourceDir'>

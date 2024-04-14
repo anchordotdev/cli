@@ -65,6 +65,8 @@ msi:
   ids:
     - windows
   wxs: ./windows/app.wxs
+  extra_files:
+    - ./windows/als2.ico
   mod_timestamp: "{{ .CommitTimestamp }}"
 
 chocolateys:
