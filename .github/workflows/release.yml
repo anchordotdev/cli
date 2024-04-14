@@ -130,9 +130,13 @@ jobs:
         with:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
+      - shell: bash
+        run: |
+          find ./cmd/dist
+          cp cmd/anchor/dist/windows/anchor.${{ env.RELEASE_VERSION }}.nupkg ./
 
       - shell: pwsh
         run: |
-          choco push --source https://push.chocolatey.org/ --api-key "$env:CHOCOLATEY_API_KEY" cmd\anchor\dist\windows\anchor.${{ env.RELEASE_VERSION }}.nupkg
+          choco push --source https://push.chocolatey.org/ --api-key "$env:CHOCOLATEY_API_KEY" anchor.${{ env.RELEASE_VERSION }}.nupkg
         env:
           CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
