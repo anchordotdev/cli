@@ -9,9 +9,6 @@
         Version='{{.RawVersion}}'
         Manufacturer='Anchor Security, Inc.'>
 
-        <Icon Id="icon.ico" SourceFile="als2.ico"/>
-        <Property Id="ARPPRODUCTICON" Value="icon.ico" />
-
         <Package
             Id='*'
             Comments='Anchor CLI'
@@ -20,6 +17,9 @@
             Compressed='yes'
         />
         <MediaTemplate EmbedCab="yes" />
+
+        <Icon Id="icon.ico" SourceFile="als2.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="icon.ico" />
 
         <Directory Id='TARGETDIR' Name='SourceDir'>
             <Directory Id='ProgramFiles{{ if eq .Arch "amd64" }}64{{ end }}Folder' Name='PFiles'>
