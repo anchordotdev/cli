@@ -80,6 +80,7 @@ chocolateys:
   authors: Anchor
   project_url: https://anchor.dev
   use: msi
+  url_template: "https://github.com/anchordotdev/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
   copyright: 2024 Anchor Security, Inc.
   license_url: https://raw.githubusercontent.com/anchordotdev/cli/main/LICENSE
   require_license_acceptance: false
