@@ -130,8 +130,11 @@ jobs:
         with:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
-      - run: |
-          find cmd/anchor/dist/windows
+      - shell: bash
+        run: |
+          pwd
+          ls -l
+          find ./cmd/anchor
           cp cmd/anchor/dist/windows/anchor.${{ env.RELEASE_VERSION }}.nupkg ./
 
       - shell: pwsh
