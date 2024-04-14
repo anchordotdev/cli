@@ -124,14 +124,13 @@ jobs:
         with:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
-          enableCrossOsArchive: true
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser-pro
           version: latest
-          args: publish
+          args: publish --merge
           workdir: cmd/anchor
         env:
           GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
