@@ -130,8 +130,7 @@ jobs:
         with:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
-      - shell: bash
-        run: |
+      - run: |
           find cmd/anchor/dist/windows
           cp cmd/anchor/dist/windows/anchor.${{ env.RELEASE_VERSION }}.nupkg ./
 
