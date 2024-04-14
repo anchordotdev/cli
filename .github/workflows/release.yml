@@ -46,12 +46,20 @@ jobs:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
           enableCrossOsArchive: true
+      - name: non-windows flags
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: echo 'flags=--skip chocolatey' >> $GITHUB_ENV
+      - name: windows flags
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: echo 'flags=--skip homebrew' >> $GITHUB_ENV
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser-pro
           version: latest
-          args: release --clean --split
+          args: release --clean --split ${{ env.flags }}
           workdir: cmd/anchor
         env:
           GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
