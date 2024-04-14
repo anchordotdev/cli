@@ -66,7 +66,10 @@ jobs:
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   release:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     needs: prepare
     steps:
       - name: Checkout
@@ -83,14 +86,17 @@ jobs:
         run: |
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - uses: actions/cache@v4
+        if: matrix.os != 'windows-latest'
         with:
           path: cmd/anchor/dist/linux
           key: linux-${{ env.sha_short }}
       - uses: actions/cache@v4
+        if: matrix.os != 'windows-latest'
         with:
           path: cmd/anchor/dist/darwin
           key: darwin-${{ env.sha_short }}
       - uses: actions/cache@v4
+        if: matrix.os == 'windows-latest'
         with:
           path: cmd/anchor/dist/windows
           key: windows-${{ env.sha_short }}
