@@ -128,6 +128,6 @@ jobs:
 
       - shell: pwsh
         run: |
-          choco --source https://push.chocolatey.org/ --api-key "$env:CHOCOLATEY_API_KEY" ./cmd/anchor/dist/windows/anchor.${{ github.ref }}.nupkg
+          choco push --source https://push.chocolatey.org/ --api-key "$env:CHOCOLATEY_API_KEY" ./cmd/anchor/dist/windows/anchor.${{ github.ref }}.nupkg
         env:
           CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
