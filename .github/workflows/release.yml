@@ -107,6 +107,9 @@ jobs:
           version: latest
           args: continue --merge
           workdir: cmd/anchor
+        env:
+          GITHUB_TOKEN: ${{ secrets._GITHUB_TOKEN }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   publish-windows:
     runs-on: windows-latest
