@@ -1,0 +1,22 @@
+Install the AnchorCA certificates of a target organization, realm, or CA into
+your local system's trust store. The default target is the localhost realm of
+your personal organization.
+
+After installation of the AnchorCA certificates, Leaf certificates under the
+AnchorCA certificates will be trusted by browsers and programs on your system.
+
+Usage:
+  anchor trust [flags]
+  anchor trust [command]
+
+Available Commands:
+  audit       Audit CA Certificates in your Local Trust Store(s)
+
+Flags:
+  -h, --help                   help for trust
+      --no-sudo                Disable sudo prompts.
+  -o, --organization string    Organization to trust.
+  -r, --realm string           Realm to trust.
+      --trust-stores strings   Trust stores to update. (default [homebrew,nss,system])
+
+Use "anchor trust [command] --help" for more information about a command.

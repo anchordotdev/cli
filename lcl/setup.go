@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/cli/browser"
+	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
@@ -22,6 +23,14 @@ import (
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/ui"
 )
+
+var CmdLclSetup = cli.NewCmd[Setup](CmdLcl, "setup", func(cmd *cobra.Command) {
+	cfg := cli.ConfigFromCmd(cmd)
+
+	cmd.Args = cobra.NoArgs
+
+	cmd.Flags().StringVar(&cfg.Lcl.Setup.Language, "language", "", "Language to integrate with Anchor.")
+})
 
 type Setup struct {
 	anc     *api.Session

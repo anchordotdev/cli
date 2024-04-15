@@ -10,7 +10,22 @@ import (
 	"github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
+	"github.com/spf13/cobra"
 )
+
+var CmdTrustClean = cli.NewCmd[Clean](CmdTrust, "clean", func(cmd *cobra.Command) {
+	cfg := cli.ConfigFromCmd(cmd)
+
+	cmd.Args = cobra.NoArgs
+
+	cmd.Flags().StringSliceVar(&cfg.Trust.Clean.States, "cert-states", []string{"expired"}, "Cert states to clean.")
+	cmd.Flags().StringVarP(&cfg.Trust.Org, "organization", "o", "", "Organization to trust.")
+	cmd.Flags().BoolVar(&cfg.Trust.NoSudo, "no-sudo", false, "Disable sudo prompts.")
+	cmd.Flags().StringVarP(&cfg.Trust.Realm, "realm", "r", "", "Realm to trust.")
+	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", []string{"homebrew", "nss", "system"}, "Trust stores to update.")
+
+	cmd.Hidden = true
+})
 
 type Clean struct {
 	Anc                *api.Session

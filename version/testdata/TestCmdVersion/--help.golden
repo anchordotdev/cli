@@ -1,0 +1,7 @@
+Show version info
+
+Usage:
+  anchor version [flags]
+
+Flags:
+  -h, --help   help for version

@@ -3,15 +3,17 @@ package auth
 import (
 	"testing"
 
+	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/cmdtest"
 )
 
 func TestCmdAuthSignin(t *testing.T) {
 	cmd := CmdAuthSignin
-	root := cmd.Root()
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
 
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, root, "auth", "signin", "--help")
+		cmdtest.TestOutput(t, cmd, "auth", "signin", "--help")
 	})
 }
 

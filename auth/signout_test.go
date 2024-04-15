@@ -13,10 +13,9 @@ func TestCmdAuthSignout(t *testing.T) {
 	cmd := CmdAuthSignin
 	cfg := cli.ConfigFromCmd(cmd)
 	cfg.Test.SkipRunE = true
-	root := cmd.Root()
 
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, root, "auth", "signout", "--help")
+		cmdtest.TestOutput(t, cmd, "auth", "signout", "--help")
 	})
 }
 

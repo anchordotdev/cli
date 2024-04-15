@@ -2,16 +2,23 @@ package version
 
 import (
 	"context"
-	"flag"
 	"runtime"
 	"testing"
 
+	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
+	"github.com/anchordotdev/cli/cmdtest"
 )
 
-var (
-	_ = flag.Bool("update", false, "ignored")
-)
+func TestCmdVersion(t *testing.T) {
+	cmd := CmdVersion
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, cmd, "version", "--help")
+	})
+}
 
 func TestCommand(t *testing.T) {
 	if runtime.GOOS == "windows" {

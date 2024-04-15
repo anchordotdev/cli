@@ -1,0 +1,8 @@
+Configure System for lcl.host Local Development
+
+Usage:
+  anchor lcl config [flags]
+
+Flags:
+  -a, --addr string   Address for local diagnostic web server. (default ":4433")
+  -h, --help          help for config

@@ -7,11 +7,22 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/truststore"
 )
+
+var CmdTrustAudit = cli.NewCmd[Audit](CmdTrust, "audit", func(cmd *cobra.Command) {
+	cfg := cli.ConfigFromCmd(cmd)
+
+	cmd.Args = cobra.NoArgs
+
+	cmd.Flags().StringVarP(&cfg.Trust.Org, "organization", "o", "", "Organization to trust.")
+	cmd.Flags().StringVarP(&cfg.Trust.Realm, "realm", "r", "", "Realm to trust.")
+	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", []string{"homebrew", "nss", "system"}, "Trust stores to update.")
+})
 
 type Audit struct{}
 

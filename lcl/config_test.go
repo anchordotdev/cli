@@ -12,11 +12,65 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
+	"github.com/stretchr/testify/require"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
+
+func TestCmdLclConfig(t *testing.T) {
+	cmd := CmdLclConfig
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, cmd, "lcl", "config", "--help")
+	})
+
+	t.Run("default --addr", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.DiagnosticAddr = ":4433"
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "config")
+
+		require.Equal(t, ":4433", cfg.Lcl.DiagnosticAddr)
+	})
+
+	t.Run("-a :4444", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.DiagnosticAddr = ":4433"
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "config", "-a", ":4444")
+
+		require.Equal(t, ":4444", cfg.Lcl.DiagnosticAddr)
+	})
+
+	t.Run("--addr :4455", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.DiagnosticAddr = ":4433"
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "config", "--addr", ":4455")
+
+		require.Equal(t, ":4455", cfg.Lcl.DiagnosticAddr)
+	})
+
+	t.Run("ADDR=:4466", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.DiagnosticAddr = ":4433"
+		})
+
+		t.Setenv("ADDR", ":4466")
+
+		cmdtest.TestExecute(t, cmd, "lcl", "config")
+
+		require.Equal(t, ":4466", cfg.Lcl.DiagnosticAddr)
+	})
+}
 
 func TestLclConfig(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -41,7 +95,7 @@ func TestLclConfig(t *testing.T) {
 	if cfg.API.Token, err = srv.GeneratePAT("lcl_config@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
-  ctx = cli.ContextWithConfig(ctx, cfg)
+	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(ctx)

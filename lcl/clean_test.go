@@ -5,8 +5,19 @@ import (
 	"testing"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
+
+func TestCmdLclClean(t *testing.T) {
+	cmd := CmdLclClean
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, cmd, "lcl", "clean", "--help")
+	})
+}
 
 func TestClean(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -21,7 +32,7 @@ func TestClean(t *testing.T) {
 	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
-  ctx = cli.ContextWithConfig(ctx, cfg)
+	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
 		if srv.IsProxy() {

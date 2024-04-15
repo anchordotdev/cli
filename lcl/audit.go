@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CmdAuthLclAudit = cli.NewCmd[Audit](CmdLcl, "audit", func(cmd *cobra.Command) {
+var CmdLclAudit = cli.NewCmd[Audit](CmdLcl, "audit", func(cmd *cobra.Command) {
 	cmd.Args = cobra.NoArgs
 })
 

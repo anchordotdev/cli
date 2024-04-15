@@ -8,10 +8,32 @@ import (
 	"time"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ui/uitest"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
+	"github.com/stretchr/testify/require"
 )
+
+func TestCmdLclSetup(t *testing.T) {
+	cmd := CmdLclSetup
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, cmd, "lcl", "setup", "--help")
+	})
+
+	t.Run("--language ruby", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.Setup.Language = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "setup", "--language", "ruby")
+
+		require.Equal(t, "ruby", cfg.Lcl.Setup.Language)
+	})
+}
 
 func TestSetup(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())

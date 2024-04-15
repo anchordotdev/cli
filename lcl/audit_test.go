@@ -10,14 +10,13 @@ import (
 	"github.com/anchordotdev/cli/ui/uitest"
 )
 
-func TestCmdDefLclAudit(t *testing.T) {
-	cmd := CmdAuthLclAudit
+func TestCmdLclAudit(t *testing.T) {
+	cmd := CmdLclAudit
 	cfg := cli.ConfigFromCmd(cmd)
 	cfg.Test.SkipRunE = true
-	root := cmd.Root()
 
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, root, "lcl", "audit", "--help")
+		cmdtest.TestOutput(t, cmd, "lcl", "audit", "--help")
 	})
 }
 

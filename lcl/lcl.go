@@ -19,7 +19,19 @@ import (
 )
 
 var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
+	cfg := cli.ConfigFromCmd(cmd)
+
 	cmd.Args = cobra.NoArgs
+
+	// config
+	cmd.Flags().StringVarP(&cfg.Lcl.DiagnosticAddr, "addr", "a", ":4433", "Address for local diagnostic web server.")
+
+	// mkcert
+	cmd.Flags().StringSliceVar(&cfg.Lcl.MkCert.Domains, "domains", []string{}, "Domains to create certificate for.")
+	cmd.Flags().StringVar(&cfg.Lcl.MkCert.SubCa, "subca", "", "SubCA to create certificate for.")
+
+	// setup
+	cmd.Flags().StringVar(&cfg.Lcl.Setup.Language, "language", "", "Language to integrate with Anchor.")
 })
 
 type Command struct {

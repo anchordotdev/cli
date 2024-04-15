@@ -38,16 +38,12 @@ type Config struct {
 		} `cmd:"config"`
 
 		MkCert struct {
-			Domains string `flag:"domains"`
-			SubCa   string `flag:"subca"`
+			Domains []string `flag:"domains"`
+			SubCa   string   `flag:"subca"`
 		} `cmd:"mkcert"`
 
 		Setup struct {
-			PackageManager string `desc:"Package manager to use for integrating Anchor." flag:"package-manager" env:"PACKAGE_MANAGER" json:"package_manager" toml:"package-manager"`
-			Service        string `desc:"Name for lcl.host service." flag:"service" env:"SERVICE" json:"service" toml:"service"`
-			Subdomain      string `desc:"Subdomain for lcl.host service." flag:"subdomain" env:"SUBDOMAIN" json:"subdomain" toml:"subdomain"`
-			File           string `desc:"File Anchor should use to detect package manager." flag:"file" env:"PACKAGE_MANAGER_FILE" json:"file" toml:"file"`
-			Language       string `desc:"Language to use for integrating Anchor." flag:"language" json:"language" toml:"language"`
+			Language string `desc:"Language to use for integrating Anchor." flag:"language" json:"language" toml:"language"`
 		} `cmd:"setup"`
 	} `cmd:"lcl"`
 

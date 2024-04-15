@@ -1,0 +1,19 @@
+Perform an audit of the local trust store(s) and report any expected, missing,
+or extra CA certificates per store. A set of expected CAs is fetched for the
+target org and (optional) realm. The default stores to audit are system, nss,
+and homebrew.
+
+CA certificate states:
+
+  * VALID:   an expected CA certificate is present in every trust store.
+  * MISSING: an expected CA certificate is missing in one or more stores.
+  * EXTRA:   an unexpected CA certificate is present in one or more stores.
+
+Usage:
+  anchor trust audit [flags]
+
+Flags:
+  -h, --help                   help for audit
+  -o, --organization string    Organization to trust.
+  -r, --realm string           Realm to trust.
+      --trust-stores strings   Trust stores to update. (default [homebrew,nss,system])

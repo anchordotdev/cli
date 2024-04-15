@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/cli/browser"
+	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
@@ -20,6 +21,14 @@ import (
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/ui"
 )
+
+var CmdLclConfig = cli.NewCmd[LclConfig](CmdLcl, "config", func(cmd *cobra.Command) {
+	cfg := cli.ConfigFromCmd(cmd)
+
+	cmd.Args = cobra.NoArgs
+
+	cmd.Flags().StringVarP(&cfg.Lcl.DiagnosticAddr, "addr", "a", ":4433", "Address for local diagnostic web server.")
+})
 
 var loopbackAddrs = []string{"127.0.0.1", "::1"}
 

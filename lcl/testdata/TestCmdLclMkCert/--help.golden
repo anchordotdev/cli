@@ -1,0 +1,9 @@
+Provision Certificate for lcl.host Local Development
+
+Usage:
+  anchor lcl mkcert [flags]
+
+Flags:
+      --domains strings   Domains to create certificate for.
+  -h, --help              help for mkcert
+      --subca string      SubCA to create certificate for.

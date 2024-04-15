@@ -1,0 +1,7 @@
+Clean lcl.host CA Certificates from the Local Trust Store(s)
+
+Usage:
+  anchor lcl clean [flags]
+
+Flags:
+  -h, --help   help for clean

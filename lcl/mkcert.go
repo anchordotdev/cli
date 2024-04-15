@@ -5,14 +5,23 @@ import (
 	"crypto/tls"
 	"errors"
 	"net/url"
-	"strings"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/cert"
 	"github.com/anchordotdev/cli/ui"
+	"github.com/spf13/cobra"
 )
+
+var CmdLclMkCert = cli.NewCmd[MkCert](CmdLcl, "mkcert", func(cmd *cobra.Command) {
+	cfg := cli.ConfigFromCmd(cmd)
+
+	cmd.Args = cobra.NoArgs
+
+	cmd.Flags().StringSliceVar(&cfg.Lcl.MkCert.Domains, "domains", []string{}, "Domains to create certificate for.")
+	cmd.Flags().StringVar(&cfg.Lcl.MkCert.SubCa, "subca", "", "SubCA to create certificate for.")
+})
 
 type MkCert struct {
 	anc *api.Session
@@ -70,9 +79,7 @@ func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate,
 	}
 
 	if len(c.domains) == 0 {
-		if cfg.Lcl.MkCert.Domains != "" {
-			c.domains = strings.Split(cfg.Lcl.MkCert.Domains, ",")
-		}
+		c.domains = cfg.Lcl.MkCert.Domains
 		if len(c.domains) == 0 {
 			return nil, errors.New("domains is required")
 		}

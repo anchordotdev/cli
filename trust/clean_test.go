@@ -2,51 +2,33 @@ package trust
 
 import (
 	"context"
-	"flag"
-	"os"
 	"testing"
 
 	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ui/uitest"
 	"github.com/stretchr/testify/require"
 )
 
-var srv = &apitest.Server{
-	Host:    "api.anchor.lcl.host",
-	RootDir: "../..",
-}
-
-func TestMain(m *testing.M) {
-	flag.Parse()
-
-	if err := srv.Start(context.Background()); err != nil {
-		panic(err)
-	}
-
-	defer os.Exit(m.Run())
-
-	srv.Close()
-}
-
-func TestCmdTrust(t *testing.T) {
-	cmd := CmdTrust
+func TestCmdTrustClean(t *testing.T) {
+	cmd := CmdTrustClean
 	cfg := cli.ConfigFromCmd(cmd)
 	cfg.Test.SkipRunE = true
 
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "trust", "--help")
+		cmdtest.TestOutput(t, cmd, "trust", "clean", "--help")
 	})
 
-	t.Run("--no-sudo", func(t *testing.T) {
+	t.Run("--cert-states all", func(t *testing.T) {
+		t.Skip()
+
 		t.Cleanup(func() {
-			cfg.Trust.Org = ""
+			cfg.Trust.Clean.States = []string{"expired"}
 		})
 
-		cmdtest.TestExecute(t, cmd, "trust", "--no-sudo")
+		cmdtest.TestExecute(t, cmd, "trust", "clean", "--cert-states", "all")
 
-		require.Equal(t, true, cfg.Trust.NoSudo)
+		require.Equal(t, []string{"all"}, cfg.Trust.Clean.States)
 	})
 
 	t.Run("--organization test", func(t *testing.T) {
@@ -54,7 +36,7 @@ func TestCmdTrust(t *testing.T) {
 			cfg.Trust.Org = ""
 		})
 
-		cmdtest.TestExecute(t, cmd, "trust", "--organization", "test")
+		cmdtest.TestExecute(t, cmd, "trust", "clean", "--organization", "test")
 
 		require.Equal(t, "test", cfg.Trust.Org)
 	})
@@ -64,7 +46,7 @@ func TestCmdTrust(t *testing.T) {
 			cfg.Trust.Org = ""
 		})
 
-		cmdtest.TestExecute(t, cmd, "trust", "-o", "test")
+		cmdtest.TestExecute(t, cmd, "trust", "clean", "-o", "test")
 
 		require.Equal(t, "test", cfg.Trust.Org)
 	})
@@ -74,7 +56,7 @@ func TestCmdTrust(t *testing.T) {
 			cfg.Trust.Realm = ""
 		})
 
-		cmdtest.TestExecute(t, cmd, "trust", "--realm", "test")
+		cmdtest.TestExecute(t, cmd, "trust", "clean", "--realm", "test")
 
 		require.Equal(t, "test", cfg.Trust.Realm)
 	})
@@ -84,29 +66,19 @@ func TestCmdTrust(t *testing.T) {
 			cfg.Trust.Realm = ""
 		})
 
-		cmdtest.TestExecute(t, cmd, "trust", "-r", "test")
+		cmdtest.TestExecute(t, cmd, "trust", "clean", "-r", "test")
 
 		require.Equal(t, "test", cfg.Trust.Realm)
 	})
 
-	t.Run("--trust-stores nss,system", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Stores = []string{"homebrew", "nss", "system"}
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "--trust-stores", "nss,system")
-
-		require.Equal(t, []string{"nss", "system"}, cfg.Trust.Stores)
-	})
 }
 
-func TestTrust(t *testing.T) {
+func TestClean(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.NonInteractive = true
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
@@ -117,14 +89,14 @@ func TestTrust(t *testing.T) {
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
-		if !srv.IsProxy() {
-			t.Skip("trust unsupported in mock mode")
+		if srv.IsProxy() {
+			t.Skip("lcl clean unsupported in proxy mode")
 		}
 
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
-		cmd := Command{}
+		cmd := Clean{}
 
 		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})

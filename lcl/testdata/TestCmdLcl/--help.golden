@@ -1,13 +1,21 @@
 Manage lcl.host Local Development Environment
 
 Usage:
-  anchor lcl <subcommand> [flags]
+  anchor lcl [flags]
   anchor lcl [command]
 
 Available Commands:
   audit       Audit lcl.host HTTPS Local Development Environment
+  clean       Clean lcl.host CA Certificates from the Local Trust Store(s)
+  config      Configure System for lcl.host Local Development
+  mkcert      Provision Certificate for lcl.host Local Development
+  setup       Setup lcl.host Application
 
 Flags:
-  -h, --help   help for lcl
+  -a, --addr string       Address for local diagnostic web server. (default ":4433")
+      --domains strings   Domains to create certificate for.
+  -h, --help              help for lcl
+      --language string   Language to integrate with Anchor.
+      --subca string      SubCA to create certificate for.
 
 Use "anchor lcl [command] --help" for more information about a command.

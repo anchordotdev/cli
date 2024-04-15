@@ -12,10 +12,62 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/api/apitest"
+	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ext509"
 	"github.com/anchordotdev/cli/internal/must"
 	"github.com/anchordotdev/cli/truststore"
+	"github.com/stretchr/testify/require"
 )
+
+func TestCmdTrustAudit(t *testing.T) {
+	cmd := CmdTrustAudit
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, cmd, "trust", "audit", "--help")
+	})
+
+	t.Run("--organization test", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Trust.Org = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "trust", "audit", "--organization", "test")
+
+		require.Equal(t, "test", cfg.Trust.Org)
+	})
+
+	t.Run("-o test", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Trust.Org = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "trust", "audit", "-o", "test")
+
+		require.Equal(t, "test", cfg.Trust.Org)
+	})
+
+	t.Run("--realm test", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Trust.Realm = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "trust", "audit", "--realm", "test")
+
+		require.Equal(t, "test", cfg.Trust.Realm)
+	})
+
+	t.Run("-r test", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Trust.Realm = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "trust", "audit", "-r", "test")
+
+		require.Equal(t, "test", cfg.Trust.Realm)
+	})
+}
 
 func TestAudit(t *testing.T) {
 	if runtime.GOOS == "windows" {

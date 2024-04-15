@@ -1,0 +1,12 @@
+Clean CA Certificates from your Local Trust Store(s)
+
+Usage:
+  anchor trust clean [flags]
+
+Flags:
+      --cert-states strings    Cert states to clean. (default [expired])
+  -h, --help                   help for clean
+      --no-sudo                Disable sudo prompts.
+  -o, --organization string    Organization to trust.
+  -r, --realm string           Realm to trust.
+      --trust-stores strings   Trust stores to update. (default [homebrew,nss,system])

@@ -1,0 +1,8 @@
+Setup lcl.host Application
+
+Usage:
+  anchor lcl setup [flags]
+
+Flags:
+  -h, --help              help for setup
+      --language string   Language to integrate with Anchor.

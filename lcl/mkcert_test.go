@@ -5,8 +5,40 @@ import (
 	"testing"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ui/uitest"
+	"github.com/stretchr/testify/require"
 )
+
+func TestCmdLclMkCert(t *testing.T) {
+	cmd := CmdLclMkCert
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
+
+	t.Run("--help", func(t *testing.T) {
+		cmdtest.TestOutput(t, cmd, "lcl", "mkcert", "--help")
+	})
+
+	t.Run("--domains test.lcl.host,test.localhost", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.MkCert.Domains = []string{}
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "mkcert", "--domains", "test.lcl.host,test.localhost")
+
+		require.Equal(t, []string{"test.lcl.host", "test.localhost"}, cfg.Lcl.MkCert.Domains)
+	})
+
+	t.Run("--subca 1234:ABCD:EF123", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.MkCert.SubCa = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "mkcert", "--subca", "1234:ABCD:EF123")
+
+		require.Equal(t, "1234:ABCD:EF123", cfg.Lcl.MkCert.SubCa)
+	})
+}
 
 func TestLclMkcert(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -23,7 +55,7 @@ func TestLclMkcert(t *testing.T) {
 	if cfg.API.Token, err = srv.GeneratePAT("lcl_mkcert@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
-  ctx = cli.ContextWithConfig(ctx, cfg)
+	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
 		t.Skip("pending better support for building needed models before running")

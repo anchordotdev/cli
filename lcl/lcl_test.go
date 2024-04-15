@@ -15,6 +15,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
+	"github.com/stretchr/testify/require"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
@@ -42,10 +43,85 @@ func TestMain(m *testing.M) {
 
 func TestCmdLcl(t *testing.T) {
 	cmd := CmdLcl
-	root := cmd.Root()
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
 
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, root, "lcl", "--help")
+		cmdtest.TestOutput(t, cmd, "lcl", "--help")
+	})
+
+	// config
+
+	t.Run("default --addr", func(t *testing.T) {
+		cmdtest.TestExecute(t, cmd, "lcl", "config")
+
+		require.Equal(t, ":4433", cfg.Lcl.DiagnosticAddr)
+	})
+
+	t.Run("-a :4444", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.DiagnosticAddr = ":4433"
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "-a", ":4444")
+
+		require.Equal(t, ":4444", cfg.Lcl.DiagnosticAddr)
+	})
+
+	t.Run("--addr :4455", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.DiagnosticAddr = ":4433"
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "--addr", ":4455")
+
+		require.Equal(t, ":4455", cfg.Lcl.DiagnosticAddr)
+	})
+
+	t.Run("ADDR=:4466", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.DiagnosticAddr = ":4433"
+		})
+
+		t.Setenv("ADDR", ":4466")
+
+		cmdtest.TestExecute(t, cmd, "lcl")
+
+		require.Equal(t, ":4466", cfg.Lcl.DiagnosticAddr)
+	})
+
+	// mkcert
+
+	t.Run("--domains test.lcl.host,test.localhost", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.MkCert.Domains = []string{}
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "--domains", "test.lcl.host,test.localhost")
+
+		require.Equal(t, []string{"test.lcl.host", "test.localhost"}, cfg.Lcl.MkCert.Domains)
+	})
+
+	t.Run("--subca 1234:ABCD:EF123", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.MkCert.SubCa = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "--subca", "1234:ABCD:EF123")
+
+		require.Equal(t, "1234:ABCD:EF123", cfg.Lcl.MkCert.SubCa)
+	})
+
+	// setup
+
+	t.Run("--language ruby", func(t *testing.T) {
+		t.Cleanup(func() {
+			cfg.Lcl.Setup.Language = ""
+		})
+
+		cmdtest.TestExecute(t, cmd, "lcl", "--language", "ruby")
+
+		require.Equal(t, "ruby", cfg.Lcl.Setup.Language)
 	})
 }
 

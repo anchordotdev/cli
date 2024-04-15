@@ -77,7 +77,7 @@ var rootDef = CmdDef{
 		{
 			Name: "lcl",
 
-			Use:   "lcl <subcommand> [flags]",
+			Use:   "lcl [flags]",
 			Short: "Manage lcl.host Local Development Environment",
 
 			SubDefs: []CmdDef{
@@ -87,13 +87,77 @@ var rootDef = CmdDef{
 					Use:   "audit [flags]",
 					Short: "Audit lcl.host HTTPS Local Development Environment",
 				},
+				{
+					Name: "clean",
+
+					Use:   "clean [flags]",
+					Short: "Clean lcl.host CA Certificates from the Local Trust Store(s)",
+				},
+				{
+					Name: "config",
+
+					Use:   "config [flags]",
+					Short: "Configure System for lcl.host Local Development",
+				},
+				{
+					Name: "mkcert",
+
+					Use:   "mkcert [flags]",
+					Short: "Provision Certificate for lcl.host Local Development",
+				},
+				{
+					Name: "setup",
+
+					Use:   "setup [flags]",
+					Short: "Setup lcl.host Application",
+				},
 			},
 		},
 		{
 			Name: "trust",
+
+			Use:   "trust [flags]",
+			Short: "Manage CA Certificates in your Local Trust Store(s)",
+			Long: heredoc.Doc(`
+				Install the AnchorCA certificates of a target organization, realm, or CA into
+				your local system's trust store. The default target is the localhost realm of
+				your personal organization.
+
+				After installation of the AnchorCA certificates, Leaf certificates under the
+				AnchorCA certificates will be trusted by browsers and programs on your system.
+			`),
+			SubDefs: []CmdDef{
+				{
+					Name: "audit",
+
+					Use:   "audit [flags]",
+					Short: "Audit CA Certificates in your Local Trust Store(s)",
+					Long: heredoc.Doc(`
+            Perform an audit of the local trust store(s) and report any expected, missing,
+            or extra CA certificates per store. A set of expected CAs is fetched for the
+            target org and (optional) realm. The default stores to audit are system, nss,
+            and homebrew.
+
+            CA certificate states:
+
+              * VALID:   an expected CA certificate is present in every trust store.
+              * MISSING: an expected CA certificate is missing in one or more stores.
+              * EXTRA:   an unexpected CA certificate is present in one or more stores.
+          `),
+				},
+				{
+					Name: "clean",
+
+					Use:   "clean [flags]",
+					Short: "Clean CA Certificates from your Local Trust Store(s)",
+				},
+			},
 		},
 		{
 			Name: "version",
+
+			Use:   "version",
+			Short: "Show version info",
 		},
 	},
 }

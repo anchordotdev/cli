@@ -9,7 +9,12 @@ import (
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/ui"
+	"github.com/spf13/cobra"
 )
+
+var CmdLclClean = cli.NewCmd[LclClean](CmdLcl, "clean", func(cmd *cobra.Command) {
+	cmd.Args = cobra.NoArgs
+})
 
 type LclClean struct {
 	anc                *api.Session
@@ -23,7 +28,7 @@ func (c LclClean) UI() cli.UI {
 }
 
 func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
-  cfg := cli.ConfigFromContext(ctx)
+	cfg := cli.ConfigFromContext(ctx)
 
 	var err error
 	clientCmd := &auth.Client{

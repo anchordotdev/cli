@@ -1,0 +1,17 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…*
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…*
+─── TrustCleanHeader ───────────────────────────────────────────────────────────
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+─── TrustCleanHint ─────────────────────────────────────────────────────────────
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+| Removing  CA certificates from the mock store(s).
+─── TrustCleanAudit ────────────────────────────────────────────────────────────
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+| Removing  CA certificates from the mock store(s).
+    * Auditing local CA certificates…*
+─── TrustCleanAudit ────────────────────────────────────────────────────────────
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+| Removing  CA certificates from the mock store(s).
+    - Audited local CA certificates: need to remove 0 certificates.

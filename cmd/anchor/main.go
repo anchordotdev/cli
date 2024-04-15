@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -214,13 +215,21 @@ func versionCheck(ctx context.Context) error {
 
 	if release.TagName == nil || *release.TagName != "v"+version {
 		fmt.Println(ui.StepHint("A new release of the anchor CLI is available."))
-		command := "brew update && brew upgrade anchor"
-		if err := clipboard.WriteAll(command); err == nil {
-			fmt.Println(ui.StepAlert(fmt.Sprintf("Copied %s to your clipboard.", ui.Announce(command))))
+		if !isWindowsRuntime() {
+			command := "brew update && brew upgrade anchor"
+			if err := clipboard.WriteAll(command); err == nil {
+				fmt.Println(ui.StepAlert(fmt.Sprintf("Copied %s to your clipboard.", ui.Announce(command))))
+			}
+			fmt.Println(ui.StepAlert(fmt.Sprintf("%s `%s` to update to the latest version.", ui.Action("Run"), ui.Emphasize(command))))
+			fmt.Println(ui.StepHint(fmt.Sprintf("Not using homebrew? Explore other options here: %s", ui.URL("https://github.com/anchordotdev/cli"))))
+			fmt.Println()
+		} else {
+			// TODO(amerine): Add chocolatey instructions.
 		}
-		fmt.Println(ui.StepAlert(fmt.Sprintf("%s `%s` to update to the latest version.", ui.Action("Run"), ui.Emphasize(command))))
-		fmt.Println(ui.StepHint(fmt.Sprintf("Not using homebrew? Explore other options here: %s", ui.URL("https://github.com/anchordotdev/cli"))))
-		fmt.Println()
 	}
 	return nil
+}
+
+func isWindowsRuntime() bool {
+	return os.Getenv("GOOS") == "windows" || runtime.GOOS == "windows"
 }
