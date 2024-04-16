@@ -118,7 +118,7 @@ winget:
       It provides a developer friendly interface for certificate management.
     license_url: https://raw.githubusercontent.com/anchordotdev/cli/main/LICENSE
     copyright: 2024 Anchor Security, Inc.
-    skip_upload: true
+    skip_upload: false
     release_notes: "{{.Changelog}}"
     release_notes_url: "https://github.com/anchordotdev/cli/releases/tag/v{{ .Version }}"
     tags: ["security", "tls", "ssl", "certificates", "localhost", "https", "cryptography", "encryption", "acme", "cli", "x509", "X.509"]
