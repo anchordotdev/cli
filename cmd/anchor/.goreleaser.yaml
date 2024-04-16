@@ -124,7 +124,7 @@ winget:
     tags: ["security", "tls", "ssl", "certificates", "localhost", "https", "cryptography", "encryption", "acme", "cli", "x509", "X.509"]
     repository:
       owner: anchordotdev
-      name: winget-packages
+      name: winget-pkgs
       branch: "{{.ProjectName}}-{{.Version}}"
       pull_request:
         enabled: true
