@@ -106,7 +106,7 @@ winget:
     license: mit
     publisher_url: https://anchor.dev
     publisher_support_url: https://github.com/anchordotdev/cli/issues
-    package_identifier: anchor.cli
+    package_identifier: AnchorSecurity.anchor
     ids:
       - anchor-msi
     use: msi
