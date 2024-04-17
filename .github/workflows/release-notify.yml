@@ -6,6 +6,7 @@ on:
 
 jobs:
   discord:
+    if: ${{ ! endsWith(github.ref,'*-test') }}
     runs-on: ubuntu-latest
     steps:
       - uses: sarisia/actions-status-discord@v1

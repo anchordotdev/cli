@@ -49,18 +49,18 @@ archives:
     builds: [windows]
     format: zip
 
-brews:
-  - repository:
-      name: homebrew-tap
-      owner: anchordotdev
+# brews:
+#   - repository:
+#       name: homebrew-tap
+#       owner: anchordotdev
 
-    description: Command-line tools for Anchor.dev
-    directory: Formula
-    homepage: https://anchor.dev/
-    license: MIT
+#     description: Command-line tools for Anchor.dev
+#     directory: Formula
+#     homepage: https://anchor.dev/
+#     license: MIT
 
-    test: |
-      assert_match "anchor is a command line interface for the Anchor certificate management platform.", shell_output("#{bin}/anchor")
+#     test: |
+#       assert_match "anchor is a command line interface for the Anchor certificate management platform.", shell_output("#{bin}/anchor")
 
 msi:
 - id: anchor-msi
@@ -72,32 +72,32 @@ msi:
     - ../../LICENSE
   mod_timestamp: "{{ .CommitTimestamp }}"
 
-chocolateys:
-- name: anchor
-  ids:
-    - anchor-msi
-  package_source_url: https://github.com/anchordotdev/cli
-  owners: Anchor Security, Inc.
-  title: Anchor CLI
-  authors: Anchor
-  project_url: https://anchor.dev
-  use: msi
-  url_template: "https://github.com/anchordotdev/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-  copyright: 2024 Anchor Security, Inc.
-  license_url: https://raw.githubusercontent.com/anchordotdev/cli/main/LICENSE
-  require_license_acceptance: false
-  project_source_url: https://github.com/anchordotdev/cli
-  docs_url: https://anchor.dev/docs
-  bug_tracker_url: https://github.com/anchordotdev/cli/issues
-  icon_url: https://anchor.dev/images/als2.png
-  tags: "security tls ssl certificates localhost https cryptography encryption acme cli x509 X.509"
-  summary: "Command-line tools for Anchor.dev"
-  description: |
-      anchor is a command line interface for the Anchor certificate management platform.
-      It provides a developer friendly interface for certificate management.
-  release_notes: "https://github.com/anchordotdev/cli/releases/tag/v{{ .Version }}"
-  api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
-  source_repo: "https://push.chocolatey.org/"
+# chocolateys:
+# - name: anchor
+#   ids:
+#     - anchor-msi
+#   package_source_url: https://github.com/anchordotdev/cli
+#   owners: Anchor Security, Inc.
+#   title: Anchor CLI
+#   authors: Anchor
+#   project_url: https://anchor.dev
+#   use: msi
+#   url_template: "https://github.com/anchordotdev/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+#   copyright: 2024 Anchor Security, Inc.
+#   license_url: https://raw.githubusercontent.com/anchordotdev/cli/main/LICENSE
+#   require_license_acceptance: false
+#   project_source_url: https://github.com/anchordotdev/cli
+#   docs_url: https://anchor.dev/docs
+#   bug_tracker_url: https://github.com/anchordotdev/cli/issues
+#   icon_url: https://anchor.dev/images/als2.png
+#   tags: "security tls ssl certificates localhost https cryptography encryption acme cli x509 X.509"
+#   summary: "Command-line tools for Anchor.dev"
+#   description: |
+#       anchor is a command line interface for the Anchor certificate management platform.
+#       It provides a developer friendly interface for certificate management.
+#   release_notes: "https://github.com/anchordotdev/cli/releases/tag/v{{ .Version }}"
+#   api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
+#   source_repo: "https://push.chocolatey.org/"
 
 winget:
   - name: anchor
