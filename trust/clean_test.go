@@ -11,66 +11,50 @@ import (
 )
 
 func TestCmdTrustClean(t *testing.T) {
-	cmd := CmdTrustClean
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "trust", "clean", "--help")
+		cmdtest.TestHelp(t, CmdTrustClean, "trust", "clean", "--help")
 	})
 
 	t.Run("--cert-states all", func(t *testing.T) {
-		t.Skip()
-
-		t.Cleanup(func() {
-			cfg.Trust.Clean.States = []string{"expired"}
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "clean", "--cert-states", "all")
-
+		cfg := cmdtest.TestCfg(t, CmdTrustClean, "--cert-states", "all")
 		require.Equal(t, []string{"all"}, cfg.Trust.Clean.States)
 	})
 
-	t.Run("--organization test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Org = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "clean", "--organization", "test")
-
-		require.Equal(t, "test", cfg.Trust.Org)
+	t.Run("--organization testOrg", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustClean, "--organization", "testOrg")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [realm]")
 	})
 
-	t.Run("-o test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Org = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "clean", "-o", "test")
-
-		require.Equal(t, "test", cfg.Trust.Org)
+	t.Run("-o testOrg", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustClean, "-o", "testOrg")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [realm]")
 	})
 
-	t.Run("--realm test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Realm = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "clean", "--realm", "test")
-
-		require.Equal(t, "test", cfg.Trust.Realm)
+	t.Run("-o testOrg -r testRealm", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdTrustClean, "-o", "testOrg", "-r", "testRealm")
+		require.Equal(t, "testOrg", cfg.Trust.Org)
+		require.Equal(t, "testRealm", cfg.Trust.Realm)
 	})
 
-	t.Run("-r test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Realm = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "clean", "-r", "test")
-
-		require.Equal(t, "test", cfg.Trust.Realm)
+	t.Run("--realm testRealm", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustClean, "--realm", "testRealm")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [organization]")
 	})
 
+	t.Run("-r testRealm", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustClean, "-r", "testRealm")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [organization]")
+	})
+
+	t.Run("default --trust-stores", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdTrustClean)
+		require.Equal(t, []string{"homebrew", "nss", "system"}, cfg.Trust.Stores)
+	})
+
+	t.Run("--trust-stores nss,system", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdTrustClean, "--trust-stores", "nss,system")
+		require.Equal(t, []string{"nss", "system"}, cfg.Trust.Stores)
+	})
 }
 
 func TestClean(t *testing.T) {

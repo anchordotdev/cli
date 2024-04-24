@@ -6,6 +6,4 @@ import (
 	"github.com/anchordotdev/cli"
 )
 
-var CmdAuth = cli.NewCmd[cli.ShowHelp](cli.CmdRoot, "auth", func(cmd *cobra.Command) {
-	cmd.Args = cobra.NoArgs
-})
+var CmdAuth = cli.NewCmd[cli.ShowHelp](cli.CmdRoot, "auth", func(cmd *cobra.Command) {})

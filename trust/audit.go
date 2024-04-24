@@ -2,38 +2,40 @@ package trust
 
 import (
 	"context"
-	"fmt"
-	"time"
 
-	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
+	"github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/truststore"
+	"github.com/anchordotdev/cli/ui"
 )
 
 var CmdTrustAudit = cli.NewCmd[Audit](CmdTrust, "audit", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Args = cobra.NoArgs
-
 	cmd.Flags().StringVarP(&cfg.Trust.Org, "organization", "o", "", "Organization to trust.")
 	cmd.Flags().StringVarP(&cfg.Trust.Realm, "realm", "r", "", "Realm to trust.")
 	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", []string{"homebrew", "nss", "system"}, "Trust stores to update.")
+
+	cmd.MarkFlagsRequiredTogether("organization", "realm")
 })
 
 type Audit struct{}
 
 func (a Audit) UI() cli.UI {
 	return cli.UI{
-		RunTTY: a.run,
+		RunTUI: a.RunTUI,
 	}
 }
 
-func (a *Audit) run(ctx context.Context, tty termenv.File) error {
+func (c *Audit) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
+
+	drv.Activate(ctx, &models.TrustAuditHeader{})
+
+	drv.Activate(ctx, &models.TrustAuditScan{})
 
 	anc, err := api.NewClient(cfg)
 	if err != nil {
@@ -66,92 +68,12 @@ func (a *Audit) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	for _, ca := range info.Valid {
-		fmt.Fprintf(tty, "%s (%s) %-7s \"%s\"\n",
-			boldGreen.Render(fmt.Sprintf("%-8s", "VALID")),
-			period(ca),
-			ca.PublicKeyAlgorithm,
-			commonName(ca),
-		)
+	drv.Send(models.TrustAuditScanFinishedMsg(true))
 
-		fmt.Fprintln(tty)
-
-		for _, store := range stores {
-			fmt.Fprintf(tty, "%7s %35s    %s\n", "", store.Description(), boldGreen.Render("TRUSTED"))
-		}
-
-		fmt.Fprintln(tty)
-	}
-
-	for _, ca := range info.Missing {
-		fmt.Fprintf(tty, "%s (%s) %-7s \"%s\"\n",
-			boldRed.Render(fmt.Sprintf("%-8s", "MISSING")),
-			period(ca),
-			ca.PublicKeyAlgorithm,
-			commonName(ca),
-		)
-
-		fmt.Fprintln(tty)
-
-		for _, store := range stores {
-			if info.IsPresent(ca, store) {
-				fmt.Fprintf(tty, "%7s %35s    %s\n", "", store.Description(), boldGreen.Render("TRUSTED"))
-			} else {
-				fmt.Fprintf(tty, "%7s %35s    %s\n", "", store.Description(), boldRed.Render("NOT PRESENT"))
-			}
-		}
-
-		fmt.Fprintln(tty)
-	}
-
-	for _, ca := range info.Extra {
-		fmt.Fprintf(tty, "%s (%s) %-7s \"%s\"\n",
-			faint.Render(fmt.Sprintf("%-8s", "EXTRA")),
-			period(ca),
-			ca.PublicKeyAlgorithm,
-			commonName(ca),
-		)
-
-		fmt.Fprintln(tty)
-
-		for _, store := range stores {
-			if info.IsPresent(ca, store) {
-				fmt.Fprintf(tty, "%7s %35s    %s\n", "", store.Description(), faintGreen.Render("TRUSTED"))
-			} else {
-				fmt.Fprintf(tty, "%7s %35s    %s\n", "", store.Description(), faint.Render("NOT PRESENT"))
-			}
-		}
-
-		fmt.Fprintln(tty)
-	}
+	drv.Activate(ctx, &models.TrustAuditInfo{
+		AuditInfo: info,
+		Stores:    stores,
+	})
 
 	return nil
-}
-
-var (
-	darkGreen  = lipgloss.Color("#008000")
-	darkRed    = lipgloss.Color("#800000")
-	lightGreen = lipgloss.Color("#00ff00")
-	lightRed   = lipgloss.Color("#ff0000")
-
-	boldGreen  = lipgloss.NewStyle().Bold(true).Foreground(lightGreen)
-	boldRed    = lipgloss.NewStyle().Bold(true).Foreground(lightRed)
-	faintGreen = lipgloss.NewStyle().Faint(true).Foreground(darkGreen)
-	faintRed   = lipgloss.NewStyle().Faint(true).Foreground(darkRed)
-
-	faint = lipgloss.NewStyle().Faint(true)
-
-	italic    = lipgloss.NewStyle().Italic(true)
-	underline = lipgloss.NewStyle().Underline(true)
-)
-
-func commonName(ca *truststore.CA) string {
-	return underline.Render(fmt.Sprintf("%s", ca.Subject.CommonName))
-}
-
-func period(ca *truststore.CA) string {
-	startAt := ca.NotBefore.Format("2006-01-02")
-	expireAt := ca.NotAfter.Add(1 * time.Second).Format("2006-01-02")
-
-	return italic.Render(fmt.Sprintf("%s - %s", startAt, expireAt))
 }

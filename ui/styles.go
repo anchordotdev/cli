@@ -15,6 +15,7 @@ var (
 	header = lipgloss.NewStyle().Bold(true)
 	hint   = lipgloss.NewStyle().Faint(true).SetString("|")
 
+	Error     = lipgloss.NewStyle().Bold(true).Foreground(colorDanger).SetString("! Error:").Render
 	Header    = header.Copy().SetString("#").Render
 	Skip      = header.Copy().Faint(true).SetString("# Skipped:").Render
 	Hint      = hint.Copy().Render
@@ -39,6 +40,7 @@ var (
 
 	colorBrandPrimary   = lipgloss.Color("#ff6000")
 	colorBrandSecondary = lipgloss.Color("#7000ff")
+	colorDanger         = lipgloss.Color("#E63757")
 
 	Prompt = lipgloss.NewStyle().Foreground(colorBrandPrimary)
 

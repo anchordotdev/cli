@@ -3,8 +3,6 @@ package cli
 import (
 	"context"
 
-	"github.com/muesli/termenv"
-
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
 )
@@ -86,7 +84,6 @@ type Config struct {
 }
 
 type UI struct {
-	RunTTY func(context.Context, termenv.File) error
 	RunTUI func(context.Context, *ui.Driver) error
 }
 

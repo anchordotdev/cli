@@ -11,31 +11,17 @@ import (
 )
 
 func TestCmdLclMkCert(t *testing.T) {
-	cmd := CmdLclMkCert
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "lcl", "mkcert", "--help")
+		cmdtest.TestHelp(t, CmdLclMkCert, "lcl", "mkcert", "--help")
 	})
 
 	t.Run("--domains test.lcl.host,test.localhost", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.MkCert.Domains = []string{}
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "mkcert", "--domains", "test.lcl.host,test.localhost")
-
+		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--domains", "test.lcl.host,test.localhost")
 		require.Equal(t, []string{"test.lcl.host", "test.localhost"}, cfg.Lcl.MkCert.Domains)
 	})
 
 	t.Run("--subca 1234:ABCD:EF123", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.MkCert.SubCa = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "mkcert", "--subca", "1234:ABCD:EF123")
-
+		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--subca", "1234:ABCD:EF123")
 		require.Equal(t, "1234:ABCD:EF123", cfg.Lcl.MkCert.SubCa)
 	})
 }

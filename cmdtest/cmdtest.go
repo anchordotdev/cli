@@ -12,33 +12,60 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExecute(t *testing.T, cmd *cobra.Command, args ...string) *bytes.Buffer {
-	// pull from env again, since setting in tests is too late for normal env handling
+func TestCfg(t *testing.T, cmd *cobra.Command, args ...string) *cli.Config {
+	cmd = cli.NewTestCmd(cmd)
 	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
 	if err := envdecode.Decode(cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
-		panic(err)
-	}
-
-	root := cmd.Root()
-
-	b := new(bytes.Buffer)
-	root.SetErr(b)
-	root.SetOut(b)
-	root.SetArgs(args)
-
-	err := root.Execute()
-	require.NoError(t, err)
-
-	return b
-}
-
-func TestOutput(t *testing.T, cmd *cobra.Command, args ...string) {
-	b := TestExecute(t, cmd, args...)
-
-	out, err := io.ReadAll(b)
-	if err != nil {
 		t.Fatal(err)
 	}
 
+	_, err := execute(cmd, args...)
+	require.NoError(t, err)
+
+	return cfg
+}
+
+func TestCmd(t *testing.T, cmd *cobra.Command, args ...string) *cobra.Command {
+	_, err := executeSkip(cmd, args...)
+	require.NoError(t, err)
+
+	return cmd
+}
+
+func TestError(t *testing.T, cmd *cobra.Command, args ...string) error {
+	_, err := executeSkip(cmd, args...)
+	require.Error(t, err)
+
+	return err
+}
+
+func TestHelp(t *testing.T, cmd *cobra.Command, args ...string) {
+	root := cmd.Root()
+
+	b, err := execute(root, args...)
+	require.NoError(t, err)
+
+	out, err := io.ReadAll(b)
+	require.NoError(t, err)
+
 	teatest.RequireEqualOutput(t, out)
+}
+
+func execute(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
+	b := new(bytes.Buffer)
+	cmd.SetErr(b)
+	cmd.SetOut(b)
+	cmd.SetArgs(args)
+
+	err := cmd.Execute()
+	return b, err
+}
+
+func executeSkip(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {
+	cmd = cli.NewTestCmd(cmd)
+	cfg := cli.ConfigFromCmd(cmd)
+	cfg.Test.SkipRunE = true
+
+	return execute(cmd, args...)
 }

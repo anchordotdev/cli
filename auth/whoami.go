@@ -4,30 +4,31 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
-	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
+	"github.com/anchordotdev/cli/auth/models"
+	"github.com/anchordotdev/cli/ui"
 )
 
-var CmdAuthWhoami = cli.NewCmd[WhoAmI](CmdAuth, "whoami", func(cmd *cobra.Command) {
-	cmd.Args = cobra.NoArgs
-})
+var CmdAuthWhoami = cli.NewCmd[WhoAmI](CmdAuth, "whoami", func(cmd *cobra.Command) {})
 
 type WhoAmI struct{}
 
-func (w WhoAmI) UI() cli.UI {
+func (c WhoAmI) UI() cli.UI {
 	return cli.UI{
-		RunTTY: w.run,
+		RunTUI: c.runTUI,
 	}
 }
 
-func (w *WhoAmI) run(ctx context.Context, tty termenv.File) error {
+func (c *WhoAmI) runTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
+
+	drv.Activate(ctx, &models.WhoAmIHeader{})
+	drv.Activate(ctx, &models.WhoAmIChecker{})
 
 	anc, err := api.NewClient(cfg)
 	if err != nil {
@@ -47,6 +48,7 @@ func (w *WhoAmI) run(ctx context.Context, tty termenv.File) error {
 		return err
 	}
 
-	fmt.Fprintf(tty, "Hello %s!\n", userInfo.Whoami)
+	drv.Send(models.UserWhoAmIMsg(userInfo.Whoami))
+
 	return nil
 }

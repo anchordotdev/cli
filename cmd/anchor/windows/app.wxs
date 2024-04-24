@@ -1,4 +1,5 @@
 <?xml version='1.0' encoding='windows-1252'?>
+
 <Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
     <Product
         Name='{{.ProjectName}} CLI {{.RawVersion}}'
@@ -18,20 +19,28 @@
         />
         <MediaTemplate EmbedCab="yes" />
 
-        <Icon Id="icon.ico" SourceFile="windows\als2.ico"/>
+        <Icon Id="icon.ico" SourceFile="windows/als2.ico"/>
         <Property Id="ARPPRODUCTICON" Value="icon.ico" />
 
         <Directory Id='TARGETDIR' Name='SourceDir'>
             <Directory Id='ProgramFiles{{ if eq .Arch "amd64" }}64{{ end }}Folder' Name='PFiles'>
-                <Directory Id='INSTALLDIR' Name='Anchor CLI' />
+                <Directory Id='INSTALLDIR' Name='Anchor CLI'>
+                    <Component Id='MainExecutable'>
+                        <File Id='{{.Binary}}.exe' Name='{{.Binary}}.exe' Source='{{.Binary}}.exe' KeyPath='yes'/>
+                        <?if $(env.OS) = Windows_NT?>
+                        <Environment Id='PATH' Name='PATH' Value='[INSTALLDIR]' Permanent='no' Part='last' Action='set' System='yes'/>
+                        <?endif?>
+                    </Component>
+                    <Component Id='License'>
+                        <File Id='LICENSE' Name='LICENSE.txt' Source='../../LICENSE' KeyPath='yes'/>
+                    </Component>
+                </Directory>
             </Directory>
         </Directory>
 
         <Feature Id='Complete'>
-            <Component Id='MainExecutable' Directory='INSTALLDIR'>
-                <File Id='{{.Binary}}.exe' Name='{{.Binary}}.exe' Source='{{.Binary}}.exe' KeyPath='yes'/>
-                <!-- <Environment Id='PATH' Name='PATH' Value='[INSTALLDIR]' Permanent='no' Part='last' Action='set' System='yes'/> -->
-            </Component>
+            <ComponentRef Id='MainExecutable' />
+            <ComponentRef Id='License' />
         </Feature>
     </Product>
 </Wix>

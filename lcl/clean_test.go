@@ -10,12 +10,8 @@ import (
 )
 
 func TestCmdLclClean(t *testing.T) {
-	cmd := CmdLclClean
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "lcl", "clean", "--help")
+		cmdtest.TestHelp(t, CmdLclClean, "lcl", "clean", "--help")
 	})
 }
 

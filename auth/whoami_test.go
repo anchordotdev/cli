@@ -2,32 +2,22 @@ package auth
 
 import (
 	"context"
-	"runtime"
 	"testing"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
-	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/cmdtest"
-	"github.com/stretchr/testify/require"
+	"github.com/anchordotdev/cli/ui/uitest"
 )
 
 func TestCmdAuthWhoAmI(t *testing.T) {
-	cmd := CmdAuthWhoami
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "auth", "whoami", "--help")
+		cmdtest.TestHelp(t, CmdAuthWhoami, "auth", "whoami", "--help")
 	})
 
 }
 
 func TestWhoAmI(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("no pty support on windows")
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -37,8 +27,7 @@ func TestWhoAmI(t *testing.T) {
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("signed-out", func(t *testing.T) {
-		_, err := apitest.RunTTY(ctx, new(WhoAmI).UI())
-		require.Error(t, err, api.ErrSignedOut)
+		uitest.TestTUIError(ctx, t, new(WhoAmI).UI(), api.ErrSignedOut)
 	})
 
 	t.Run("signed-in", func(t *testing.T) {
@@ -48,13 +37,8 @@ func TestWhoAmI(t *testing.T) {
 		}
 		cfg.API.Token = apiToken
 
-		buf, err := apitest.RunTTY(ctx, new(WhoAmI).UI())
-		if err != nil {
-			t.Fatal(err)
-		}
+		cmd := WhoAmI{}
 
-		if want, got := "Hello anky@anchor.dev!\n", buf.String(); want != got {
-			t.Errorf("want output %q, got %q", want, got)
-		}
+		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})
 }

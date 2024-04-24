@@ -18,13 +18,11 @@ var (
 )
 
 func TestCmdRoot(t *testing.T) {
-	root := cli.CmdRoot
-
 	t.Run("root", func(t *testing.T) {
-		cmdtest.TestOutput(t, root)
+		cmdtest.TestHelp(t, cli.CmdRoot)
 	})
 
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, root, "--help")
+		cmdtest.TestHelp(t, cli.CmdRoot, "--help")
 	})
 }

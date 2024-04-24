@@ -1,77 +1,66 @@
 package trust
 
 import (
-	"bufio"
 	"context"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"regexp"
-	"runtime"
 	"testing"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
-	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ext509"
 	"github.com/anchordotdev/cli/internal/must"
 	"github.com/anchordotdev/cli/truststore"
+	"github.com/anchordotdev/cli/ui/uitest"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCmdTrustAudit(t *testing.T) {
-	cmd := CmdTrustAudit
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "trust", "audit", "--help")
+		cmdtest.TestHelp(t, CmdTrustAudit, "trust", "audit", "--help")
 	})
 
-	t.Run("--organization test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Org = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "audit", "--organization", "test")
-
-		require.Equal(t, "test", cfg.Trust.Org)
+	t.Run("--organization testOrg", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustAudit, "--organization", "testOrg")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [realm]")
 	})
 
-	t.Run("-o test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Org = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "audit", "-o", "test")
-
-		require.Equal(t, "test", cfg.Trust.Org)
+	t.Run("-o testOrg", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustAudit, "-o", "testOrg")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [realm]")
 	})
 
-	t.Run("--realm test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Realm = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "trust", "audit", "--realm", "test")
-
-		require.Equal(t, "test", cfg.Trust.Realm)
+	t.Run("-o testOrg -r testRealm", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdTrustAudit, "-o", "testOrg", "-r", "testRealm")
+		require.Equal(t, "testOrg", cfg.Trust.Org)
+		require.Equal(t, "testRealm", cfg.Trust.Realm)
 	})
 
-	t.Run("-r test", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Trust.Realm = ""
-		})
+	t.Run("--realm testRealm", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustAudit, "--realm", "testRealm")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [organization]")
+	})
 
-		cmdtest.TestExecute(t, cmd, "trust", "audit", "-r", "test")
+	t.Run("-r testRealm", func(t *testing.T) {
+		err := cmdtest.TestError(t, CmdTrustAudit, "-r", "testRealm")
+		require.ErrorContains(t, err, "if any flags in the group [organization realm] are set they must all be set; missing [organization]")
+	})
 
-		require.Equal(t, "test", cfg.Trust.Realm)
+	t.Run("default --trust-stores", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdTrust)
+		require.Equal(t, []string{"homebrew", "nss", "system"}, cfg.Trust.Stores)
+	})
+
+	t.Run("--trust-stores nss,system", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdTrust, "--trust-stores", "nss,system")
+		require.Equal(t, []string{"nss", "system"}, cfg.Trust.Stores)
 	})
 }
 
 func TestAudit(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("no pty support on windows")
+	if srv.IsProxy() {
+		t.Skip("trust audit unsupported in proxy mode")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -111,52 +100,8 @@ func TestAudit(t *testing.T) {
 
 		cmd := &Audit{}
 
-		buf, err := apitest.RunTTY(ctx, cmd.UI())
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		scanner := bufio.NewScanner(buf)
-
-		testOutput(t, scanner, []any{
-			regexp.MustCompile(`^VALID    [(][0-9- ]+[)] (RSA|ECDSA)\s+"[a-zA-Z0-9- \/]+ - AnchorCA"$`),
-			nil,
-			regexp.MustCompile(`\s+Mock\s+TRUSTED$`),
-			nil,
-			regexp.MustCompile(`^MISSING  [(][0-9- ]+[)] (RSA|ECDSA)\s+"[a-zA-Z0-9- \/]+ - AnchorCA"$`),
-			nil,
-			regexp.MustCompile(`\s+Mock\s+NOT PRESENT$`),
-			nil,
-			regexp.MustCompile(`^EXTRA    [(][0-9- ]+[)] (RSA|ECDSA)\s+"Extra CA - AnchorCA"$`),
-			nil,
-			regexp.MustCompile(`\s+Mock\s+TRUSTED$`),
-			nil,
-		})
+		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})
-}
-
-func testOutput(t *testing.T, scanner *bufio.Scanner, lines []any) {
-	t.Helper()
-
-	for _, line := range lines {
-		if !scanner.Scan() {
-			t.Fatalf("want more output, got %q %v (nil is EOF)", scanner.Err(), scanner.Err())
-		}
-		switch line := line.(type) {
-		case string:
-			if want, got := line, scanner.Text(); want != got {
-				t.Errorf("want output line %q, got %q", want, got)
-			}
-		case *regexp.Regexp:
-			if want, got := line, scanner.Text(); !want.MatchString(got) {
-				t.Errorf("want output line %q to match %q", got, want)
-			}
-		}
-	}
-
-	if scanner.Scan() {
-		t.Errorf("want EOF, got %q", scanner.Text())
-	}
 }
 
 var (

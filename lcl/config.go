@@ -25,8 +25,6 @@ import (
 var CmdLclConfig = cli.NewCmd[LclConfig](CmdLcl, "config", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Args = cobra.NoArgs
-
 	cmd.Flags().StringVarP(&cfg.Lcl.DiagnosticAddr, "addr", "a", ":4433", "Address for local diagnostic web server.")
 })
 

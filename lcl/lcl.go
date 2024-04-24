@@ -21,8 +21,6 @@ import (
 var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Args = cobra.NoArgs
-
 	// config
 	cmd.Flags().StringVarP(&cfg.Lcl.DiagnosticAddr, "addr", "a", ":4433", "Address for local diagnostic web server.")
 
@@ -45,8 +43,6 @@ func (c Command) UI() cli.UI {
 }
 
 func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
-	drv.Activate(ctx, &models.LclPreamble{})
-
 	var err error
 	cmd := &auth.Client{
 		Anc:    c.anc,
@@ -57,6 +53,7 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	if err != nil {
 		return err
 	}
+	drv.Activate(ctx, &models.LclPreamble{})
 
 	drv.Activate(ctx, &models.LclHeader{})
 	drv.Activate(ctx, &models.LclHint{})

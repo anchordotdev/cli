@@ -12,9 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CmdLclAudit = cli.NewCmd[Audit](CmdLcl, "audit", func(cmd *cobra.Command) {
-	cmd.Args = cobra.NoArgs
-})
+var CmdLclAudit = cli.NewCmd[Audit](CmdLcl, "audit", func(cmd *cobra.Command) {})
 
 type Audit struct {
 	anc                *api.Session

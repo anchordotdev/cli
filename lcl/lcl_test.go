@@ -42,85 +42,50 @@ func TestMain(m *testing.M) {
 }
 
 func TestCmdLcl(t *testing.T) {
-	cmd := CmdLcl
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "lcl", "--help")
+		cmdtest.TestHelp(t, CmdLcl, "lcl", "--help")
 	})
 
 	// config
 
 	t.Run("default --addr", func(t *testing.T) {
-		cmdtest.TestExecute(t, cmd, "lcl", "config")
-
+		cfg := cmdtest.TestCfg(t, CmdLcl)
 		require.Equal(t, ":4433", cfg.Lcl.DiagnosticAddr)
 	})
 
 	t.Run("-a :4444", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.DiagnosticAddr = ":4433"
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "-a", ":4444")
-
+		cfg := cmdtest.TestCfg(t, CmdLcl, "-a", ":4444")
 		require.Equal(t, ":4444", cfg.Lcl.DiagnosticAddr)
 	})
 
 	t.Run("--addr :4455", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.DiagnosticAddr = ":4433"
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "--addr", ":4455")
-
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--addr", ":4455")
 		require.Equal(t, ":4455", cfg.Lcl.DiagnosticAddr)
 	})
 
 	t.Run("ADDR=:4466", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.DiagnosticAddr = ":4433"
-		})
-
 		t.Setenv("ADDR", ":4466")
 
-		cmdtest.TestExecute(t, cmd, "lcl")
-
+		cfg := cmdtest.TestCfg(t, CmdLcl)
 		require.Equal(t, ":4466", cfg.Lcl.DiagnosticAddr)
 	})
 
 	// mkcert
 
 	t.Run("--domains test.lcl.host,test.localhost", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.MkCert.Domains = []string{}
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "--domains", "test.lcl.host,test.localhost")
-
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--domains", "test.lcl.host,test.localhost")
 		require.Equal(t, []string{"test.lcl.host", "test.localhost"}, cfg.Lcl.MkCert.Domains)
 	})
 
 	t.Run("--subca 1234:ABCD:EF123", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.MkCert.SubCa = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "--subca", "1234:ABCD:EF123")
-
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--subca", "1234:ABCD:EF123")
 		require.Equal(t, "1234:ABCD:EF123", cfg.Lcl.MkCert.SubCa)
 	})
 
 	// setup
 
 	t.Run("--language ruby", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.Setup.Language = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "--language", "ruby")
-
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--language", "ruby")
 		require.Equal(t, "ruby", cfg.Lcl.Setup.Language)
 	})
 }

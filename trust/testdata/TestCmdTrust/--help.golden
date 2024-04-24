@@ -10,7 +10,7 @@ Usage:
   anchor trust [command]
 
 Available Commands:
-  audit       Audit CA Certificates in your Local Trust Store(s)
+  audit       Audit CA Certificates in Your Local Trust Store(s)
 
 Flags:
   -h, --help                   help for trust

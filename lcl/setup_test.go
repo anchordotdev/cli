@@ -16,21 +16,12 @@ import (
 )
 
 func TestCmdLclSetup(t *testing.T) {
-	cmd := CmdLclSetup
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "lcl", "setup", "--help")
+		cmdtest.TestHelp(t, CmdLclSetup, "lcl", "setup", "--help")
 	})
 
 	t.Run("--language ruby", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.Setup.Language = ""
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "setup", "--language", "ruby")
-
+		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--language", "ruby")
 		require.Equal(t, "ruby", cfg.Lcl.Setup.Language)
 	})
 }

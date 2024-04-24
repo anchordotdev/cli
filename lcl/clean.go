@@ -12,9 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CmdLclClean = cli.NewCmd[LclClean](CmdLcl, "clean", func(cmd *cobra.Command) {
-	cmd.Args = cobra.NoArgs
-})
+var CmdLclClean = cli.NewCmd[LclClean](CmdLcl, "clean", func(cmd *cobra.Command) {})
 
 type LclClean struct {
 	anc                *api.Session

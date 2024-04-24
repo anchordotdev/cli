@@ -1,0 +1,14 @@
+─── TrustAuditHeader ───────────────────────────────────────────────────────────
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+─── TrustAuditScan ─────────────────────────────────────────────────────────────
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+    * Scanning local and expected CA certificates…*
+─── TrustAuditScan ─────────────────────────────────────────────────────────────
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+    - Scanned local and expected CA certificates.
+─── TrustAuditInfo ─────────────────────────────────────────────────────────────
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+    - Scanned local and expected CA certificates.
+    - VALID - oas-examples - AnchorCA ECDSA: trusted by [Mock]
+    - MISSING - oas-examples - AnchorCA RSA: missing from [Mock]
+    - EXTRA - Extra CA - AnchorCA ECDSA: trusted by [Mock]

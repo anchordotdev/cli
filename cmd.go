@@ -14,6 +14,7 @@ type CmdDef struct {
 	Name string
 
 	Use   string
+	Args  cobra.PositionalArgs
 	Short string
 	Long  string
 
@@ -24,6 +25,7 @@ var rootDef = CmdDef{
 	Name: "anchor",
 
 	Use:   "anchor <command> <subcommand> [flags]",
+	Args:  cobra.NoArgs,
 	Short: "anchor - a CLI interface for anchor.dev",
 	Long: heredoc.Doc(`
 		anchor is a command line interface for the Anchor certificate management platform.
@@ -36,6 +38,7 @@ var rootDef = CmdDef{
 			Name: "auth",
 
 			Use:   "auth <subcommand> [flags]",
+			Args:  cobra.NoArgs,
 			Short: "Manage Anchor.dev Authentication",
 
 			SubDefs: []CmdDef{
@@ -43,7 +46,8 @@ var rootDef = CmdDef{
 					Name: "signin",
 
 					Use:   "signin [flags]",
-					Short: "Authenticate with your account",
+					Args:  cobra.NoArgs,
+					Short: "Authenticate With Your Account",
 					Long: heredoc.Doc(`
 						Sign into your Anchor account for your local system user.
 
@@ -55,7 +59,8 @@ var rootDef = CmdDef{
 					Name: "signout",
 
 					Use:   "signout [flags]",
-					Short: "Invalidate your local Anchor account session",
+					Args:  cobra.NoArgs,
+					Short: "Invalidate Local Anchor Session",
 					Long: heredoc.Doc(`
 						Sign out of your Anchor account for your local system user.
 
@@ -67,7 +72,8 @@ var rootDef = CmdDef{
 					Name: "whoami",
 
 					Use:   "whoami [flags]",
-					Short: "Identify current account",
+					Args:  cobra.NoArgs,
+					Short: "Identify Current Anchor.dev Account",
 					Long: heredoc.Doc(`
 						Print the details of the Anchor account for your local system user.
 					`),
@@ -78,6 +84,7 @@ var rootDef = CmdDef{
 			Name: "lcl",
 
 			Use:   "lcl [flags]",
+			Args:  cobra.NoArgs,
 			Short: "Manage lcl.host Local Development Environment",
 
 			SubDefs: []CmdDef{
@@ -85,30 +92,35 @@ var rootDef = CmdDef{
 					Name: "audit",
 
 					Use:   "audit [flags]",
+					Args:  cobra.NoArgs,
 					Short: "Audit lcl.host HTTPS Local Development Environment",
 				},
 				{
 					Name: "clean",
 
 					Use:   "clean [flags]",
+					Args:  cobra.NoArgs,
 					Short: "Clean lcl.host CA Certificates from the Local Trust Store(s)",
 				},
 				{
 					Name: "config",
 
 					Use:   "config [flags]",
+					Args:  cobra.NoArgs,
 					Short: "Configure System for lcl.host Local Development",
 				},
 				{
 					Name: "mkcert",
 
 					Use:   "mkcert [flags]",
+					Args:  cobra.NoArgs,
 					Short: "Provision Certificate for lcl.host Local Development",
 				},
 				{
 					Name: "setup",
 
 					Use:   "setup [flags]",
+					Args:  cobra.NoArgs,
 					Short: "Setup lcl.host Application",
 				},
 			},
@@ -117,6 +129,7 @@ var rootDef = CmdDef{
 			Name: "trust",
 
 			Use:   "trust [flags]",
+			Args:  cobra.NoArgs,
 			Short: "Manage CA Certificates in your Local Trust Store(s)",
 			Long: heredoc.Doc(`
 				Install the AnchorCA certificates of a target organization, realm, or CA into
@@ -131,7 +144,8 @@ var rootDef = CmdDef{
 					Name: "audit",
 
 					Use:   "audit [flags]",
-					Short: "Audit CA Certificates in your Local Trust Store(s)",
+					Args:  cobra.NoArgs,
+					Short: "Audit CA Certificates in Your Local Trust Store(s)",
 					Long: heredoc.Doc(`
             Perform an audit of the local trust store(s) and report any expected, missing,
             or extra CA certificates per store. A set of expected CAs is fetched for the
@@ -149,6 +163,7 @@ var rootDef = CmdDef{
 					Name: "clean",
 
 					Use:   "clean [flags]",
+					Args:  cobra.NoArgs,
 					Short: "Clean CA Certificates from your Local Trust Store(s)",
 				},
 			},
@@ -157,12 +172,17 @@ var rootDef = CmdDef{
 			Name: "version",
 
 			Use:   "version",
+			Args:  cobra.NoArgs,
 			Short: "Show version info",
 		},
 	},
 }
 
 var cmdDefByCommands = map[*cobra.Command]*CmdDef{}
+
+var constructorByCommands = map[*cobra.Command]func() *cobra.Command{}
+
+var version string
 
 type UIer interface {
 	UI() UI
@@ -188,62 +208,89 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 		def = &rootDef
 	}
 
-	cfg := new(Config)
-	defaults.SetDefaults(cfg)
-	if err := envdecode.Decode(cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
-		panic(err)
+	constructor := func() *cobra.Command {
+		cfg := new(Config)
+		defaults.SetDefaults(cfg)
+		if err := envdecode.Decode(cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
+			panic(err)
+		}
+
+		cmd := &cobra.Command{
+			Use:          def.Use,
+			Args:         def.Args,
+			Short:        def.Short,
+			Long:         def.Long,
+			SilenceUsage: true,
+		}
+
+		ctx := ContextWithConfig(context.Background(), cfg)
+		cmd.SetContext(ctx)
+
+		cmd.SetErrPrefix(ui.Error(""))
+
+		fn(cmd)
+
+		// FIXME: ideally we would only set these in TEST
+		// allow pass through of update arg for teatest golden tests
+		cmd.Flags().Bool("update", false, "update .golden files")
+		if err := cmd.Flags().MarkHidden("update"); err != nil {
+			panic(err)
+		}
+		cmd.Flags().Bool("prism-proxy", false, "run prism in proxy mode")
+		if err := cmd.Flags().MarkHidden("prism-proxy"); err != nil {
+			panic(err)
+		}
+		cmd.Flags().Bool("prism-verbose", false, "run prism in verbose mode")
+		if err := cmd.Flags().MarkHidden("prism-verbose"); err != nil {
+			panic(err)
+		}
+
+		cmd.RunE = func(cmd *cobra.Command, _ []string) error {
+			cfg := ConfigFromCmd(cmd)
+			if cfg.Test.SkipRunE {
+				return nil
+			}
+
+			ctx, cancel := context.WithCancelCause(cmd.Context())
+			defer cancel(nil)
+
+			drv, prg := ui.NewDriverTUI(ctx)
+			errc := make(chan error)
+
+			go func() {
+				defer close(errc)
+
+				_, err := prg.Run()
+				cancel(err)
+
+				errc <- err
+			}()
+
+			var t T
+			if err := t.UI().RunTUI(ctx, drv); err != nil && err != context.Canceled {
+				prg.Quit()
+
+				<-errc // TODO: report this somewhere?
+				return err
+			}
+
+			prg.Quit()
+
+			return <-errc // TODO: special handling for a UI error
+		}
+
+		return cmd
 	}
 
-	cmd := &cobra.Command{
-		Use:   def.Use,
-		Short: def.Short,
-		Long:  def.Long,
-		// FIMXE: add PersistentPreRunE version check
-	}
-
+	cmd := constructor()
 	if parent != nil {
 		parent.AddCommand(cmd)
 	}
-
-	ctx := ContextWithConfig(context.Background(), cfg)
-	cmd.SetContext(ctx)
-
-	fn(cmd)
-
-	cmd.RunE = func(cmd *cobra.Command, _ []string) error {
-		cfg := ConfigFromCmd(cmd)
-		if cfg.Test.SkipRunE {
-			return nil
-		}
-
-		ctx, cancel := context.WithCancelCause(cmd.Context())
-		defer cancel(nil)
-
-		drv, prg := ui.NewDriverTUI(ctx)
-		errc := make(chan error)
-
-		go func() {
-			defer close(errc)
-
-			_, err := prg.Run()
-			cancel(err)
-
-			errc <- err
-		}()
-
-		var t T
-		if err := t.UI().RunTUI(ctx, drv); err != nil && err != context.Canceled {
-			prg.Quit()
-
-			<-errc // TODO: report this somewhere?
-			return err
-		}
-
-		prg.Quit()
-
-		return <-errc // TODO: special handling for a UI error
-	}
-
 	cmdDefByCommands[cmd] = def
+	constructorByCommands[cmd] = constructor
 	return cmd
+}
+
+func NewTestCmd(cmd *cobra.Command) *cobra.Command {
+	return constructorByCommands[cmd]()
 }

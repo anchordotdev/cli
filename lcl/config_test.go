@@ -21,53 +21,29 @@ import (
 )
 
 func TestCmdLclConfig(t *testing.T) {
-	cmd := CmdLclConfig
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "lcl", "config", "--help")
+		cmdtest.TestHelp(t, CmdLclConfig, "lcl", "config", "--help")
 	})
 
 	t.Run("default --addr", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.DiagnosticAddr = ":4433"
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "config")
-
+		cfg := cmdtest.TestCfg(t, CmdLclConfig)
 		require.Equal(t, ":4433", cfg.Lcl.DiagnosticAddr)
 	})
 
 	t.Run("-a :4444", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.DiagnosticAddr = ":4433"
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "config", "-a", ":4444")
-
+		cfg := cmdtest.TestCfg(t, CmdLclConfig, "-a", ":4444")
 		require.Equal(t, ":4444", cfg.Lcl.DiagnosticAddr)
 	})
 
 	t.Run("--addr :4455", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.DiagnosticAddr = ":4433"
-		})
-
-		cmdtest.TestExecute(t, cmd, "lcl", "config", "--addr", ":4455")
-
+		cfg := cmdtest.TestCfg(t, CmdLclConfig, "--addr", ":4455")
 		require.Equal(t, ":4455", cfg.Lcl.DiagnosticAddr)
 	})
 
 	t.Run("ADDR=:4466", func(t *testing.T) {
-		t.Cleanup(func() {
-			cfg.Lcl.DiagnosticAddr = ":4433"
-		})
-
 		t.Setenv("ADDR", ":4466")
 
-		cmdtest.TestExecute(t, cmd, "lcl", "config")
-
+		cfg := cmdtest.TestCfg(t, CmdLclConfig)
 		require.Equal(t, ":4466", cfg.Lcl.DiagnosticAddr)
 	})
 }

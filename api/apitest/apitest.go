@@ -1,7 +1,6 @@
 package apitest
 
 import (
-	"bytes"
 	"context"
 	"flag"
 	"path/filepath"
@@ -15,12 +14,8 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/creack/pty"
 	"github.com/gofrs/flock"
-	"github.com/muesli/termenv"
 	"golang.org/x/sync/errgroup"
-
-	"github.com/anchordotdev/cli"
 )
 
 var (
@@ -335,39 +330,4 @@ func UnusedPort() (string, error) {
 	ln.Close()
 
 	return ln.Addr().String(), nil
-}
-
-func RunTTY(ctx context.Context, ui cli.UI) (*bytes.Buffer, error) {
-	ptmx, pts, err := pty.Open()
-	if err != nil {
-		return nil, err
-	}
-
-	// the test TTY needs to be a real TTY (*os.File), but the data we want to
-	// read from is tee'd to the buffer, so throw away the TTY's data to avoid
-	// blocking on a full TTY buffer, which may stall the test.
-	go io.Copy(io.Discard, pts)
-
-	tty := &testTTY{
-		File: ptmx,
-	}
-	tty.w = io.MultiWriter(ptmx, &tty.buf)
-
-	output := termenv.NewOutput(tty, termenv.WithProfile(termenv.Ascii))
-	termenv.SetDefaultOutput(output)
-	if err := ui.RunTTY(ctx, output.TTY()); err != nil {
-		return nil, err
-	}
-	return &tty.buf, nil
-}
-
-type testTTY struct {
-	termenv.File
-
-	w   io.Writer
-	buf bytes.Buffer
-}
-
-func (t *testTTY) Write(p []byte) (int, error) {
-	return t.w.Write(p)
 }

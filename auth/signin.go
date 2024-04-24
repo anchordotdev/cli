@@ -11,8 +11,6 @@ import (
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/cli/browser"
-	"github.com/mattn/go-isatty"
-	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 
 	"github.com/anchordotdev/cli"
@@ -23,9 +21,7 @@ import (
 )
 
 var (
-	CmdAuthSignin = cli.NewCmd[SignIn](CmdAuth, "signin", func(cmd *cobra.Command) {
-		cmd.Args = cobra.NoArgs
-	})
+	CmdAuthSignin = cli.NewCmd[SignIn](CmdAuth, "signin", func(cmd *cobra.Command) {})
 
 	ErrSigninFailed = errors.New("sign in failed")
 )
@@ -38,110 +34,9 @@ type SignIn struct {
 
 func (s SignIn) UI() cli.UI {
 	return cli.UI{
-		RunTTY: s.runTTY,
 		RunTUI: s.RunTUI,
 	}
 }
-
-func (s *SignIn) runTTY(ctx context.Context, tty termenv.File) error {
-	cfg := cli.ConfigFromContext(ctx)
-
-	output := termenv.DefaultOutput()
-	cp := output.ColorProfile()
-
-	fmt.Fprintln(tty,
-		output.String("# Run `anchor auth signin`").Bold(),
-	)
-
-	anc, err := api.NewClient(cfg)
-	if err != nil && err != api.ErrSignedOut {
-		return err
-	}
-
-	codes, err := anc.GenerateUserFlowCodes(ctx, s.Source)
-	if err != nil {
-		return err
-	}
-
-	if isatty.IsTerminal(tty.Fd()) {
-		if err := clipboard.WriteAll(codes.UserCode); err != nil {
-			fmt.Fprintln(tty,
-				" ",
-				output.String("!").Background(cp.Color("#7000ff")),
-				output.String("Copy").Foreground(cp.Color("#ff6000")).Bold(),
-				"your user code:",
-				output.String(codes.UserCode).Background(cp.Color("#7000ff")).Bold(),
-			)
-		} else {
-			fmt.Fprintln(tty,
-				" ",
-				output.String("!").Background(cp.Color("#7000ff")),
-				"Copied your user code",
-				output.String(codes.UserCode).Background(cp.Color("#7000ff")).Bold(),
-				"to your clipboard.",
-			)
-		}
-		fmt.Fprintln(tty,
-			" ",
-			output.String("| When prompted you will paste this code in your browser to connect your CLI.").Faint(),
-		)
-		fmt.Fprintln(tty,
-			" ",
-			output.String("!").Background(cp.Color("#7000ff")),
-			output.String("Press Enter").Foreground(cp.Color("#ff6000")).Bold(),
-			"to open",
-			output.String(codes.VerificationUri).Faint().Underline(),
-			"in your browser...",
-		)
-		fmt.Scanln()
-
-		if err = browser.OpenURL(codes.VerificationUri); err != nil {
-			return err
-		}
-	} else {
-		fmt.Fprintln(tty,
-			" ",
-			output.String("!").Background(cp.Color("#7000ff")),
-			output.String("Open").Foreground(cp.Color("#ff6000")).Bold(),
-			output.String(codes.VerificationUri).Faint().Underline(),
-			"in a browser and enter your user code:",
-			output.String(codes.UserCode).Bold(),
-		)
-	}
-
-	var patToken string
-	for patToken == "" {
-		if patToken, err = anc.CreatePATToken(ctx, codes.DeviceCode); err != nil {
-			return err
-		}
-
-		if patToken == "" {
-			time.Sleep(time.Duration(codes.Interval) * time.Second)
-		}
-	}
-	cfg.API.Token = patToken
-
-	userInfo, err := fetchUserInfo(cfg)
-	if err != nil {
-		return err
-	}
-
-	kr := keyring.Keyring{Config: cfg}
-	if err := kr.Set(keyring.APIToken, cfg.API.Token); err != nil {
-		return err
-	}
-
-	fmt.Fprintln(tty)
-	fmt.Fprintf(tty,
-		"  - Signed in as %s!",
-		output.String(userInfo.Whoami).Bold(),
-	)
-	fmt.Fprintln(tty)
-
-	return nil
-}
-
-// FIXME: dedup mostly identical RunTUI/RunTTY
 
 func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)

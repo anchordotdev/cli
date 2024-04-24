@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema-pro.json
+
 project_name: anchor
 
 before:
@@ -15,15 +17,15 @@ builds:
         - CGO_ENABLED=0
     id: linux
     goos: [linux]
-    goarch: [amd64,arm64,386]
+    goarch: ['amd64','arm64','386']
   - <<: *build_defaults
     id: macos
     goos: [darwin]
-    goarch: [amd64,arm64]
+    goarch: ['amd64','arm64']
   - <<: *build_defaults
     id: windows
     goos: [windows]
-    goarch: [amd64,386]
+    goarch: ['amd64','386']
 
 archives:
   - id: linux
@@ -33,7 +35,8 @@ archives:
       wrap_in_directory: true
       name_template: >-
         {{ .ProjectName }}_
-        {{- title .Os }}_
+        {{- if eq .Os "darwin" }}MacOS
+        {{- else}}{{- title .Os }}{{ end }}_
         {{- if eq .Arch "amd64" }}x86_64
         {{- else if eq .Arch "386" }}i386
         {{- else }}{{ .Arch }}{{ end }}
@@ -61,12 +64,14 @@ brews:
       assert_match "anchor is a command line interface for the Anchor certificate management platform.", shell_output("#{bin}/anchor")
 
 msi:
-- id: anchor-msi
+- name: msi-builder
+  id: anchor-msi
   ids:
     - windows
   wxs: ./windows/app.wxs
   extra_files:
     - ./windows/als2.ico
+    - ../../LICENSE
   mod_timestamp: "{{ .CommitTimestamp }}"
 
 chocolateys:

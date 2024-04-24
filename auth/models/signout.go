@@ -8,13 +8,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type SignOutPreamble struct{}
+type SignOutHeader struct{}
 
-func (SignOutPreamble) Init() tea.Cmd { return nil }
+func (SignOutHeader) Init() tea.Cmd { return nil }
 
-func (m *SignOutPreamble) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+func (m *SignOutHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 
-func (m *SignOutPreamble) View() string {
+func (m *SignOutHeader) View() string {
 	var b strings.Builder
 	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Signout from Anchor.dev %s", ui.Whisper("`anchor auth signout`"))))
 	return b.String()

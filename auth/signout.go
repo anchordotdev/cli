@@ -10,9 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CmdAuthSignout = cli.NewCmd[SignOut](CmdAuth, "signout", func(cmd *cobra.Command) {
-	cmd.Args = cobra.NoArgs
-})
+var CmdAuthSignout = cli.NewCmd[SignOut](CmdAuth, "signout", func(cmd *cobra.Command) {})
 
 type SignOut struct{}
 
@@ -25,7 +23,7 @@ func (s SignOut) UI() cli.UI {
 func (s *SignOut) runTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
-	drv.Activate(ctx, &models.SignOutPreamble{})
+	drv.Activate(ctx, &models.SignOutHeader{})
 
 	kr := keyring.Keyring{Config: cfg}
 	err := kr.Delete(keyring.APIToken)

@@ -2,7 +2,6 @@ package lcl
 
 import (
 	"context"
-	"runtime"
 	"testing"
 
 	"github.com/anchordotdev/cli"
@@ -11,20 +10,12 @@ import (
 )
 
 func TestCmdLclAudit(t *testing.T) {
-	cmd := CmdLclAudit
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "lcl", "audit", "--help")
+		cmdtest.TestHelp(t, CmdLclAudit, "lcl", "audit", "--help")
 	})
 }
 
 func TestAudit(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("no pty support on windows")
-	}
-
 	if srv.IsProxy() {
 		t.Skip("lcl audit unsupported in proxy mode")
 	}

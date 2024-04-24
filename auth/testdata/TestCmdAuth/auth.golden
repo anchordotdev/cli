@@ -5,9 +5,9 @@ Usage:
   anchor auth [command]
 
 Available Commands:
-  signin      Authenticate with your account
-  signout     Invalidate your local Anchor account session
-  whoami      Identify current account
+  signin      Authenticate With Your Account
+  signout     Invalidate Local Anchor Session
+  whoami      Identify Current Anchor.dev Account
 
 Flags:
   -h, --help   help for auth

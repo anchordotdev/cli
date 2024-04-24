@@ -5,7 +5,6 @@ import (
 	"flag"
 	"testing"
 
-	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/cmdtest"
 )
@@ -27,16 +26,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestCmdAuth(t *testing.T) {
-	cmd := CmdAuth
-	cfg := cli.ConfigFromCmd(cmd)
-	cfg.Test.SkipRunE = true
-
 	t.Run("auth", func(t *testing.T) {
-		cfg.Test.SkipRunE = false
-		cmdtest.TestOutput(t, cmd, "auth")
+		cmdtest.TestHelp(t, CmdAuth, "auth")
 	})
 
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestOutput(t, cmd, "auth", "--help")
+		cmdtest.TestHelp(t, CmdAuth, "auth", "--help")
 	})
 }
