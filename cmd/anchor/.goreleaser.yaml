@@ -64,7 +64,7 @@ brews:
       assert_match "anchor is a command line interface for the Anchor certificate management platform.", shell_output("#{bin}/anchor")
 
 msi:
-- name: msi-builder
+- name: "msi-builder-{{ .MsiArch }}"
   id: anchor-msi
   ids:
     - windows
