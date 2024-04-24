@@ -25,13 +25,14 @@ jobs:
           fetch-depth: 0
       - name: 'Caches: go'
         uses: actions/cache@v4
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: go-${{ runner.os }}-${{ github.job }}-${{ hashFiles(inputs.key-files) }}
-        restore-keys: |
-          go-${{ runner.os }}-${{ github.job }}-
-          go-${{ runner.os }}-
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: go-${{ runner.os }}-${{ github.job }}-${{ hashFiles(inputs.key-files) }}
+          restore-keys: |
+            go-${{ runner.os }}-${{ github.job }}-
+            go-${{ runner.os }}-
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
