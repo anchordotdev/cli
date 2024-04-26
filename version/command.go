@@ -22,11 +22,11 @@ func (c Command) UI() cli.UI {
 
 func (c Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, &models.Version{
-		Arch:    info.arch,
-		Commit:  info.commit,
-		Date:    info.date,
-		OS:      info.os,
-		Version: info.version,
+		Arch:    cli.Version.Arch,
+		Commit:  cli.Version.Commit,
+		Date:    cli.Version.Date,
+		OS:      cli.Version.Os,
+		Version: cli.Version.Version,
 	})
 
 	return nil

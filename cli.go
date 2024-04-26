@@ -2,10 +2,40 @@ package cli
 
 import (
 	"context"
+	"fmt"
+	"runtime"
 
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
 )
+
+var Version = struct {
+	Version, Commit, Date string
+
+	Os, Arch string
+}{
+	Version: "dev",
+	Commit:  "none",
+	Date:    "unknown",
+	Os:      runtime.GOOS,
+	Arch:    runtime.GOARCH,
+}
+
+func IsDevVersion() bool {
+	return Version.Version == "dev"
+}
+
+func UserAgent() string {
+	return "Anchor CLI " + VersionString()
+}
+
+func ReleaseTagName() string {
+	return fmt.Sprintf("v%s", Version.Version)
+}
+
+func VersionString() string {
+	return fmt.Sprintf("%s (%s/%s) Commit: %s BuildDate: %s", Version.Version, Version.Os, Version.Arch, Version.Commit, Version.Date)
+}
 
 type Config struct {
 	JSON           bool `desc:"Only print JSON output to STDOUT." flag:"json,j" env:"JSON_OUTPUT" toml:"json-output"`

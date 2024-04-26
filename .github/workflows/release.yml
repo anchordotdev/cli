@@ -138,6 +138,11 @@ jobs:
       - shell: bash
         run: |
           cp cmd/anchor/dist/windows/anchor.${{ env.RELEASE_VERSION }}.nupkg ./
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anchor.${{ env.RELEASE_VERSION }}.nupkg
+          overwrite: true
+          path: cmd/anchor/dist/windows/anchor.${{ env.RELEASE_VERSION }}.nupkg
 
       - shell: pwsh
         run: |

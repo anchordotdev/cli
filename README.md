@@ -52,7 +52,7 @@ Available via [Chocolatey][] or as a downloadable binary from the [releases page
 
 Install:
 ```
-chocolatey install anchor --version=0.0.23
+chocolatey install anchor --version=0.0.22
 ```
 
 ### Install from source

@@ -14,6 +14,14 @@ import (
 	"github.com/muesli/termenv"
 )
 
+var (
+	spinnerReplacer = strings.NewReplacer(strings.Split(spinnerCharacters, ",")...)
+
+	waitingFrames     = WaitingSpinner().Spinner.Frames
+	replacementFrame  = waitingFrames[0]
+	spinnerCharacters = strings.Join(waitingFrames, ","+replacementFrame+",") + "," + replacementFrame
+)
+
 type Program interface {
 	Quit()
 	Run() (tea.Model, error)
@@ -159,12 +167,13 @@ func (d *Driver) View() string {
 	for _, mdl := range d.models {
 		out += mdl.View()
 	}
-	if d.test && out != "" && out != d.lastView {
+	normalizedOut := spinnerReplacer.Replace(out)
+	if d.test && out != "" && normalizedOut != d.lastView {
 		separator := "─── " + reflect.TypeOf(d.active).Elem().Name() + " "
 		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
 		fmt.Fprintln(d.out, separator)
-		fmt.Fprint(d.out, out)
-		d.lastView = out
+		fmt.Fprint(d.out, normalizedOut)
+		d.lastView = normalizedOut
 	}
 	return out
 }

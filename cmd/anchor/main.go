@@ -21,7 +21,9 @@ var (
 
 func init() {
 	if version != "" {
-		versionpkg.Set(version, commit, date)
+		cli.Version.Commit = commit
+		cli.Version.Date = date
+		cli.Version.Version = version
 	}
 	cli.CmdRoot.PersistentPreRunE = versionpkg.VersionCheck
 }

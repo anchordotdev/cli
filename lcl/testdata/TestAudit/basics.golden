@@ -1,7 +1,7 @@
 ─── Client ─────────────────────────────────────────────────────────────────────
-    * Checking authentication: probing credentials locally…*
+    * Checking authentication: probing credentials locally…⠋
 ─── Client ─────────────────────────────────────────────────────────────────────
-    * Checking authentication: testing credentials remotely…*
+    * Checking authentication: testing credentials remotely…⠋
 ─── AuditHeader ────────────────────────────────────────────────────────────────
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
 ─── AuditHint ──────────────────────────────────────────────────────────────────
@@ -10,7 +10,7 @@
 ─── AuditResources ─────────────────────────────────────────────────────────────
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
     | We'll begin by checking your system to determine what you need for your setup.
-    * Checking resources on Anchor.dev…*
+    * Checking resources on Anchor.dev…⠋
 ─── AuditResources ─────────────────────────────────────────────────────────────
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
     | We'll begin by checking your system to determine what you need for your setup.
@@ -19,7 +19,7 @@
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
     | We'll begin by checking your system to determine what you need for your setup.
     - Checked resources on Anchor.dev: need to provision resources.
-    * Scanning local and expected CA certificates…*
+    * Scanning local and expected CA certificates…⠋
 ─── AuditTrust ─────────────────────────────────────────────────────────────────
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
     | We'll begin by checking your system to determine what you need for your setup.

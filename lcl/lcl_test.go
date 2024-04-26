@@ -170,20 +170,6 @@ func TestLcl(t *testing.T) {
 					t.Fatal(<-errc)
 				}
 
-				expect := "Entered hello-world.lcl.host domain for lcl.host diagnostic certificate."
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
-		)
-
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
 				expect := fmt.Sprintf("! Press Enter to open %s in your browser.", httpURL)
 				return bytes.Contains(bts, []byte(expect))
 			},

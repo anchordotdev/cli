@@ -14,7 +14,6 @@ import (
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/ui"
-	"github.com/anchordotdev/cli/version"
 	"github.com/spf13/cobra"
 )
 
@@ -127,7 +126,7 @@ func provisionCert(eab *api.Eab, domains []string, acmeURL string) (*tls.Certifi
 		HostPolicy: autocert.HostWhitelist(domains...),
 		Client: &acme.Client{
 			DirectoryURL: acmeURL,
-			UserAgent:    version.UserAgent(),
+			UserAgent:    cli.UserAgent(),
 		},
 		ExternalAccountBinding: &acme.ExternalAccountBinding{
 			KID: eab.Kid,

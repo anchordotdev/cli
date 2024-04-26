@@ -2,7 +2,7 @@
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
 ─── TrustAuditScan ─────────────────────────────────────────────────────────────
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
-    * Scanning local and expected CA certificates…*
+    * Scanning local and expected CA certificates…⠋
 ─── TrustAuditScan ─────────────────────────────────────────────────────────────
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
     - Scanned local and expected CA certificates.

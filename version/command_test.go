@@ -3,6 +3,7 @@ package version
 import (
 	"context"
 	"flag"
+	"fmt"
 	"runtime"
 	"testing"
 
@@ -22,14 +23,12 @@ func TestCmdVersion(t *testing.T) {
 }
 
 func TestCommand(t *testing.T) {
-	if runtime.GOOS != "linux" {
-		t.Skip("only run version test on linux since OS is in output")
-	}
+	t.Run(fmt.Sprintf("golden-%s_%s", runtime.GOOS, runtime.GOARCH), func(t *testing.T) {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+		cmd := Command{}
 
-	cmd := new(Command)
-
-	uitest.TestTUIOutput(ctx, t, cmd.UI())
+		uitest.TestTUIOutput(ctx, t, cmd.UI())
+	})
 }

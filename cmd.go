@@ -245,9 +245,17 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 			panic(err)
 		}
 
-		cmd.RunE = func(cmd *cobra.Command, _ []string) error {
+		cmd.RunE = func(cmd *cobra.Command, args []string) error {
 			cfg := ConfigFromCmd(cmd)
 			if cfg.Test.SkipRunE {
+				return nil
+			}
+
+			var t T
+
+			switch any(t).(type) {
+			case ShowHelp:
+				cmd.HelpFunc()(cmd, args)
 				return nil
 			}
 
@@ -266,7 +274,6 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 				errc <- err
 			}()
 
-			var t T
 			if err := t.UI().RunTUI(ctx, drv); err != nil && err != context.Canceled {
 				prg.Quit()
 

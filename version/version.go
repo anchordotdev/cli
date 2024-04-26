@@ -6,40 +6,15 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/atotto/clipboard"
 	"github.com/google/go-github/v54/github"
 	"github.com/spf13/cobra"
 )
 
-var info = struct {
-	version, commit, date string
-
-	os, arch string
-}{
-	version: "dev",
-	commit:  "none",
-	date:    "unknown",
-	os:      runtime.GOOS,
-	arch:    runtime.GOARCH,
-}
-
-func Set(version, commit, date string) {
-	info.version = version
-	info.commit = commit
-	info.date = date
-}
-
-func String() string {
-	return fmt.Sprintf("%s (%s/%s) Commit: %s BuildDate: %s", info.version, info.os, info.arch, info.commit, info.date)
-}
-
-func UserAgent() string {
-	return "Anchor CLI " + String()
-}
-
 func VersionCheck(cmd *cobra.Command, args []string) error {
-	if info.version == "dev" {
+	if cli.IsDevVersion() {
 		return nil
 	}
 
@@ -53,7 +28,7 @@ func VersionCheck(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if release.TagName == nil || *release.TagName != "v"+info.version {
+	if release.TagName == nil || *release.TagName != cli.ReleaseTagName() {
 		fmt.Println(ui.StepHint("A new release of the anchor CLI is available."))
 		if !isWindowsRuntime() {
 			command := "brew update && brew upgrade anchor"

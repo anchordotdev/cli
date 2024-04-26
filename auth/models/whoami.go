@@ -39,7 +39,7 @@ func (m *WhoAmIChecker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case UserWhoAmIMsg:
 		m.whoami = string(msg)
-		return m, tea.Quit
+		return m, nil
 	}
 
 	var cmd tea.Cmd

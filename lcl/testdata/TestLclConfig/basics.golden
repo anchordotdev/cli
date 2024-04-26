@@ -1,7 +1,7 @@
 ─── Client ─────────────────────────────────────────────────────────────────────
-    * Checking authentication: probing credentials locally…*
+    * Checking authentication: probing credentials locally…⠋
 ─── Client ─────────────────────────────────────────────────────────────────────
-    * Checking authentication: testing credentials remotely…*
+    * Checking authentication: testing credentials remotely…⠋
 ─── LclConfigHeader ────────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
 ─── LclConfigHint ──────────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@
     |
     | We'll start a local diagnostic web server to guide you through the process.
     - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
-    * Resolving hello-world.lcl.host domain…*
+    * Resolving hello-world.lcl.host domain…⠋
 ─── DomainResolver ─────────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates for your local applications, we need to
@@ -151,7 +151,7 @@
     - Resolved hello-world.lcl.host domain: success!
     | Now we'll provision your application's resources on Anchor.dev and the HTTPS
     | certificates for your development environment.
-    - Creating hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev… *
+    - Creating hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev… ⠋
 ─── ProvisionService ───────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates for your local applications, we need to
@@ -203,7 +203,7 @@
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
     | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
-    * Comparing local and expected CA certificates…*
+    * Comparing local and expected CA certificates…⠋
 ─── TrustPreflight ─────────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates for your local applications, we need to

@@ -17,7 +17,6 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/keyring"
-	"github.com/anchordotdev/cli/version"
 	"golang.org/x/exp/slices"
 )
 
@@ -370,7 +369,7 @@ type userAgentSetter struct {
 }
 
 func (s userAgentSetter) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("User-Agent", version.UserAgent())
+	req.Header.Set("User-Agent", cli.UserAgent())
 
 	return s.RoundTripper.RoundTrip(req)
 }

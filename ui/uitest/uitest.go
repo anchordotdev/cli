@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/teatest"
@@ -20,11 +19,6 @@ import (
 func init() {
 	lipgloss.SetColorProfile(termenv.Ascii) // no color for consistent golden file
 	lipgloss.SetHasDarkBackground(false)    // dark background for consistent golden file
-
-	ui.Waiting = spinner.Spinner{
-		Frames: []string{"*"},
-		FPS:    time.Second / 100,
-	}
 }
 
 func TestTUI(ctx context.Context, t *testing.T) (*ui.Driver, *teatest.TestModel) {

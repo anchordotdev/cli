@@ -1,5 +1,5 @@
 ─── TrustPreflight ─────────────────────────────────────────────────────────────
-    * Comparing local and expected CA certificates…*
+    * Comparing local and expected CA certificates…⠋
 ─── TrustPreflight ─────────────────────────────────────────────────────────────
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     ! Installing 2 missing certificates. (requires sudo)
