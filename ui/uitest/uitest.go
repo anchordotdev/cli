@@ -35,11 +35,18 @@ type program struct {
 }
 
 func (p program) Quit() {
-	panic("TODO")
+	err := p.TestModel.Quit()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (p program) Run() (tea.Model, error) {
 	panic("TODO")
+}
+
+func (p program) Wait() {
+	// no-op, for TestError and since TestModel doesn't provide a Wait without needing a t.testing
 }
 
 func TestTUIError(ctx context.Context, t *testing.T, tui cli.UI, msgAndArgs ...interface{}) {

@@ -26,6 +26,7 @@ type Program interface {
 	Quit()
 	Run() (tea.Model, error)
 	Send(tea.Msg)
+	Wait()
 }
 
 type Driver struct {
@@ -67,6 +68,9 @@ func NewDriverTUI(ctx context.Context) (*Driver, Program) {
 		tea.WithInputTTY(),
 		tea.WithContext(ctx),
 	}
+
+	drv.out = &safeReadWriter{rw: new(bytes.Buffer)}
+	drv.Out = io.TeeReader(drv.out, &drv.finalOut)
 	drv.Program = tea.NewProgram(drv, opts...)
 
 	return drv, drv.Program
@@ -168,8 +172,8 @@ func (d *Driver) View() string {
 		out += mdl.View()
 	}
 	normalizedOut := spinnerReplacer.Replace(out)
-	if d.test && out != "" && normalizedOut != d.lastView {
-		separator := "─── " + reflect.TypeOf(d.active).Elem().Name() + " "
+	if out != "" && normalizedOut != d.lastView {
+		separator := fmt.Sprintf("─── %s ", reflect.TypeOf(d.active).Elem().Name())
 		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
 		fmt.Fprintln(d.out, separator)
 		fmt.Fprint(d.out, normalizedOut)

@@ -2,6 +2,9 @@ package cli
 
 import (
 	"context"
+	"fmt"
+	"runtime/debug"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/anchordotdev/cli/ui"
@@ -182,8 +185,6 @@ var cmdDefByCommands = map[*cobra.Command]*CmdDef{}
 
 var constructorByCommands = map[*cobra.Command]func() *cobra.Command{}
 
-var version string
-
 type UIer interface {
 	UI() UI
 }
@@ -216,11 +217,12 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 		}
 
 		cmd := &cobra.Command{
-			Use:          def.Use,
-			Args:         def.Args,
-			Short:        def.Short,
-			Long:         def.Long,
-			SilenceUsage: true,
+			Use:           def.Use,
+			Args:          def.Args,
+			Short:         def.Short,
+			Long:          def.Long,
+			SilenceErrors: true,
+			SilenceUsage:  true,
 		}
 
 		ctx := ContextWithConfig(context.Background(), cfg)
@@ -245,7 +247,7 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 			panic(err)
 		}
 
-		cmd.RunE = func(cmd *cobra.Command, args []string) error {
+		cmd.RunE = func(cmd *cobra.Command, args []string) (returnedError error) {
 			cfg := ConfigFromCmd(cmd)
 			if cfg.Test.SkipRunE {
 				return nil
@@ -263,6 +265,7 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 			defer cancel(nil)
 
 			drv, prg := ui.NewDriverTUI(ctx)
+
 			errc := make(chan error)
 
 			go func() {
@@ -274,16 +277,12 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 				errc <- err
 			}()
 
+			defer Cleanup(&returnedError, errc, ctx, drv, cmd, args)
 			if err := t.UI().RunTUI(ctx, drv); err != nil && err != context.Canceled {
-				prg.Quit()
-
-				<-errc // TODO: report this somewhere?
 				return err
 			}
 
-			prg.Quit()
-
-			return <-errc // TODO: special handling for a UI error
+			return nil
 		}
 
 		return cmd
@@ -296,6 +295,32 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 	cmdDefByCommands[cmd] = def
 	constructorByCommands[cmd] = constructor
 	return cmd
+}
+
+func Cleanup(returnedError *error, errc chan error, ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args []string) {
+	var stack string
+
+	panicMsg := recover()
+	if panicMsg != nil {
+		lines := strings.Split(string(debug.Stack()), "\n")
+		// omit lines: 0 go routine, 2-3 stack call, 4-5 cleanup call
+		stack = strings.Join(lines[5:], "\n")
+
+		*returnedError = fmt.Errorf("%s", panicMsg)
+	}
+
+	if *returnedError != nil {
+		ReportError(ctx, drv, cmd, args, *returnedError, stack)
+	}
+
+	// release/restore
+	drv.Program.Quit()
+	drv.Program.Wait()
+
+	// FIXME: handle UI errors?
+	if errc != nil {
+		*returnedError = <-errc
+	}
 }
 
 func NewTestCmd(cmd *cobra.Command) *cobra.Command {

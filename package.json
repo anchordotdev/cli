@@ -1,0 +1,9 @@
+{
+  "name": "anchor",
+  "private": true,
+  "dependencies": {},
+  "scripts": {},
+  "devDependencies": {
+    "@stoplight/prism-cli": "5.7.0"
+  }
+}

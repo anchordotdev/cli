@@ -15,7 +15,6 @@ var (
 	header = lipgloss.NewStyle().Bold(true)
 	hint   = lipgloss.NewStyle().Faint(true).SetString("|")
 
-	Error     = lipgloss.NewStyle().Bold(true).Foreground(colorDanger).SetString("! Error:").Render
 	Header    = header.Copy().SetString("#").Render
 	Skip      = header.Copy().Faint(true).SetString("# Skipped:").Render
 	Hint      = hint.Copy().Render
@@ -32,6 +31,7 @@ var (
 	Accentuate         = lipgloss.NewStyle().Italic(true).Render
 	Action             = lipgloss.NewStyle().Bold(true).Foreground(colorBrandPrimary).Render
 	Announce           = lipgloss.NewStyle().Background(colorBrandSecondary).Render
+	Error              = lipgloss.NewStyle().Bold(true).Foreground(colorDanger).Render
 	Emphasize          = lipgloss.NewStyle().Bold(true).Render
 	EmphasizeUnderline = lipgloss.NewStyle().Bold(true).Underline(true).Render
 	Titlize            = lipgloss.NewStyle().Bold(true).Render
