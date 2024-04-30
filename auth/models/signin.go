@@ -94,7 +94,7 @@ func (m *SignInChecker) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case UserSignInMsg:
 		m.whoami = string(msg)
-		return m, tea.Quit
+		return m, nil
 	}
 
 	var cmd tea.Cmd
