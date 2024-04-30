@@ -14,6 +14,6 @@ Usage:
 
 Flags:
   -h, --help                   help for audit
-  -o, --organization string    Organization to trust.
+  -o, --org string             Organization to trust.
   -r, --realm string           Realm to trust.
       --trust-stores strings   Trust stores to update. (default [homebrew,nss,system])

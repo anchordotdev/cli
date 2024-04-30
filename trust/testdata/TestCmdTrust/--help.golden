@@ -15,7 +15,7 @@ Available Commands:
 Flags:
   -h, --help                   help for trust
       --no-sudo                Disable sudo prompts.
-  -o, --organization string    Organization to trust.
+  -o, --org string             Organization to trust.
   -r, --realm string           Realm to trust.
       --trust-stores strings   Trust stores to update. (default [homebrew,nss,system])
 
