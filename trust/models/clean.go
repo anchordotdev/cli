@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -159,6 +160,14 @@ func (m *TrustCleanCA) View() string {
 	}
 
 	if m.cleaning != nil {
+		// present thumbprint for comparison with pop up prompt
+		if runtime.GOOS == "windows" {
+			fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("\"%s\" Thumbprint (sha1): %s",
+				m.CA.Subject.CommonName,
+				m.CA.WindowsThumbprint(),
+			)))
+		}
+
 		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Cleaning %s %s: removing from %s…%s",
 			ui.EmphasizeUnderline(m.CA.Subject.CommonName),
 			ui.Emphasize(m.CA.PublicKeyAlgorithm.String()),

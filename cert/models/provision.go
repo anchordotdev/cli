@@ -32,7 +32,7 @@ func (m *Provision) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.chainFile = msg[1]
 		m.keyFile = msg[2]
 
-		return m, tea.Quit
+		return m, nil
 	default:
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)

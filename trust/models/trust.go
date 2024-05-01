@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/anchordotdev/cli"
@@ -116,7 +117,7 @@ func (m *TrustPreflight) View() string {
 			fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to install %d missing certificates. (%s)", ui.Action("Press Enter"), len(m.auditInfo.Missing), ui.Accentuate("requires sudo"))))
 		}
 	case noSync:
-		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Compared local and expected CA certificates: found matching certificates.")))
+		fmt.Fprintln(&b, ui.StepDone("Compared local and expected CA certificates: found matching certificates."))
 	default:
 		panic("impossible")
 	}
@@ -185,6 +186,14 @@ func (m *TrustUpdateStore) View() string {
 	}
 
 	if m.installing != nil {
+		// present thumbprint for comparison with pop up prompt
+		if runtime.GOOS == "windows" {
+			fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("\"%s\" Thumbprint (sha1): %s",
+				m.installing.Subject.CommonName,
+				m.installing.WindowsThumbprint(),
+			)))
+		}
+
 		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Updating %s: installing %s %s.",
 			ui.Emphasize(m.Store.Description()),
 			ui.Underline(m.installing.Subject.CommonName),

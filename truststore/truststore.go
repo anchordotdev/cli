@@ -1,11 +1,14 @@
 package truststore
 
 import (
+	"crypto/sha1"
 	"crypto/subtle"
 	"crypto/x509"
+	"encoding/hex"
 	"fmt"
 	"io/fs"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -29,6 +32,15 @@ type CA struct {
 
 func (c *CA) Equal(ca *CA) bool {
 	return c.UniqueName == ca.UniqueName && subtle.ConstantTimeCompare(c.Raw, ca.Raw) == 1
+}
+
+var reWindowsThumbprintSpacer = regexp.MustCompile(".{8}")
+
+func (c *CA) WindowsThumbprint() string {
+	certSha := sha1.Sum(c.Raw)
+	certHex := strings.ToUpper(hex.EncodeToString(certSha[:]))
+	thumbprint := strings.TrimRight(reWindowsThumbprintSpacer.ReplaceAllString(certHex, "$0 "), " ")
+	return thumbprint
 }
 
 func fatalErr(err error, msg string) error {
