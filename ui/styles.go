@@ -19,6 +19,7 @@ var (
 	Skip      = header.Copy().Faint(true).SetString("# Skipped:").Render
 	Hint      = hint.Copy().Render
 	Underline = lipgloss.NewStyle().Underline(true).Render
+	Warning   = header.Copy().SetString(bgBanana(fgMidnight("!")) + fgBanana(" Warning:")).Render
 
 	// https://github.com/charmbracelet/lipgloss/blob/v0.9.1/style.go#L149
 
@@ -28,9 +29,11 @@ var (
 	StepInProgress = lipgloss.NewStyle().SetString("    *").Render
 	StepPrompt     = lipgloss.NewStyle().SetString("    " + Prompt.Render("?")).Render
 
+	Announce = lipgloss.NewStyle().Background(colorBrandSecondary).Render
+	bgBanana = lipgloss.NewStyle().Background(colorBanana).Render
+
 	Accentuate         = lipgloss.NewStyle().Italic(true).Render
 	Action             = lipgloss.NewStyle().Bold(true).Foreground(colorBrandPrimary).Render
-	Announce           = lipgloss.NewStyle().Background(colorBrandSecondary).Render
 	Error              = lipgloss.NewStyle().Bold(true).Foreground(colorDanger).Render
 	Emphasize          = lipgloss.NewStyle().Bold(true).Render
 	EmphasizeUnderline = lipgloss.NewStyle().Bold(true).Underline(true).Render
@@ -38,9 +41,19 @@ var (
 	URL                = lipgloss.NewStyle().Faint(true).Underline(true).Render
 	Whisper            = lipgloss.NewStyle().Faint(true).Render
 
-	colorBrandPrimary   = lipgloss.Color("#ff6000")
-	colorBrandSecondary = lipgloss.Color("#7000ff")
-	colorDanger         = lipgloss.Color("#E63757")
+	fgBanana   = lipgloss.NewStyle().Foreground(colorBanana).Render
+	fgMidnight = lipgloss.NewStyle().Foreground(colorMidnight).Render
+
+	colorBrandPrimary   = colorMandarin
+	colorBrandSecondary = colorGrape
+	colorDanger         = colorApple
+
+	// Brand Palette
+	colorMidnight = lipgloss.Color("#110C18")
+	colorGrape    = lipgloss.Color("#60539E")
+	colorMandarin = lipgloss.Color("#FF6000")
+	colorApple    = lipgloss.Color("#CE4433")
+	colorBanana   = lipgloss.Color("#FBF5AC")
 
 	Prompt = lipgloss.NewStyle().Foreground(colorBrandPrimary)
 

@@ -2,10 +2,7 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/atotto/clipboard"
@@ -17,6 +14,7 @@ import (
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth/models"
 	"github.com/anchordotdev/cli/keyring"
+	cliModels "github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
@@ -49,7 +47,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, s.Hint)
 
 	anc, err := api.NewClient(cfg)
-	if err != nil && err != api.ErrSignedOut {
+	if err != nil && !errors.Is(err, api.ErrSignedOut) {
 		return err
 	}
 
@@ -78,7 +76,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	if err := browser.OpenURL(codes.VerificationUri); err != nil {
-		return err
+		drv.Activate(ctx, &cliModels.Browserless{Url: codes.VerificationUri})
 	}
 
 	drv.Activate(ctx, new(models.SignInChecker))
@@ -95,38 +93,24 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 	cfg.API.Token = patToken
 
-	userInfo, err := fetchUserInfo(cfg)
+	anc, err = api.NewClient(cfg)
+	if err != nil {
+		return err
+	}
+
+	userInfo, err := anc.UserInfo(ctx)
 	if err != nil {
 		return err
 	}
 
 	kr := keyring.Keyring{Config: cfg}
 	if err := kr.Set(keyring.APIToken, cfg.API.Token); err != nil {
-		return err
+		drv.Activate(ctx, &models.KeyringUnavailable{
+			ShowGnomeKeyringHint: errors.Is(err, api.ErrGnomeKeyringRequired),
+		})
 	}
 
 	drv.Send(models.UserSignInMsg(userInfo.Whoami))
 
 	return nil
-}
-
-func fetchUserInfo(cfg *cli.Config) (*api.Root, error) {
-	anc, err := api.NewClient(cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := anc.Get("")
-	if err != nil {
-		return nil, err
-	}
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected response code: %d", res.StatusCode)
-	}
-
-	var userInfo *api.Root
-	if err := json.NewDecoder(res.Body).Decode(&userInfo); err != nil {
-		return nil, err
-	}
-	return userInfo, nil
 }

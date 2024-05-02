@@ -159,11 +159,11 @@ func init() {
 	joinedGoPaths := strings.Join(goPaths, ",<gopath>,") + ",<gopath>"
 	replacements := strings.Split(joinedGoPaths, ",")
 	replacements = append(replacements, runtime.GOROOT(), "<goroot>")
-	
+
 	if pwd, _ := os.Getwd(); pwd != "" {
 		replacements = append(replacements, pwd, "<pwd>")
 	}
-	
+
 	stackPathReplacer = strings.NewReplacer(replacements...)
 }
 
@@ -212,7 +212,7 @@ func ReportError(ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args [
 	if stack != "" {
 		fmt.Fprintf(&body, "**Stack:**\n```\n%s\n```\n", normalizeStack(stack))
 	}
-	fmt.Fprintf(&body, "**Stdout:**\n```\n%s\n```\n", strings.TrimRight(string(drv.FinalOut()), "\n"))
+	fmt.Fprintf(&body, "**Stdout:**\n```\n%s\n```\n", strings.TrimRight(string(drv.LastView), "\n"))
 	q.Add("body", body.String())
 
 	reportErrorConfirmCh := make(chan struct{})

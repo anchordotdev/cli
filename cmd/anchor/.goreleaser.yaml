@@ -17,15 +17,15 @@ builds:
         - CGO_ENABLED=0
     id: linux
     goos: [linux]
-    goarch: ['amd64','arm64','386']
+    goarch: ["amd64", "arm64", "386"]
   - <<: *build_defaults
     id: macos
     goos: [darwin]
-    goarch: ['amd64','arm64']
+    goarch: ["amd64", "arm64"]
   - <<: *build_defaults
     id: windows
     goos: [windows]
-    goarch: ['amd64','386']
+    goarch: ["amd64", "386"]
 
 archives:
   - id: linux
@@ -64,39 +64,87 @@ brews:
       assert_match "anchor is a command line interface for the Anchor certificate management platform.", shell_output("#{bin}/anchor")
 
 msi:
-- name: "msi-builder-{{ .MsiArch }}"
-  id: anchor-msi
-  ids:
-    - windows
-  wxs: ./windows/app.wxs
-  extra_files:
-    - ./windows/als2.ico
-    - ../../LICENSE
-  mod_timestamp: "{{ .CommitTimestamp }}"
+  - name: "msi-builder-{{ .MsiArch }}"
+    id: anchor-msi
+    ids:
+      - windows
+    wxs: ./windows/app.wxs
+    extra_files:
+      - ./windows/als2.ico
+      - ../../LICENSE
+    mod_timestamp: "{{ .CommitTimestamp }}"
 
 chocolateys:
-- name: anchor
-  ids:
-    - anchor-msi
-  package_source_url: https://github.com/anchordotdev/cli
-  owners: Anchor Security, Inc.
-  title: Anchor CLI
-  authors: Anchor
-  project_url: https://anchor.dev
-  use: msi
-  url_template: "https://github.com/anchordotdev/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-  copyright: 2024 Anchor Security, Inc.
-  license_url: https://raw.githubusercontent.com/anchordotdev/cli/main/LICENSE
-  require_license_acceptance: false
-  project_source_url: https://github.com/anchordotdev/cli
-  docs_url: https://anchor.dev/docs
-  bug_tracker_url: https://github.com/anchordotdev/cli/issues
-  icon_url: https://anchor.dev/images/als2.png
-  tags: "security tls ssl certificates localhost https cryptography encryption acme cli x509 X.509"
-  summary: "Command-line tools for Anchor.dev"
-  description: |
+  - name: anchor
+    ids:
+      - anchor-msi
+    package_source_url: https://github.com/anchordotdev/cli
+    owners: Anchor Security, Inc.
+    title: Anchor CLI
+    authors: Anchor
+    project_url: https://anchor.dev
+    use: msi
+    url_template: "https://github.com/anchordotdev/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    copyright: 2024 Anchor Security, Inc.
+    license_url: https://raw.githubusercontent.com/anchordotdev/cli/main/LICENSE
+    require_license_acceptance: false
+    project_source_url: https://github.com/anchordotdev/cli
+    docs_url: https://anchor.dev/docs
+    bug_tracker_url: https://github.com/anchordotdev/cli/issues
+    icon_url: https://anchor.dev/images/als2.png
+    tags: "security tls ssl certificates localhost https cryptography encryption acme cli x509 X.509"
+    summary: "Command-line tools for Anchor.dev"
+    description: |
       anchor is a command line interface for the Anchor certificate management platform.
       It provides a developer friendly interface for certificate management.
-  release_notes: "https://github.com/anchordotdev/cli/releases/tag/v{{ .Version }}"
-  api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
-  source_repo: "https://push.chocolatey.org/"
+    release_notes: "https://github.com/anchordotdev/cli/releases/tag/v{{ .Version }}"
+    api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
+    source_repo: "https://push.chocolatey.org/"
+
+winget:
+  - name: cli
+    publisher: Anchor
+    short_description: "Command-line tools for Anchor.dev"
+    license: mit
+    publisher_url: https://anchor.dev
+    publisher_support_url: https://github.com/anchordotdev/cli/issues
+    package_identifier: Anchor.cli
+    ids:
+      - anchor-msi
+    use: msi
+    product_code: C5F94F62-E3CC-48E2-AB3C-4DED8C6099E9
+    url_template: "https://github.com/anchordotdev/cli/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    homepage: https://anchor.dev
+    description: |
+      anchor is a command line interface for the Anchor certificate management platform.
+      It provides a developer friendly interface for certificate management.
+    license_url: https://raw.githubusercontent.com/anchordotdev/cli/main/LICENSE
+    copyright: 2024 Anchor Security, Inc.
+    release_notes: "{{.Changelog}}"
+    release_notes_url: "https://github.com/anchordotdev/cli/releases/tag/v{{ .Version }}"
+    tags:
+      [
+        "security",
+        "tls",
+        "ssl",
+        "certificates",
+        "localhost",
+        "https",
+        "cryptography",
+        "encryption",
+        "acme",
+        "cli",
+        "x509",
+        "X.509",
+      ]
+    repository:
+      owner: anchordotdev
+      name: winget-pkgs
+      branch: "{{.ProjectName}}-{{.Version}}"
+      pull_request:
+        enabled: true
+        check_boxes: true
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master

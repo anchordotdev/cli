@@ -41,7 +41,7 @@ type Driver struct {
 	Out      io.Reader
 	out      io.ReadWriter
 	test     bool
-	lastView string
+	LastView string
 }
 
 func NewDriverTest(ctx context.Context) *Driver {
@@ -172,12 +172,12 @@ func (d *Driver) View() string {
 		out += mdl.View()
 	}
 	normalizedOut := spinnerReplacer.Replace(out)
-	if out != "" && normalizedOut != d.lastView {
+	if out != "" && normalizedOut != d.LastView {
 		separator := fmt.Sprintf("─── %s ", reflect.TypeOf(d.active).Elem().Name())
 		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
 		fmt.Fprintln(d.out, separator)
 		fmt.Fprint(d.out, normalizedOut)
-		d.lastView = normalizedOut
+		d.LastView = normalizedOut
 	}
 	return out
 }

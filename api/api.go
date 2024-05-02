@@ -22,7 +22,7 @@ import (
 
 var (
 	ErrSignedOut            = errors.New("sign in required")
-	ErrGnomeKeyringRequired = errors.New("gnome-keyring is required for secure credential storage.\n    ! Please install with your host package manager")
+	ErrGnomeKeyringRequired = fmt.Errorf("gnome-keyring required for secure credential storage: %w", ErrSignedOut)
 )
 
 // NB: can't call this Client since the name is already taken by an openapi
@@ -64,23 +64,15 @@ func NewClient(cfg *cli.Config) (*Session, error) {
 
 		if apiToken, err = kr.Get(keyring.APIToken); err == keyring.ErrNotFound {
 			return anc, ErrSignedOut
-		} else if err != nil {
-			if runtime.GOOS == "linux" {
-				_, err := exec.LookPath("gnome-keyring-daemon")
-				if err != nil {
-					_, err := exec.LookPath("apt-get")
-					if err == nil {
-						return nil, fmt.Errorf("%w:\n    sudo apt-get install gnome-keyring", ErrGnomeKeyringRequired)
-					}
-					_, err = exec.LookPath("yum")
-					if err == nil {
-						return nil, fmt.Errorf("%w:\n    sudo yum install gnome-keyring", ErrGnomeKeyringRequired)
-					}
-					return nil, fmt.Errorf("%w.", ErrGnomeKeyringRequired)
-				}
+		}
+		if err != nil {
+			if gnomeKeyringMissing() {
+				return anc, ErrGnomeKeyringRequired
 			}
+
 			return nil, fmt.Errorf("reading PAT token from keyring failed: %w", err)
 		}
+
 		if !strings.HasPrefix(apiToken, "ap0_") || len(apiToken) != 64 {
 			return nil, fmt.Errorf("read invalid PAT token from keyring")
 		}
@@ -390,3 +382,13 @@ const NotFoundErr = StatusCodeError(http.StatusNotFound)
 
 func (err StatusCodeError) StatusCode() int { return int(err) }
 func (err StatusCodeError) Error() string   { return fmt.Sprintf("unexpected %d status response", err) }
+
+func gnomeKeyringMissing() bool {
+	if runtime.GOOS != "linux" {
+		return false
+	}
+	if path, _ := exec.LookPath("gnome-keyring-daemon"); path != "" {
+		return false
+	}
+	return true
+}

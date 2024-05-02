@@ -111,3 +111,23 @@ func (m *SignInChecker) View() string {
 	}
 	return b.String()
 }
+
+type KeyringUnavailable struct {
+	ShowGnomeKeyringHint bool
+}
+
+func (m *KeyringUnavailable) Init() tea.Cmd { return nil }
+
+func (m *KeyringUnavailable) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *KeyringUnavailable) View() string {
+	var b strings.Builder
+	fmt.Fprintln(&b, ui.Warning("Unable to access keyring, credentials will not be stored."))
+
+	if m.ShowGnomeKeyringHint {
+		fmt.Fprintln(&b, ui.StepHint("gnome-keyring is required for secure credential storage."))
+		fmt.Fprintln(&b, ui.StepHint("Please install with your host package manager"))
+	}
+
+	return b.String()
+}
