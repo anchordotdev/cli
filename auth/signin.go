@@ -14,7 +14,7 @@ import (
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth/models"
 	"github.com/anchordotdev/cli/keyring"
-	cliModels "github.com/anchordotdev/cli/models"
+	climodels "github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
@@ -76,7 +76,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	if err := browser.OpenURL(codes.VerificationUri); err != nil {
-		drv.Activate(ctx, &cliModels.Browserless{Url: codes.VerificationUri})
+		drv.Activate(ctx, &climodels.Browserless{Url: codes.VerificationUri})
 	}
 
 	drv.Activate(ctx, new(models.SignInChecker))

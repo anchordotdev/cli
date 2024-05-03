@@ -65,16 +65,14 @@ func NewClient(cfg *cli.Config) (*Session, error) {
 		if apiToken, err = kr.Get(keyring.APIToken); err == keyring.ErrNotFound {
 			return anc, ErrSignedOut
 		}
-		if err != nil {
-			if gnomeKeyringMissing() {
-				return anc, ErrGnomeKeyringRequired
-			}
-
-			return nil, fmt.Errorf("reading PAT token from keyring failed: %w", err)
+		if err != nil && gnomeKeyringMissing() {
+			return anc, ErrGnomeKeyringRequired
 		}
 
-		if !strings.HasPrefix(apiToken, "ap0_") || len(apiToken) != 64 {
-			return nil, fmt.Errorf("read invalid PAT token from keyring")
+		if apiToken != "" {
+			if !strings.HasPrefix(apiToken, "ap0_") || len(apiToken) != 64 {
+				return nil, fmt.Errorf("read invalid PAT token from keyring")
+			}
 		}
 	}
 

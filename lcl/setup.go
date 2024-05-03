@@ -21,6 +21,7 @@ import (
 	"github.com/anchordotdev/cli/cert"
 	"github.com/anchordotdev/cli/detection"
 	"github.com/anchordotdev/cli/lcl/models"
+	climodels "github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
@@ -200,7 +201,7 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 
 	if !cfg.Trust.MockMode {
 		if err := browser.OpenURL(setupGuideURL); err != nil {
-			return err
+			drv.Activate(ctx, &climodels.Browserless{Url: setupGuideURL})
 		}
 	}
 

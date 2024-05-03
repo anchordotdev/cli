@@ -67,7 +67,11 @@ func (m *Browserless) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 func (m *Browserless) View() string {
 	var b strings.Builder
 
-	fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("Unable to open browser. Please open this URL in a browser to continue: %s", m.Url)))
+	fmt.Fprintln(&b, ui.Warning("Unable to open browser."))
+	fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s this in a browser to continue: %s.",
+		ui.Action("Open"),
+		ui.URL(m.Url),
+	)))
 
 	return b.String()
 }

@@ -162,6 +162,8 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
+	browserless := false
+
 	// If no certificates are missing, skip http and go directly to https
 	if len(auditInfo.Missing) != 0 {
 		httpURL, err := url.Parse("http://" + domain + ":" + diagPort)
@@ -189,14 +191,17 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 
 		if !cfg.Trust.MockMode {
 			if err := browser.OpenURL(httpURL.String()); err != nil {
-				return err
+				browserless = true
+				drv.Activate(ctx, &models.Browserless{})
 			}
 		}
 
-		select {
-		case requestedScheme = <-requestc:
-		case <-ctx.Done():
-			return ctx.Err()
+		if !browserless {
+			select {
+			case requestedScheme = <-requestc:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 		}
 
 		if requestedScheme == "https" {
@@ -241,15 +246,18 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 
 	if !cfg.Trust.MockMode {
 		if err := browser.OpenURL(httpsURL.String()); err != nil {
-			return err
+			browserless = true
+			drv.Activate(ctx, &models.Browserless{})
 		}
 	}
 
-	for requestedScheme != "https" {
-		select {
-		case requestedScheme = <-requestc:
-		case <-ctx.Done():
-			return ctx.Err()
+	if !browserless {
+		for requestedScheme != "https" {
+			select {
+			case requestedScheme = <-requestc:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
 		}
 	}
 

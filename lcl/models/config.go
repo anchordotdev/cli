@@ -139,3 +139,15 @@ func (m LclConfigSuccess) View() string {
 
 	return b.String()
 }
+
+type Browserless struct{}
+
+func (m *Browserless) Init() tea.Cmd { return nil }
+
+func (m *Browserless) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *Browserless) View() string {
+	var b strings.Builder
+	fmt.Fprintln(&b, ui.Warning("Unable to open browser, skipping browser-based verification."))
+	return b.String()
+}
