@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 	"unicode/utf8"
@@ -15,6 +16,9 @@ import (
 )
 
 var (
+	// regex from https://github.com/acarl005/stripansi
+	reAnsiStripper = regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
+
 	spinnerReplacer = strings.NewReplacer(strings.Split(spinnerCharacters, ",")...)
 
 	waitingFrames     = WaitingSpinner().Spinner.Frames
@@ -164,6 +168,16 @@ func (d *Driver) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return d, nil
 	}
 	return d, cmd
+}
+
+func (d *Driver) ErrorView() string {
+	var out string
+	for _, mdl := range d.models {
+		out += mdl.View()
+	}
+	normalizedOut := spinnerReplacer.Replace(out)
+	normalizedOut = reAnsiStripper.ReplaceAllString(normalizedOut, "")
+	return normalizedOut
 }
 
 func (d *Driver) View() string {

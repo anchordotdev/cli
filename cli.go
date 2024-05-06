@@ -212,7 +212,7 @@ func ReportError(ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args [
 	if stack != "" {
 		fmt.Fprintf(&body, "**Stack:**\n```\n%s\n```\n", normalizeStack(stack))
 	}
-	fmt.Fprintf(&body, "**Stdout:**\n```\n%s\n```\n", strings.TrimRight(string(drv.LastView), "\n"))
+	fmt.Fprintf(&body, "**Stdout:**\n```\n%s\n```\n", strings.TrimRight(drv.ErrorView(), "\n"))
 	q.Add("body", body.String())
 
 	reportErrorConfirmCh := make(chan struct{})

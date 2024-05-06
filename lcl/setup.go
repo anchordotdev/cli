@@ -209,7 +209,8 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 }
 
 var (
-	parameterizeUnwantedRegex           = regexp.MustCompile(`[^a-z0-9\-_]+`)
+	// unlike ActiveSupport parameterize, we also drop underscore as it is invalid in subdomains
+	parameterizeUnwantedRegex           = regexp.MustCompile(`[^a-z0-9\-]+`)
 	parameterizeDuplicateSeparatorRegex = regexp.MustCompile(`-{2,}`)
 	parameterizeLeadingTrailingRegex    = regexp.MustCompile(`^-|-$`)
 )
