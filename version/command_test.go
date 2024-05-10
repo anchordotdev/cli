@@ -2,18 +2,13 @@ package version
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"runtime"
 	"testing"
 
 	"github.com/anchordotdev/cli/cmdtest"
+	_ "github.com/anchordotdev/cli/testflags"
 	"github.com/anchordotdev/cli/ui/uitest"
-)
-
-var (
-	_ = flag.Bool("prism-verbose", false, "ignored")
-	_ = flag.Bool("prism-proxy", false, "ignored")
 )
 
 func TestCmdVersion(t *testing.T) {

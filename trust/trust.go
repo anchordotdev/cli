@@ -17,6 +17,7 @@ import (
 	"github.com/anchordotdev/cli/ext509/oid"
 	"github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/truststore"
+	truststoremodels "github.com/anchordotdev/cli/truststore/models"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
 )
@@ -39,40 +40,45 @@ type Command struct {
 
 func (c Command) UI() cli.UI {
 	return cli.UI{
-		RunTUI: c.runTUI,
+		RunTUI: c.run,
 	}
 }
 
-func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
+func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
+	var err error
+	clientCmd := &auth.Client{
+		Anc: c.Anc,
+	}
+	c.Anc, err = clientCmd.Perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+
+	drv.Activate(ctx, &models.TrustHeader{})
+	drv.Activate(ctx, &models.TrustHint{})
+
+	err = c.Perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c Command) Perform(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
-	anc := c.Anc
-	if anc == nil {
-		var err error
-		if anc, err = c.apiClient(ctx, drv); err != nil {
+	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
+
+	var err error
+	if c.OrgSlug == "" && c.RealmSlug == "" {
+		c.OrgSlug, c.RealmSlug, err = fetchOrgAndRealm(ctx, c.Anc)
+		if err != nil {
 			return err
 		}
 	}
 
-	orgSlug, realmSlug := c.OrgSlug, c.RealmSlug
-	if orgSlug == "" || realmSlug == "" {
-		if orgSlug != "" || realmSlug != "" {
-			panic("trust: OrgSlug & RealmSlug must be initialized together")
-		}
-
-		var err error
-		if orgSlug, realmSlug, err = fetchOrgAndRealm(ctx, anc); err != nil {
-			return err
-		}
-	}
-
-	confirmc := make(chan struct{})
-	drv.Activate(ctx, &models.TrustPreflight{
-		Config:    cfg,
-		ConfirmCh: confirmc,
-	})
-
-	cas, err := fetchExpectedCAs(ctx, anc, orgSlug, realmSlug)
+	cas, err := fetchExpectedCAs(ctx, c.Anc, c.OrgSlug, c.RealmSlug)
 	if err != nil {
 		return err
 	}
@@ -96,25 +102,21 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 		Stores:   stores,
 		SelectFn: checkAnchorCert,
 	}
-
-	info, err := audit.Perform()
+	auditInfo, err := audit.Perform()
 	if err != nil {
 		return err
 	}
-	drv.Send(models.AuditInfoMsg(info))
+	drv.Send(truststoremodels.AuditInfoMsg(auditInfo))
 
-	if len(info.Missing) == 0 {
-		drv.Send(models.PreflightFinishedMsg{})
+	confirmCh := make(chan struct{})
+	drv.Activate(ctx, &models.TrustUpdateConfirm{
+		ConfirmCh: confirmCh,
+	})
 
-		return nil
-	}
-
-	if !cfg.NonInteractive {
-		select {
-		case <-confirmc:
-		case <-ctx.Done():
-			return ctx.Err()
-		}
+	select {
+	case <-confirmCh:
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 
 	tmpDir, err := os.MkdirTemp("", "anchor-trust")
@@ -124,7 +126,7 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 	defer os.RemoveAll(tmpDir)
 
 	// FIXME: this write is required for the InstallCAs to work, feels like a leaky abstraction
-	for _, ca := range info.Missing {
+	for _, ca := range auditInfo.Missing {
 		if err := writeCAFile(ca, tmpDir); err != nil {
 			return err
 		}
@@ -134,8 +136,8 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 		drv.Activate(ctx, &models.TrustUpdateStore{
 			Store: store,
 		})
-		for _, ca := range info.Missing {
-			if info.IsPresent(ca, store) {
+		for _, ca := range auditInfo.Missing {
+			if auditInfo.IsPresent(ca, store) {
 				continue
 			}
 			drv.Send(models.TrustStoreInstallingCAMsg{CA: *ca})
@@ -149,30 +151,6 @@ func (c *Command) runTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	return nil
-}
-
-func (c *Command) apiClient(ctx context.Context, drv *ui.Driver) (*api.Session, error) {
-	cfg := cli.ConfigFromContext(ctx)
-
-	anc, err := api.NewClient(cfg)
-	if errors.Is(err, api.ErrSignedOut) {
-		if err := c.runSignIn(ctx, drv); err != nil {
-			return nil, err
-		}
-		if anc, err = api.NewClient(cfg); err != nil {
-			return nil, err
-		}
-	} else if err != nil {
-		return nil, err
-	}
-	return anc, nil
-}
-
-func (c *Command) runSignIn(ctx context.Context, drv *ui.Driver) error {
-	cmdSignIn := &auth.SignIn{
-		Hint: &models.TrustSignInHint{},
-	}
-	return cmdSignIn.RunTUI(ctx, drv)
 }
 
 func fetchOrgAndRealm(ctx context.Context, anc *api.Session) (string, string, error) {

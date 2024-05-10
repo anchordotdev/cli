@@ -216,7 +216,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 			RealmSlug: c.realmSlug,
 		}
 
-		if err := cmdTrust.UI().RunTUI(ctx, drv); err != nil {
+		if err = cmdTrust.Perform(ctx, drv); err != nil {
 			return err
 		}
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/trust"
+	truststoreModels "github.com/anchordotdev/cli/truststore/models"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
 )
@@ -86,17 +87,14 @@ func (c Audit) perform(ctx context.Context, drv *ui.Driver) (*LclAuditResult, er
 		drv.Send(models.AuditResourcesFoundMsg{})
 	}
 
-	drv.Activate(ctx, &models.AuditTrust{})
+	drv.Activate(ctx, &truststoreModels.TrustStoreAudit{})
 
-	// FIXME: use config anc?
-	trustStoreAuditResult, err := trust.PerformAudit(ctx, c.anc, c.orgSlug, c.realmSlug)
+	auditInfo, err := trust.PerformAudit(ctx, c.anc, c.orgSlug, c.realmSlug)
 	if err != nil {
 		return nil, err
 	}
 
-	missingCount := len(trustStoreAuditResult.Missing)
-	result.trusted = missingCount == 0
-	drv.Send(models.AuditTrustMissingMsg(missingCount))
+	drv.Send(truststoreModels.AuditInfoMsg(auditInfo))
 
 	// TODO: audit local app status
 

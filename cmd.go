@@ -221,7 +221,6 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 			Args:          def.Args,
 			Short:         def.Short,
 			Long:          def.Long,
-			SilenceErrors: true,
 			SilenceUsage:  true,
 		}
 
@@ -231,21 +230,6 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 		cmd.SetErrPrefix(ui.Error(""))
 
 		fn(cmd)
-
-		// FIXME: ideally we would only set these in TEST
-		// allow pass through of update arg for teatest golden tests
-		cmd.Flags().Bool("update", false, "update .golden files")
-		if err := cmd.Flags().MarkHidden("update"); err != nil {
-			panic(err)
-		}
-		cmd.Flags().Bool("prism-proxy", false, "run prism in proxy mode")
-		if err := cmd.Flags().MarkHidden("prism-proxy"); err != nil {
-			panic(err)
-		}
-		cmd.Flags().Bool("prism-verbose", false, "run prism in verbose mode")
-		if err := cmd.Flags().MarkHidden("prism-verbose"); err != nil {
-			panic(err)
-		}
 
 		cmd.RunE = func(cmd *cobra.Command, args []string) (returnedError error) {
 			cfg := ConfigFromCmd(cmd)

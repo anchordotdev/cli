@@ -1,7 +1,6 @@
 package lcl
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -90,17 +89,8 @@ func TestLclConfig(t *testing.T) {
 
 		// wait for prompt
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				return bytes.Contains(bts, []byte("? What lcl.host domain would you like to use for diagnostics?"))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? What lcl.host domain would you like to use for diagnostics?",
 		)
 
 		tm.Type("hello-world")
@@ -112,18 +102,8 @@ func TestLclConfig(t *testing.T) {
 			t.Skip("diagnostic unsupported in mock mode")
 		}
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := fmt.Sprintf("! Press Enter to open %s in your browser.", httpURL)
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			fmt.Sprintf("! Press Enter to open %s in your browser.", httpURL),
 		)
 
 		tm.Send(tea.KeyMsg{
@@ -134,36 +114,16 @@ func TestLclConfig(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := "! Press Enter to install 2 missing certificates. (requires sudo)"
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"! Press Enter to install missing certificates. (requires sudo)",
 		)
 
 		tm.Send(tea.KeyMsg{
 			Type: tea.KeyEnter,
 		})
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := fmt.Sprintf("! Press Enter to open %s in your browser.", httpsURL)
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			fmt.Sprintf("! Press Enter to open %s in your browser.", httpsURL),
 		)
 
 		tm.Send(tea.KeyMsg{
@@ -188,6 +148,6 @@ func TestLclConfig(t *testing.T) {
 		}
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
-		teatest.RequireEqualOutput(t, drv.FinalOut())
+		uitest.TestGolden(t, drv.Golden())
 	})
 }

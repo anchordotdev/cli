@@ -7,7 +7,6 @@ import (
 
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -23,42 +22,15 @@ func (m *TrustAuditHeader) View() string {
 	return b.String()
 }
 
-type TrustAuditScanFinishedMsg bool
+type TrustAuditHint struct{}
 
-type TrustAuditScan struct {
-	spinner spinner.Model
+func (m *TrustAuditHint) Init() tea.Cmd { return nil }
 
-	finished bool
-}
+func (m *TrustAuditHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 
-func (m *TrustAuditScan) Init() tea.Cmd {
-	m.spinner = ui.WaitingSpinner()
-
-	return m.spinner.Tick
-}
-
-func (m *TrustAuditScan) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case TrustAuditScanFinishedMsg:
-		m.finished = bool(msg)
-		return m, nil
-	default:
-		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
-	}
-}
-
-func (m *TrustAuditScan) View() string {
+func (m *TrustAuditHint) View() string {
 	var b strings.Builder
-
-	if !m.finished {
-		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Scanning local and expected CA certificates…%s", m.spinner.View())))
-		return b.String()
-	}
-
-	fmt.Fprintln(&b, ui.StepDone("Scanned local and expected CA certificates."))
-
+	fmt.Fprintln(&b, ui.StepHint("We will compare your CA certificates from Anchor and your local trust stores."))
 	return b.String()
 }
 

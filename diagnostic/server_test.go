@@ -5,18 +5,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"flag"
 	"net"
 	"net/http"
 	"testing"
 
 	"github.com/anchordotdev/cli/internal/must"
-)
-
-var (
-	_ = flag.Bool("prism-verbose", false, "ignored")
-	_ = flag.Bool("prism-proxy", false, "ignored")
-	_ = flag.Bool("update", false, "ignored")
+	_ "github.com/anchordotdev/cli/testflags"
 )
 
 func TestServerSupportsDualProtocols(t *testing.T) {

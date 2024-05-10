@@ -1,17 +1,11 @@
 package keyring
 
 import (
-	"flag"
 	"testing"
 
 	"github.com/anchordotdev/cli"
+	_ "github.com/anchordotdev/cli/testflags"
 	"github.com/zalando/go-keyring"
-)
-
-var (
-	_ = flag.Bool("prism-verbose", false, "ignored")
-	_ = flag.Bool("prism-proxy", false, "ignored")
-	_ = flag.Bool("update", false, "ignored")
 )
 
 func TestKeyring(t *testing.T) {

@@ -7,8 +7,10 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
+	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/truststore"
+	truststoremodels "github.com/anchordotdev/cli/truststore/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
@@ -22,7 +24,9 @@ var CmdTrustAudit = cli.NewCmd[Audit](CmdTrust, "audit", func(cmd *cobra.Command
 	cmd.MarkFlagsRequiredTogether("org", "realm")
 })
 
-type Audit struct{}
+type Audit struct {
+	anc *api.Session
+}
 
 func (a Audit) UI() cli.UI {
 	return cli.UI{
@@ -31,22 +35,29 @@ func (a Audit) UI() cli.UI {
 }
 
 func (c *Audit) RunTUI(ctx context.Context, drv *ui.Driver) error {
+	var err error
+	cmd := &auth.Client{
+		Anc:    c.anc,
+		Source: "lclhost",
+	}
+	c.anc, err = cmd.Perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+
 	cfg := cli.ConfigFromContext(ctx)
 
 	drv.Activate(ctx, &models.TrustAuditHeader{})
-	drv.Activate(ctx, &models.TrustAuditScan{})
+	drv.Activate(ctx, &models.TrustAuditHint{})
 
-	anc, err := api.NewClient(cfg)
+	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
+
+	org, realm, err := fetchOrgAndRealm(ctx, c.anc)
 	if err != nil {
 		return err
 	}
 
-	org, realm, err := fetchOrgAndRealm(ctx, anc)
-	if err != nil {
-		return err
-	}
-
-	expectedCAs, err := fetchExpectedCAs(ctx, anc, org, realm)
+	expectedCAs, err := fetchExpectedCAs(ctx, c.anc, org, realm)
 	if err != nil {
 		return err
 	}
@@ -62,15 +73,15 @@ func (c *Audit) RunTUI(ctx context.Context, drv *ui.Driver) error {
 		SelectFn: checkAnchorCert,
 	}
 
-	info, err := audit.Perform()
+	auditInfo, err := audit.Perform()
 	if err != nil {
 		return err
 	}
 
-	drv.Send(models.TrustAuditScanFinishedMsg(true))
+	drv.Send(truststoremodels.AuditInfoMsg(auditInfo))
 
 	drv.Activate(ctx, &models.TrustAuditInfo{
-		AuditInfo: info,
+		AuditInfo: auditInfo,
 		Stores:    stores,
 	})
 

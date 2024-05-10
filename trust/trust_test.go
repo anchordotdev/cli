@@ -2,14 +2,16 @@ package trust
 
 import (
 	"context"
-	"flag"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ui/uitest"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/exp/teatest"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,8 +21,6 @@ var srv = &apitest.Server{
 }
 
 func TestMain(m *testing.M) {
-	flag.Parse()
-
 	if err := srv.Start(context.Background()); err != nil {
 		panic(err)
 	}
@@ -97,12 +97,31 @@ func TestTrust(t *testing.T) {
 		if !srv.IsProxy() {
 			t.Skip("trust unsupported in mock mode")
 		}
-
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
+		drv, tm := uitest.TestTUI(ctx, t)
+
 		cmd := Command{}
 
-		uitest.TestTUIOutput(ctx, t, cmd.UI())
+		uitest.TestTUI(ctx, t)
+
+		errc := make(chan error, 1)
+		go func() {
+			errc <- cmd.UI().RunTUI(ctx, drv)
+
+			tm.Quit()
+		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"! Press Enter to install missing certificates. (requires sudo)",
+		)
+
+		tm.Send(tea.KeyMsg{
+			Type: tea.KeyEnter,
+		})
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
 	})
 }

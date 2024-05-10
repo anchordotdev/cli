@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/anchordotdev/cli"
+	_ "github.com/anchordotdev/cli/testflags"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/anchordotdev/cli/ui/uitest"
 	tea "github.com/charmbracelet/bubbletea"
@@ -87,7 +88,7 @@ func TestError(t *testing.T) {
 			require.EqualError(t, returnedError, testErr.Error())
 
 			tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
-			teatest.RequireEqualOutput(t, drv.FinalOut())
+			uitest.TestGolden(t, drv.Golden())
 		}()
 		defer cli.Cleanup(&returnedError, nil, ctx, drv, CmdError, []string{})
 		returnedError = cmd.UI().RunTUI(ctx, drv)
@@ -133,7 +134,7 @@ func TestPanic(t *testing.T) {
 			require.EqualError(t, returnedError, "test panic")
 
 			tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
-			teatest.RequireEqualOutput(t, drv.FinalOut())
+			uitest.TestGolden(t, drv.Golden())
 		}()
 		defer cli.Cleanup(&returnedError, nil, ctx, drv, CmdPanic, []string{})
 		_ = cmd.UI().RunTUI(ctx, drv)

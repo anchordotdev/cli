@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/anchordotdev/cli"
-	"github.com/charmbracelet/x/exp/teatest"
+	"github.com/anchordotdev/cli/ui/uitest"
 	"github.com/joeshaw/envdecode"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
@@ -49,7 +49,7 @@ func TestHelp(t *testing.T, cmd *cobra.Command, args ...string) {
 	out, err := io.ReadAll(b)
 	require.NoError(t, err)
 
-	teatest.RequireEqualOutput(t, out)
+	uitest.TestGolden(t, string(out))
 }
 
 func execute(cmd *cobra.Command, args ...string) (*bytes.Buffer, error) {

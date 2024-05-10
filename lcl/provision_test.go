@@ -1,15 +1,12 @@
 package lcl
 
 import (
-	"bytes"
 	"context"
 	"testing"
-	"time"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/ui/uitest"
-	"github.com/charmbracelet/x/exp/teatest"
 )
 
 func TestProvision(t *testing.T) {
@@ -39,7 +36,7 @@ func TestProvision(t *testing.T) {
 	}
 
 	t.Run("diagnostic", func(t *testing.T) {
-		drv, tm := uitest.TestTUI(ctx, t)
+		drv, _ := uitest.TestTUI(ctx, t)
 
 		cmd := &Provision{
 			Domains: []string{"subdomain.lcl.host", "subdomain.localhost"},
@@ -53,19 +50,8 @@ func TestProvision(t *testing.T) {
 
 		t.Skip("pending ability to stub out the detection.Perform results")
 
-		teatest.WaitFor(
-			t, tm.Output(),
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					if err := <-errc; err != nil {
-						t.Fatal(<-errc)
-					}
-				}
-
-				return bytes.Contains(bts, []byte("- Created test-service resources for lcl.host diagnostic server on Anchor.dev."))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"- Created test-service resources for lcl.host diagnostic server on Anchor.dev.",
 		)
 	})
 }

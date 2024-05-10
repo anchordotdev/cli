@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"flag"
 	"testing"
 
 	"github.com/anchordotdev/cli/api/apitest"
@@ -15,8 +14,6 @@ var srv = &apitest.Server{
 }
 
 func TestMain(m *testing.M) {
-	flag.Parse()
-
 	if err := srv.Start(context.Background()); err != nil {
 		panic(err)
 	}

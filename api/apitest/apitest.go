@@ -2,27 +2,27 @@ package apitest
 
 import (
 	"context"
-	"flag"
+	"fmt"
 	"path/filepath"
 	"strings"
 
 	"io"
-	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/exec"
 	"time"
 
+	_ "github.com/anchordotdev/cli/testflags"
 	"github.com/gofrs/flock"
+	"github.com/spf13/pflag"
 	"golang.org/x/sync/errgroup"
 )
 
 var (
-	proxy      = flag.Bool("prism-proxy", false, "run prism in proxy mode")
-	verbose    = flag.Bool("prism-verbose", false, "verbose output for prism/rails servers")
-	oapiConfig = flag.String("oapi-config", "config/openapi.yml", "openapi spec file path")
-	lockfile   = flag.String("api-lockfile", "tmp/apitest.lock", "rails server lockfile path")
+	proxy, _      = pflag.CommandLine.GetBool("prism-proxy")
+	verbose, _    = pflag.CommandLine.GetBool("prism-verbose")
+	oapiConfig, _ = pflag.CommandLine.GetString("oapi-config")
+	lockfile, _   = pflag.CommandLine.GetString("api-lockfile")
 )
 
 type Server struct {
@@ -45,7 +45,7 @@ func (s *Server) Close() {
 }
 
 func (s *Server) IsProxy() bool {
-	return *proxy
+	return proxy
 }
 
 func (s *Server) GeneratePAT(email string) (string, error) {
@@ -65,7 +65,7 @@ func (s *Server) GeneratePAT(email string) (string, error) {
 }
 
 func (s *Server) Start(ctx context.Context) error {
-	if *proxy {
+	if proxy {
 		return s.StartProxy(ctx)
 	}
 	return s.StartMock(ctx)
@@ -105,7 +105,7 @@ func (s *Server) StartMock(ctx context.Context) error {
 func (s *Server) StartProxy(ctx context.Context) error {
 	ctx, stopfn := context.WithCancel(ctx)
 
-	lock := flock.New(filepath.Join(s.RootDir, *lockfile))
+	lock := flock.New(filepath.Join(s.RootDir, lockfile))
 	if err := lock.Lock(); err != nil {
 		stopfn()
 		return err
@@ -185,7 +185,7 @@ func (s *Server) startMock(ctx context.Context) (string, func() error, error) {
 	}
 
 	args := []string{
-		"npx", "prism", "mock", *oapiConfig,
+		"npx", "prism", "mock", oapiConfig,
 		"--port", port, "--host", host,
 	}
 
@@ -209,7 +209,7 @@ func (s *Server) startCmd(ctx context.Context, args []string) (func() error, err
 	}
 
 	wait := cmd.Wait
-	if *verbose {
+	if verbose {
 		var err error
 		if wait, err = drainCmd(cmd); err != nil {
 			return nil, err
@@ -255,7 +255,7 @@ func (s *Server) startProxy(ctx context.Context, upstreamAddr string) (string, f
 	upstreamURL := "http://" + upstreamAddr + "/"
 
 	args := []string{
-		"npx", "prism", "proxy", *oapiConfig, upstreamURL,
+		"npx", "prism", "proxy", oapiConfig, upstreamURL,
 		"--port", port, "--host", host,
 	}
 
@@ -267,8 +267,18 @@ func (s *Server) startProxy(ctx context.Context, upstreamAddr string) (string, f
 }
 
 func (s *Server) waitTCP(addr string) error {
+	var dialer net.Dialer
+
+	duration := 16 * time.Second
+	ctx, cancel := context.WithTimeoutCause(
+		context.Background(),
+		duration,
+		fmt.Errorf("waitTcp %s timeout waiting for: %s", duration, addr),
+	)
+	defer cancel()
+
 	for {
-		if conn, err := net.Dial("tcp4", addr); err == nil {
+		if conn, err := dialer.DialContext(ctx, "tcp4", addr); err == nil {
 			conn.Close()
 			return nil
 		} else if !isConnRefused(err) {
@@ -276,18 +286,6 @@ func (s *Server) waitTCP(addr string) error {
 		}
 
 		time.Sleep(10 * time.Millisecond)
-	}
-}
-
-func (s *Server) waitHTTP(errc chan<- error) {
-	for {
-		res, err := http.Get(s.URL)
-		if err != nil {
-			log.Printf("err = %q %#v", err, err)
-		} else {
-			log.Printf("res = %#v", res)
-			return
-		}
 	}
 }
 

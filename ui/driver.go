@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -41,11 +40,10 @@ type Driver struct {
 	models []tea.Model
 	active tea.Model
 
-	finalOut bytes.Buffer
-	Out      io.Reader
-	out      io.ReadWriter
-	test     bool
-	LastView string
+	goldenMutex sync.Mutex
+	golden      string
+
+	lastView string
 }
 
 func NewDriverTest(ctx context.Context) *Driver {
@@ -56,11 +54,8 @@ func NewDriverTest(ctx context.Context) *Driver {
 		tea.WithContext(ctx),
 		tea.WithoutRenderer(),
 	}
-	drv.Program = tea.NewProgram(drv, opts...)
 
-	drv.out = &safeReadWriter{rw: new(bytes.Buffer)}
-	drv.Out = io.TeeReader(drv.out, &drv.finalOut)
-	drv.test = true
+	drv.Program = tea.NewProgram(drv, opts...)
 
 	return drv
 }
@@ -73,8 +68,6 @@ func NewDriverTUI(ctx context.Context) (*Driver, Program) {
 		tea.WithContext(ctx),
 	}
 
-	drv.out = &safeReadWriter{rw: new(bytes.Buffer)}
-	drv.Out = io.TeeReader(drv.out, &drv.finalOut)
 	drv.Program = tea.NewProgram(drv, opts...)
 
 	return drv, drv.Program
@@ -106,9 +99,10 @@ func (d *Driver) Activate(ctx context.Context, model tea.Model) {
 	}
 }
 
-func (d *Driver) FinalOut() []byte {
-	io.ReadAll(d.Out)
-	return d.finalOut.Bytes()
+func (d *Driver) Golden() string {
+	d.goldenMutex.Lock()
+	defer d.goldenMutex.Unlock()
+	return d.golden
 }
 
 type stopMsg struct{}
@@ -186,12 +180,14 @@ func (d *Driver) View() string {
 		out += mdl.View()
 	}
 	normalizedOut := spinnerReplacer.Replace(out)
-	if out != "" && normalizedOut != d.LastView {
+	if out != "" && normalizedOut != d.lastView {
 		separator := fmt.Sprintf("─── %s ", reflect.TypeOf(d.active).Elem().Name())
 		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
-		fmt.Fprintln(d.out, separator)
-		fmt.Fprint(d.out, normalizedOut)
-		d.LastView = normalizedOut
+		d.lastView = normalizedOut
+
+		d.goldenMutex.Lock()
+		defer d.goldenMutex.Unlock()
+		d.golden += strings.Join([]string{separator, normalizedOut}, "\n")
 	}
 	return out
 }
@@ -210,24 +206,3 @@ func isExit(cmd tea.Cmd) bool {
 }
 
 func Exit() tea.Msg { return io.EOF }
-
-// safeReadWriter implements io.ReadWriter, but locks reads and writes.
-type safeReadWriter struct {
-	sync.RWMutex
-
-	rw io.ReadWriter
-}
-
-// Read implements io.ReadWriter.
-func (s *safeReadWriter) Read(p []byte) (n int, err error) {
-	s.RLock()
-	defer s.RUnlock()
-	return s.rw.Read(p) //nolint: wrapcheck
-}
-
-// Write implements io.ReadWriter.
-func (s *safeReadWriter) Write(p []byte) (int, error) {
-	s.Lock()
-	defer s.Unlock()
-	return s.rw.Write(p) //nolint: wrapcheck
-}

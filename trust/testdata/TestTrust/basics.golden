@@ -1,22 +1,47 @@
-─── TrustPreflight ─────────────────────────────────────────────────────────────
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── TrustHeader ────────────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+─── TrustHint ──────────────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     * Comparing local and expected CA certificates…⠋
-─── TrustPreflight ─────────────────────────────────────────────────────────────
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
-    ! Installing 2 missing certificates. (requires sudo)
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    ! Press Enter to install missing certificates. (requires sudo)
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
-    ! Installing 2 missing certificates. (requires sudo)
     * Updating Mock: installing ankydotdev/localhost - AnchorCA ECDSA.
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
-    ! Installing 2 missing certificates. (requires sudo)
     - Updated Mock: installed ankydotdev/localhost - AnchorCA [ECDSA]
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
-    ! Installing 2 missing certificates. (requires sudo)
     - Updated Mock: installed ankydotdev/localhost - AnchorCA [ECDSA]
     * Updating Mock: installing ankydotdev/localhost - AnchorCA RSA.
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
-    ! Installing 2 missing certificates. (requires sudo)
     - Updated Mock: installed ankydotdev/localhost - AnchorCA [ECDSA, RSA]

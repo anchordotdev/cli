@@ -1,7 +1,6 @@
 package lcl
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"testing"
@@ -63,36 +62,16 @@ func TestSetup(t *testing.T) {
 
 		// wait for prompt
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := "? What application server type?"
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? What application server type?",
 		)
 
 		tm.Send(tea.KeyMsg{
 			Type: tea.KeyEnter,
 		})
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := "? What is the application name?"
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? What is the application name?",
 		)
 
 		tm.Type("test-app")
@@ -100,18 +79,8 @@ func TestSetup(t *testing.T) {
 			Type: tea.KeyEnter,
 		})
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := "? What lcl.host domain would you like to use for local application development?"
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? What lcl.host domain would you like to use for local application development?",
 		)
 
 		if !srv.IsProxy() {
@@ -124,18 +93,8 @@ func TestSetup(t *testing.T) {
 
 		t.Skip("Pending workaround for consistent setup guide port value")
 
-		teatest.WaitFor(
-			t, drv.Out,
-			func(bts []byte) bool {
-				if len(errc) > 0 {
-					t.Fatal(<-errc)
-				}
-
-				expect := fmt.Sprintf("! Press Enter to open %s.", setupGuideURL)
-				return bytes.Contains(bts, []byte(expect))
-			},
-			teatest.WithCheckInterval(time.Millisecond*100),
-			teatest.WithDuration(time.Second*3),
+		uitest.WaitForGoldenContains(t, drv, errc,
+			fmt.Sprintf("! Press Enter to open %s.", setupGuideURL),
 		)
 
 		tm.Send(tea.KeyMsg{
@@ -143,6 +102,6 @@ func TestSetup(t *testing.T) {
 		})
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
-		teatest.RequireEqualOutput(t, drv.FinalOut())
+		uitest.TestGolden(t, drv.Golden())
 	})
 }
