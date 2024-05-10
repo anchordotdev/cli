@@ -98,5 +98,7 @@ func (c Audit) perform(ctx context.Context, drv *ui.Driver) (*LclAuditResult, er
 
 	// TODO: audit local app status
 
+	result.trusted = (len(auditInfo.Missing) == 0)
+
 	return &result, nil
 }
