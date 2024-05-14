@@ -217,17 +217,17 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 		}
 
 		cmd := &cobra.Command{
-			Use:           def.Use,
-			Args:          def.Args,
-			Short:         def.Short,
-			Long:          def.Long,
-			SilenceUsage:  true,
+			Use:          def.Use,
+			Args:         def.Args,
+			Short:        def.Short,
+			Long:         def.Long,
+			SilenceUsage: true,
 		}
 
 		ctx := ContextWithConfig(context.Background(), cfg)
 		cmd.SetContext(ctx)
 
-		cmd.SetErrPrefix(ui.Error(""))
+		cmd.SetErrPrefix(ui.Error("Error!"))
 
 		fn(cmd)
 

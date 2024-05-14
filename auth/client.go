@@ -44,7 +44,7 @@ func (c Client) Perform(ctx context.Context, drv *ui.Driver) (*api.Session, erro
 
 	if errors.Is(newClientErr, api.ErrSignedOut) || errors.Is(userInfoErr, api.ErrSignedOut) {
 		if c.Hint == nil {
-			c.Hint = &models.SignInHint{}
+			c.Hint = models.SignInHint
 		}
 		cmd := &SignIn{
 			Hint:   c.Hint,

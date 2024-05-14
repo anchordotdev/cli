@@ -45,17 +45,17 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	var err error
 	cmd := &auth.Client{
 		Anc:    c.anc,
-		Hint:   &models.LclSignInHint{},
+		Hint:   models.LclSignInHint,
 		Source: "lclhost",
 	}
 	c.anc, err = cmd.Perform(ctx, drv)
 	if err != nil {
 		return err
 	}
-	drv.Activate(ctx, &models.LclPreamble{})
+	drv.Activate(ctx, models.LclPreamble)
 
-	drv.Activate(ctx, &models.LclHeader{})
-	drv.Activate(ctx, &models.LclHint{})
+	drv.Activate(ctx, models.LclHeader)
+	drv.Activate(ctx, models.LclHint)
 
 	userInfo, err := c.anc.UserInfo(ctx)
 	if err != nil {
@@ -66,8 +66,8 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	realmSlug := "localhost"
 
 	// run audit command
-	drv.Activate(ctx, &models.AuditHeader{})
-	drv.Activate(ctx, &models.AuditHint{})
+	drv.Activate(ctx, models.AuditHeader)
+	drv.Activate(ctx, models.AuditHint)
 
 	cmdAudit := &Audit{
 		anc:       c.anc,
@@ -81,11 +81,11 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	if lclAuditResult.diagnosticServiceExists && lclAuditResult.trusted {
-		drv.Activate(ctx, &models.LclConfigSkip{})
+		drv.Activate(ctx, models.LclConfigSkip)
 	} else {
 		// run config command
-		drv.Activate(ctx, &models.LclConfigHeader{})
-		drv.Activate(ctx, &models.LclConfigHint{})
+		drv.Activate(ctx, models.LclConfigHeader)
+		drv.Activate(ctx, models.LclConfigHint)
 
 		cmdConfig := &LclConfig{
 			anc:       c.anc,
@@ -99,8 +99,8 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	// run setup command
-	drv.Activate(ctx, &models.SetupHeader{})
-	drv.Activate(ctx, &models.SetupHint{})
+	drv.Activate(ctx, models.SetupHeader)
+	drv.Activate(ctx, models.SetupHint)
 
 	cmdSetup := &Setup{
 		anc:     c.anc,

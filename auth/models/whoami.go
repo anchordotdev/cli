@@ -9,16 +9,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type WhoAmIHeader struct{}
-
-func (m *WhoAmIHeader) Init() tea.Cmd { return nil }
-
-func (m *WhoAmIHeader) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *WhoAmIHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Identify Current Anchor.dev Account %s", ui.Whisper("`anchor auth whoami`"))))
-	return b.String()
+var WhoAmIHeader = ui.Section{
+	Name: "WhoAmIHeader",
+	Model: ui.MessageLines{
+		ui.Header(fmt.Sprintf("Identify Current Anchor.dev Account %s", ui.Whisper("`anchor auth whoami`"))),
+	},
 }
 
 type WhoAmIChecker struct {

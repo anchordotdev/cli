@@ -12,61 +12,42 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type LclSignInHint struct{}
+var (
+	LclSignInHint = ui.Section{
+		Name: "LclSignInHint",
+		Model: ui.MessageLines{
+			ui.StepHint("Please sign up or sign in with your Anchor account."),
+			ui.StepHint(""),
+			ui.StepHint("Once authenticated, we can provision your personalized Anchor resources to"),
+			ui.StepHint("power HTTPS in your local development environment."),
+		},
+	}
 
-func (LclSignInHint) Init() tea.Cmd { return nil }
+	LclPreamble = ui.Section{
+		Name: "LclPreamble",
+		Model: ui.MessageLines{
+			ui.Hint("Let's set up lcl.host HTTPS in your local development environment!"),
+			ui.Hint(""),
+			ui.Hint("lcl.host (made by the team at Anchor) adds HTTPS in a fast and totally free way"),
+			ui.Hint("to local applications & services."),
+		},
+	}
 
-func (m *LclSignInHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+	LclHeader = ui.Section{
+		Name: "LclHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Setup lcl.host HTTPS Local Development Environment %s", ui.Whisper("`anchor lcl`"))),
+		},
+	}
 
-func (m *LclSignInHint) View() string {
-	var b strings.Builder
-	// FIXME: first line duplicated from SignInHint, should dedup somehow
-	fmt.Fprintln(&b, ui.StepHint("Please sign up or sign in with your Anchor account."))
-	fmt.Fprintln(&b, ui.StepHint(""))
-	fmt.Fprintln(&b, ui.StepHint("Once authenticated, we can provision your personalized Anchor resources to"))
-	fmt.Fprintln(&b, ui.StepHint("power HTTPS in your local development environment."))
-	return b.String()
-}
-
-type LclPreamble struct{}
-
-func (LclPreamble) Init() tea.Cmd { return nil }
-
-func (m LclPreamble) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m LclPreamble) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Hint("Let's set up lcl.host HTTPS in your local development environment!"))
-	fmt.Fprintln(&b, ui.Hint(""))
-	fmt.Fprintln(&b, ui.Hint("lcl.host (made by the team at Anchor) adds HTTPS in a fast and totally free way"))
-	fmt.Fprintln(&b, ui.Hint("to local applications & services."))
-	return b.String()
-}
-
-type LclHeader struct{}
-
-func (LclHeader) Init() tea.Cmd { return nil }
-
-func (m LclHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m LclHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Setup lcl.host HTTPS Local Development Environment %s", ui.Whisper("`anchor lcl`"))))
-	return b.String()
-}
-
-type LclHint struct{}
-
-func (LclHint) Init() tea.Cmd { return nil }
-
-func (m LclHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m LclHint) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.StepHint("Once setup finishes, you'll have a secure context in your browsers and local"))
-	fmt.Fprintln(&b, ui.StepHint("system so you can use HTTPS locally."))
-	return b.String()
-}
+	LclHint = ui.Section{
+		Name: "LclHint",
+		Model: ui.MessageLines{
+			ui.StepHint("Once setup finishes, you'll have a secure context in your browsers and local"),
+			ui.StepHint("system so you can use HTTPS locally."),
+		},
+	}
+)
 
 type ProvisionService struct {
 	Name, ServerType string

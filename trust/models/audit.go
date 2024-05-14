@@ -10,29 +10,21 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type TrustAuditHeader struct{}
+var (
+	TrustAuditHeader = ui.Section{
+		Name: "TrustAuditHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Audit CA Certificates in Your Local Trust Store(s) %s", ui.Whisper("`anchor trust audit`"))),
+		},
+	}
 
-func (m *TrustAuditHeader) Init() tea.Cmd { return nil }
-
-func (m *TrustAuditHeader) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *TrustAuditHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Audit CA Certificates in Your Local Trust Store(s) %s", ui.Whisper("`anchor trust audit`"))))
-	return b.String()
-}
-
-type TrustAuditHint struct{}
-
-func (m *TrustAuditHint) Init() tea.Cmd { return nil }
-
-func (m *TrustAuditHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *TrustAuditHint) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.StepHint("We will compare your CA certificates from Anchor and your local trust stores."))
-	return b.String()
-}
+	TrustAuditHint = ui.Section{
+		Name: "TrustAuditHint",
+		Model: ui.MessageLines{
+			ui.StepHint("We will compare your CA certificates from Anchor and your local trust stores."),
+		},
+	}
+)
 
 type TrustAuditInfo struct {
 	AuditInfo *truststore.AuditInfo

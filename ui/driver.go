@@ -181,7 +181,16 @@ func (d *Driver) View() string {
 	}
 	normalizedOut := spinnerReplacer.Replace(out)
 	if out != "" && normalizedOut != d.lastView {
-		separator := fmt.Sprintf("─── %s ", reflect.TypeOf(d.active).Elem().Name())
+		var section string
+		if mdl, ok := d.active.(interface{ Section() string }); ok {
+			section = mdl.Section()
+		} else if kind := reflect.TypeOf(d.active).Kind(); kind == reflect.Interface || kind == reflect.Pointer {
+			section = reflect.TypeOf(d.active).Elem().Name()
+		} else {
+			section = reflect.TypeOf(d.active).Name()
+		}
+
+		separator := fmt.Sprintf("─── %s ", section)
 		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
 		d.lastView = normalizedOut
 

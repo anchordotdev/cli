@@ -54,8 +54,8 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	drv.Activate(ctx, &models.TrustHeader{})
-	drv.Activate(ctx, &models.TrustHint{})
+	drv.Activate(ctx, models.TrustHeader)
+	drv.Activate(ctx, models.TrustHint)
 
 	err = c.Perform(ctx, drv)
 	if err != nil {
@@ -67,6 +67,10 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 
 func (c Command) Perform(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
+
+	if isVMOrContainer(cfg) {
+		drv.Activate(ctx, &models.VMHint{})
+	}
 
 	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
 

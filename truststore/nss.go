@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -33,6 +34,8 @@ const (
 	certUtilPRFileNotFoundOutput = "PR_FILE_NOT_FOUND_ERROR"
 	certUtilSecReadOnlyOutput    = "SEC_ERROR_READ_ONLY"
 )
+
+var trustAttributesRegexp = regexp.MustCompile(`\s+[a-zA-Z]?,[a-zA-z]?,[a-zA-Z]?\s*$`)
 
 var firefoxPaths = []string{
 	"/usr/bin/firefox",
@@ -269,32 +272,13 @@ func (s *NSS) ListCAs() ([]*CA, error) {
 			}
 		}
 
-		padLen := strings.Index(lines[0], "Trust Attributes")
-		if padLen <= 0 {
-			return NSSError{
-				Err: errors.New("certutil unexpected output format"),
-
-				CertutilInstallHelp: s.certutilInstallHelp,
-				NSSBrowsers:         nssBrowsers,
-			}
-		}
-
 		if len(lines) == 2 {
 			return nil // no certs in the output
 		}
 
 		var nicks []string
 		for _, line := range lines[3:] {
-			if len(line) < padLen {
-				return NSSError{
-					Err: errors.New("certutil unexpected line format"),
-
-					CertutilInstallHelp: s.certutilInstallHelp,
-					NSSBrowsers:         nssBrowsers,
-				}
-			}
-
-			nicks = append(nicks, strings.TrimSpace(line[:padLen]))
+			nicks = append(nicks, parseCertNick(line))
 		}
 
 		for _, nick := range nicks {
@@ -454,4 +438,8 @@ func (s *NSS) handleCertUtilResult(profile string, out []byte, err error) error 
 	}
 
 	return nil
+}
+
+func parseCertNick(line string) string {
+	return trustAttributesRegexp.ReplaceAllString(line, "")
 }

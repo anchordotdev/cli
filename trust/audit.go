@@ -47,8 +47,8 @@ func (c *Audit) RunTUI(ctx context.Context, drv *ui.Driver) error {
 
 	cfg := cli.ConfigFromContext(ctx)
 
-	drv.Activate(ctx, &models.TrustAuditHeader{})
-	drv.Activate(ctx, &models.TrustAuditHint{})
+	drv.Activate(ctx, models.TrustAuditHeader)
+	drv.Activate(ctx, models.TrustAuditHint)
 
 	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
 

@@ -13,34 +13,22 @@ import (
 	"github.com/anchordotdev/cli/ui"
 )
 
-type SetupHeader struct{}
+var (
+	SetupHeader = ui.Section{
+		Name: "SetupHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Setup lcl.host Application %s", ui.Whisper("`anchor lcl setup`"))),
+		},
+	}
 
-func (m *SetupHeader) Init() tea.Cmd { return nil }
-
-func (m *SetupHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *SetupHeader) View() string {
-	var b strings.Builder
-
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Setup lcl.host Application %s", ui.Whisper("`anchor lcl setup`"))))
-
-	return b.String()
-}
-
-type SetupHint struct{}
-
-func (m *SetupHint) Init() tea.Cmd { return nil }
-
-func (m *SetupHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *SetupHint) View() string {
-	var b strings.Builder
-
-	fmt.Fprintln(&b, ui.StepHint("We'll start by scanning your current directory, then ask you questions about"))
-	fmt.Fprintln(&b, ui.StepHint("your local application so that we can generate setup instructions for you."))
-
-	return b.String()
-}
+	SetupHint = ui.Section{
+		Name: "SetupHint",
+		Model: ui.MessageLines{
+			ui.StepHint("We'll start by scanning your current directory, then ask you questions about"),
+			ui.StepHint("your local application so that we can generate setup instructions for you."),
+		},
+	}
+)
 
 type SetupScan struct {
 	finished bool

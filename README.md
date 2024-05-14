@@ -46,13 +46,18 @@ brew upgrade anchordotdev/tap/anchor
 
 ### Windows
 
-Available via [Chocolatey][] or as a downloadable binary from the [releases page][].
+Available via [Winget][] or as a downloadable binary from the [releases page][].
 
-### Chocolatey
+### Winget
 
 Install:
 ```
-chocolatey install anchor --version=0.0.22
+winget install anchor
+```
+
+Upgrade:
+```
+winget upgrade anchor
 ```
 
 ### Install from source
@@ -62,7 +67,7 @@ Install:
 go install github.com/anchordotdev/cli/cmd/anchor@latest
 ```
 
-[Chocolatey]: https://community.chocolatey.org/
+[Winget]: https://learn.microsoft.com/en-us/windows/package-manager/winget/
 [Homebrew]: https://brew.sh
 [releases page]: https://github.com/anchordotdev/cli/releases/latest
 

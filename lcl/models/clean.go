@@ -9,16 +9,11 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type LclCleanHeader struct{}
-
-func (LclCleanHeader) Init() tea.Cmd { return nil }
-
-func (m *LclCleanHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *LclCleanHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Clean lcl.host CA Certificates from Local Trust Store(s) %s", ui.Whisper("`anchor trust clean`"))))
-	return b.String()
+var LclCleanHeader = ui.Section{
+	Name: "LclCleanHeader",
+	Model: ui.MessageLines{
+		ui.Header(fmt.Sprintf("Clean lcl.host CA Certificates from Local Trust Store(s) %s", ui.Whisper("`anchor trust clean`"))),
+	},
 }
 
 type LclCleanHint struct {

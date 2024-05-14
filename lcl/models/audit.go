@@ -11,29 +11,21 @@ import (
 
 type AuditUnauthenticated bool
 
-type AuditHeader struct{}
+var (
+	AuditHeader = ui.Section{
+		Name: "AuditHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Audit lcl.host HTTPS Local Development Environment %s", ui.Whisper("`anchor lcl audit`"))),
+		},
+	}
 
-func (AuditHeader) Init() tea.Cmd { return nil }
-
-func (m *AuditHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *AuditHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Audit lcl.host HTTPS Local Development Environment %s", ui.Whisper("`anchor lcl audit`"))))
-	return b.String()
-}
-
-type AuditHint struct{}
-
-func (AuditHint) Init() tea.Cmd { return nil }
-
-func (m *AuditHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *AuditHint) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.StepHint("We'll begin by checking your system to determine what you need for your setup."))
-	return b.String()
-}
+	AuditHint = ui.Section{
+		Name: "AuditHint",
+		Model: ui.MessageLines{
+			ui.StepHint("We'll begin by checking your system to determine what you need for your setup."),
+		},
+	}
+)
 
 type AuditResourcesFoundMsg struct{}
 type AuditResourcesNotFoundMsg struct{}

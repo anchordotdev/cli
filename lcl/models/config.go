@@ -8,44 +8,38 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type LclConfigSkip struct{}
+var (
+	LclConfigSkip = ui.Section{
+		Name: "LclConfigSkip",
+		Model: ui.MessageLines{
+			ui.Skip("Configure System for lcl.host Local Development `anchor lcl config`"),
+		},
+	}
 
-func (LclConfigSkip) Init() tea.Cmd { return nil }
+	LclConfigHeader = ui.Section{
+		Name: "LclConfigHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Configure System for lcl.host HTTPS Local Development %s", ui.Whisper("`anchor lcl config`"))),
+		},
+	}
 
-func (m *LclConfigSkip) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+	LclConfigHint = ui.Section{
+		Name: "LclConfigHint",
+		Model: ui.MessageLines{
+			ui.StepHint("Before issuing HTTPS certificates for your local applications, we need to"),
+			ui.StepHint("configure your browsers and OS to trust your personal certificates."),
+			ui.Whisper("    |"), // whisper instead of stephint to avoid whitespace errors from git + golden
+			ui.StepHint("We'll start a local diagnostic web server to guide you through the process."),
+		},
+	}
 
-func (m *LclConfigSkip) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Skip("Configure System for lcl.host Local Development `anchor lcl config`"))
-	return b.String()
-}
-
-type LclConfigHeader struct{}
-
-func (LclConfigHeader) Init() tea.Cmd { return nil }
-
-func (m LclConfigHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m LclConfigHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Configure System for lcl.host HTTPS Local Development %s", ui.Whisper("`anchor lcl config`"))))
-	return b.String()
-}
-
-type LclConfigHint struct{}
-
-func (LclConfigHint) Init() tea.Cmd { return nil }
-
-func (m LclConfigHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m LclConfigHint) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.StepHint("Before issuing HTTPS certificates for your local applications, we need to"))
-	fmt.Fprintln(&b, ui.StepHint("configure your browsers and OS to trust your personal certificates."))
-	fmt.Fprintln(&b, ui.Whisper("    |")) // whisper instead of stephint to avoid whitespace errors from git + golden
-	fmt.Fprintln(&b, ui.StepHint("We'll start a local diagnostic web server to guide you through the process."))
-	return b.String()
-}
+	Browserless = ui.Section{
+		Name: "Browserless",
+		Model: ui.MessageLines{
+			ui.Warning("Unable to open browser, skipping browser-based verification."),
+		},
+	}
+)
 
 type LclConfig struct {
 	ConfirmCh chan<- struct{}
@@ -137,17 +131,5 @@ func (m LclConfigSuccess) View() string {
 
 	// TODO: move success part of Diagnostic to here
 
-	return b.String()
-}
-
-type Browserless struct{}
-
-func (m *Browserless) Init() tea.Cmd { return nil }
-
-func (m *Browserless) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *Browserless) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Warning("Unable to open browser, skipping browser-based verification."))
 	return b.String()
 }

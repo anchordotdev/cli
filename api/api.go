@@ -22,6 +22,7 @@ import (
 
 var (
 	ErrSignedOut            = errors.New("sign in required")
+	ErrTransient            = errors.New("transient error encountered, please retry")
 	ErrGnomeKeyringRequired = fmt.Errorf("gnome-keyring required for secure credential storage: %w", ErrSignedOut)
 )
 
@@ -123,6 +124,8 @@ func (s *Session) CreatePATToken(ctx context.Context, deviceCode string) (string
 		return "", err
 	}
 
+	requestId := res.Header.Get("X-Request-Id")
+
 	switch res.StatusCode {
 	case http.StatusOK:
 		var patTokens *AuthCliPatTokensResponse
@@ -130,6 +133,8 @@ func (s *Session) CreatePATToken(ctx context.Context, deviceCode string) (string
 			return "", err
 		}
 		return patTokens.PatToken, nil
+	case http.StatusServiceUnavailable:
+		return "", ErrTransient
 	case http.StatusBadRequest:
 		var errorsRes *Error
 		if err = json.NewDecoder(res.Body).Decode(&errorsRes); err != nil {
@@ -137,16 +142,16 @@ func (s *Session) CreatePATToken(ctx context.Context, deviceCode string) (string
 		}
 		switch errorsRes.Type {
 		case "urn:anchordev:api:cli-auth:authorization-pending":
-			return "", nil
+			return "", ErrTransient
 		case "urn:anchordev:api:cli-auth:expired-device-code":
 			return "", fmt.Errorf("Your authorization request has expired, please try again.")
 		case "urn:anchordev:api:cli-auth:incorrect-device-code":
 			return "", fmt.Errorf("Your authorization request was not found, please try again.")
 		default:
-			return "", fmt.Errorf("unexpected error: %s", errorsRes.Detail)
+			return "", fmt.Errorf("request [%s]: unexpected error: %s", requestId, errorsRes.Detail)
 		}
 	default:
-		return "", fmt.Errorf("unexpected response code: %d", res.StatusCode)
+		return "", fmt.Errorf("request [%s]: unexpected response code: %d", requestId, res.StatusCode)
 	}
 }
 
@@ -262,7 +267,8 @@ func (s *Session) get(ctx context.Context, path string, out any) error {
 		if err = json.NewDecoder(res.Body).Decode(&errorsRes); err != nil {
 			return err
 		}
-		return fmt.Errorf("%w: %s", StatusCodeError(res.StatusCode), errorsRes.Title)
+		requestId := res.Header.Get("X-Request-Id")
+		return fmt.Errorf("request [%s]: %w: %s", requestId, StatusCodeError(res.StatusCode), errorsRes.Title)
 	}
 	return json.NewDecoder(res.Body).Decode(out)
 }
@@ -292,7 +298,8 @@ func (s *Session) post(ctx context.Context, path string, in, out any) error {
 		if err = json.NewDecoder(res.Body).Decode(&errorsRes); err != nil {
 			return err
 		}
-		return fmt.Errorf("%w: %s", StatusCodeError(res.StatusCode), errorsRes.Title)
+		requestId := res.Header.Get("X-Request-Id")
+		return fmt.Errorf("request [%s]: %w: %s", requestId, StatusCodeError(res.StatusCode), errorsRes.Title)
 	}
 	return json.NewDecoder(res.Body).Decode(out)
 }
@@ -326,14 +333,16 @@ func (r responseChecker) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, fmt.Errorf("request error %s %s: %w", req.Method, req.URL.Path, err)
 	}
 
+	requestId := res.Header.Get("X-Request-Id")
+
 	switch res.StatusCode {
 	case http.StatusForbidden:
 		return nil, ErrSignedOut
 	case http.StatusInternalServerError:
-		return nil, fmt.Errorf("request failed: %w", err)
+		return nil, fmt.Errorf("request [%s] failed: %w", requestId, err)
 	}
 	if contentType := res.Header.Get("Content-Type"); !jsonMediaTypes.Matches(contentType) {
-		return nil, fmt.Errorf("non-json response received: %q: %w", contentType, err)
+		return nil, fmt.Errorf("request [%s]: %d response, expected json content-type, got: %q", requestId, res.StatusCode, contentType)
 	}
 	return res, nil
 }

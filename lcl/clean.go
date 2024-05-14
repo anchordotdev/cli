@@ -51,7 +51,7 @@ func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
 		c.realmSlug = "localhost"
 	}
 
-	drv.Activate(ctx, &models.LclCleanHeader{})
+	drv.Activate(ctx, models.LclCleanHeader)
 	drv.Activate(ctx, &models.LclCleanHint{
 		TrustStores: cfg.Trust.Stores,
 	})

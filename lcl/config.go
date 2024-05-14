@@ -52,8 +52,8 @@ func (c LclConfig) runTUI(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	drv.Activate(ctx, &models.LclConfigHeader{})
-	drv.Activate(ctx, &models.LclConfigHint{})
+	drv.Activate(ctx, models.LclConfigHeader)
+	drv.Activate(ctx, models.LclConfigHint)
 
 	err = c.perform(ctx, drv)
 	if err != nil {
@@ -192,7 +192,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		if !cfg.Trust.MockMode {
 			if err := browser.OpenURL(httpURL.String()); err != nil {
 				browserless = true
-				drv.Activate(ctx, &models.Browserless{})
+				drv.Activate(ctx, models.Browserless)
 			}
 		}
 
@@ -247,7 +247,7 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 	if !cfg.Trust.MockMode {
 		if err := browser.OpenURL(httpsURL.String()); err != nil {
 			browserless = true
-			drv.Activate(ctx, &models.Browserless{})
+			drv.Activate(ctx, models.Browserless)
 		}
 	}
 

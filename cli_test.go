@@ -14,9 +14,7 @@ import (
 	"github.com/anchordotdev/cli/ui"
 	"github.com/anchordotdev/cli/ui/uitest"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/exp/teatest"
-	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 )
@@ -24,16 +22,20 @@ import (
 func setupCleanup(t *testing.T) {
 	t.Helper()
 
-	colorProfile := lipgloss.ColorProfile()
-	lipgloss.SetColorProfile(termenv.TrueColor)
-
 	cliOS, cliArch := cli.Version.Os, cli.Version.Arch
 	cli.Version.Os, cli.Version.Arch = "goos", "goarch"
 
-	t.Cleanup(func() {
-		lipgloss.SetColorProfile(colorProfile)
+	cliExecutable := cli.Executable
+	switch runtime.GOOS {
+	case "darwin", "linux":
+		cli.Executable = "/tmp/go-build0123456789/b001/exe/anchor"
+	case "windows":
+		cli.Executable = `C:\Users\username\AppData\Local\Temp\go-build0123456789/b001/exe/anchor.exe`
+	}
 
+	t.Cleanup(func() {
 		cli.Version.Os, cli.Version.Arch = cliOS, cliArch
+		cli.Executable = cliExecutable
 	})
 }
 
@@ -71,9 +73,14 @@ func TestError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	var err error
 	cfg := cli.Config{}
 	cfg.NonInteractive = true
 	cfg.Test.Browserless = true
+	cfg.Timestamp = Timestamp
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx = cli.ContextWithConfig(ctx, &cfg)
 
 	t.Run(fmt.Sprintf("golden-%s", testTag()), func(t *testing.T) {
@@ -117,9 +124,14 @@ func TestPanic(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	var err error
 	cfg := cli.Config{}
 	cfg.NonInteractive = true
 	cfg.Test.Browserless = true
+	cfg.Timestamp = Timestamp
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx = cli.ContextWithConfig(ctx, &cfg)
 
 	t.Run(fmt.Sprintf("golden-%s", testTag()), func(t *testing.T) {
@@ -168,3 +180,5 @@ func (m *TestHint) View() string {
 	fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("Test %s Hint.", m.Type)))
 	return b.String()
 }
+
+var Timestamp, _ = time.Parse(time.RFC3339Nano, "2024-01-02T15:04:05.987654321Z")

@@ -50,7 +50,7 @@ func (c *Clean) runTUI(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	drv.Activate(ctx, &models.TrustCleanHeader{})
+	drv.Activate(ctx, models.TrustCleanHeader)
 	drv.Activate(ctx, &models.TrustCleanHint{
 		CertStates:  cfg.Trust.Clean.States,
 		TrustStores: cfg.Trust.Stores,

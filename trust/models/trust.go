@@ -11,32 +11,24 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type TrustHeader struct{}
+var (
+	TrustHeader = ui.Section{
+		Name: "TrustHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Manage CA Certificates in your Local Trust Store(s) %s", ui.Whisper("`anchor trust`"))),
+		},
+	}
 
-func (m *TrustHeader) Init() tea.Cmd { return nil }
-
-func (m *TrustHeader) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *TrustHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Manage CA Certificates in your Local Trust Store(s) %s", ui.Whisper("`anchor trust`"))))
-	return b.String()
-}
-
-type TrustHint struct{}
-
-func (m *TrustHint) Init() tea.Cmd { return nil }
-
-func (m *TrustHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *TrustHint) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("%s %s",
-		ui.Accentuate("This may require sudo privileges, learn why here: "),
-		ui.URL("https://lcl.host/why-sudo"),
-	)))
-	return b.String()
-}
+	TrustHint = ui.Section{
+		Name: "TrustHint",
+		Model: ui.MessageLines{
+			ui.StepHint(fmt.Sprintf("%s %s",
+				ui.Accentuate("This may require sudo privileges, learn why here: "),
+				ui.URL("https://lcl.host/why-sudo"),
+			)),
+		},
+	}
+)
 
 type TrustUpdateConfirm struct {
 	ConfirmCh chan<- struct{}
@@ -148,5 +140,19 @@ func (m *TrustUpdateStore) View() string {
 		)))
 	}
 
+	return b.String()
+}
+
+type VMHint struct{}
+
+func (m *VMHint) Init() tea.Cmd { return nil }
+
+func (m *VMHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *VMHint) View() string {
+	var b strings.Builder
+	fmt.Fprintln(&b, ui.StepWarning("Running trust inside a VM or container will not update the host system."))
+	fmt.Fprintln(&b, ui.StepHint("Rerun this command on your host system to update it's trust stores and enable")) // enable secure communication."))
+	fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("secure communication, learn more here: %s", ui.URL("https://cl.host/vm-container-setup"))))
 	return b.String()
 }

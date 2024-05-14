@@ -28,6 +28,7 @@ var (
 	StepHint       = hint.Copy().SetString("    |").Render
 	StepInProgress = lipgloss.NewStyle().SetString("    *").Render
 	StepPrompt     = lipgloss.NewStyle().SetString("    " + Prompt.Render("?")).Render
+	StepWarning    = header.Copy().SetString("    " + bgBanana(fgMidnight("!")) + fgBanana(" Warning:")).Render
 
 	Accentuate         = lipgloss.NewStyle().Italic(true).Render
 	Action             = lipgloss.NewStyle().Bold(true).Foreground(colorBrandPrimary).Render

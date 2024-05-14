@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"go/build"
+	"io/fs"
 	"net/url"
 	"os"
 	"regexp"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/ui"
@@ -16,6 +18,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
+
+var Executable string
 
 var Version = struct {
 	Version, Commit, Date string
@@ -120,6 +124,12 @@ type Config struct {
 	}
 
 	Version struct{} `cmd:"version"`
+
+	// values used for testing
+
+	GOOS      string    `desc:"change OS identifier in tests"`
+	ProcFS    fs.FS     `desc:"change the proc filesystem in tests"`
+	Timestamp time.Time `desc:"timestamp to use/display in tests"`
 }
 
 type UI struct {
@@ -205,10 +215,25 @@ func ReportError(ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args [
 	fmt.Fprintf(&body, "\n")
 	fmt.Fprintf(&body, "---\n")
 	fmt.Fprintf(&body, "\n")
-	fmt.Fprintf(&body, "**Command:** `%s`\n", cmd.CalledAs())
+	fmt.Fprintf(&body, "**Command:** `%s`\n", cmd.CommandPath())
+	var executable string
+	if Executable != "" {
+		executable = Executable
+	} else {
+		executable, _ = os.Executable()
+	}
+	if executable != "" {
+		fmt.Fprintf(&body, "**Executable:** `%s`\n", executable)
+	}
 	fmt.Fprintf(&body, "**Version:** `%s`\n", VersionString())
 	fmt.Fprintf(&body, "**Arguments:** `[%s]`\n", strings.Join(args, ", "))
 	fmt.Fprintf(&body, "**Flags:** `[%s]`\n", strings.Join(flags, ", "))
+
+	timestamp := cfg.Timestamp
+	if timestamp.IsZero() {
+		timestamp = time.Now().UTC()
+	}
+	fmt.Fprintf(&body, "**Timestamp:** `%s`\n", timestamp.Format(time.RFC3339Nano))
 	if stack != "" {
 		fmt.Fprintf(&body, "**Stack:**\n```\n%s\n```\n", normalizeStack(stack))
 	}

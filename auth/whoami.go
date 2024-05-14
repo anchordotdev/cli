@@ -27,7 +27,7 @@ func (c WhoAmI) UI() cli.UI {
 func (c *WhoAmI) runTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
-	drv.Activate(ctx, &models.WhoAmIHeader{})
+	drv.Activate(ctx, models.WhoAmIHeader)
 	drv.Activate(ctx, &models.WhoAmIChecker{})
 
 	anc, err := api.NewClient(cfg)

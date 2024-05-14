@@ -53,8 +53,8 @@ func (c Setup) run(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	drv.Activate(ctx, &models.SetupHeader{})
-	drv.Activate(ctx, &models.SetupHint{})
+	drv.Activate(ctx, models.SetupHeader)
+	drv.Activate(ctx, models.SetupHint)
 
 	err = c.perform(ctx, drv)
 	if err != nil {

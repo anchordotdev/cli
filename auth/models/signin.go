@@ -9,29 +9,21 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type SignInHeader struct{}
+var (
+	SignInHeader = ui.Section{
+		Name: "SignInHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Signin to Anchor.dev %s", ui.Whisper("`anchor auth signin`"))),
+		},
+	}
 
-func (SignInHeader) Init() tea.Cmd { return nil }
-
-func (m *SignInHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *SignInHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Signin to Anchor.dev %s", ui.Whisper("`anchor auth signin`"))))
-	return b.String()
-}
-
-type SignInHint struct{}
-
-func (SignInHint) Init() tea.Cmd { return nil }
-
-func (m SignInHint) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m SignInHint) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.StepHint("Please sign up or sign in with your Anchor account."))
-	return b.String()
-}
+	SignInHint = ui.Section{
+		Name: "SignInHint",
+		Model: ui.MessageLines{
+			ui.StepHint("Please sign up or sign in with your Anchor account."),
+		},
+	}
+)
 
 type SignInPrompt struct {
 	ConfirmCh       chan<- struct{}

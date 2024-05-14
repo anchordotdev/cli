@@ -23,13 +23,13 @@ func (s SignOut) UI() cli.UI {
 func (s *SignOut) runTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
-	drv.Activate(ctx, &models.SignOutHeader{})
+	drv.Activate(ctx, models.SignOutHeader)
 
 	kr := keyring.Keyring{Config: cfg}
 	err := kr.Delete(keyring.APIToken)
 
 	if err == nil {
-		drv.Activate(ctx, &models.SignOutSuccess{})
+		drv.Activate(ctx, models.SignOutSuccess)
 	}
 
 	return err

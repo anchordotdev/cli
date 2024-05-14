@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/anchordotdev/cli"
@@ -98,6 +99,48 @@ func TestTrust(t *testing.T) {
 			t.Skip("trust unsupported in mock mode")
 		}
 		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		cmd := Command{}
+
+		uitest.TestTUI(ctx, t)
+
+		errc := make(chan error, 1)
+		go func() {
+			errc <- cmd.UI().RunTUI(ctx, drv)
+
+			tm.Quit()
+		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"! Press Enter to install missing certificates. (requires sudo)",
+		)
+
+		tm.Send(tea.KeyMsg{
+			Type: tea.KeyEnter,
+		})
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
+	})
+
+	t.Run("wsl-vm", func(t *testing.T) {
+		if !srv.IsProxy() {
+			t.Skip("trust unsupported in mock mode")
+		}
+
+		cfg := *cfg
+
+		cfg.GOOS = "linux"
+		cfg.ProcFS = fstest.MapFS{
+			"version": &fstest.MapFile{
+				Data: unameWSL2,
+			},
+		}
+
+		ctx, cancel := context.WithCancel(cli.ContextWithConfig(ctx, &cfg))
 		defer cancel()
 
 		drv, tm := uitest.TestTUI(ctx, t)

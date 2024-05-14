@@ -13,16 +13,11 @@ import (
 	"github.com/anchordotdev/cli/ui"
 )
 
-type TrustCleanHeader struct{}
-
-func (m *TrustCleanHeader) Init() tea.Cmd { return nil }
-
-func (m *TrustCleanHeader) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
-
-func (m *TrustCleanHeader) View() string {
-	var b strings.Builder
-	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("Clean CA Certificates from Local Trust Store(s) %s", ui.Whisper("`anchor trust clean`"))))
-	return b.String()
+var TrustCleanHeader = ui.Section{
+	Name: "TrustCleanHeader",
+	Model: ui.MessageLines{
+		ui.Header(fmt.Sprintf("Clean CA Certificates from Local Trust Store(s) %s", ui.Whisper("`anchor trust clean`"))),
+	},
 }
 
 type TrustCleanHint struct {

@@ -37,8 +37,8 @@ func (c Audit) run(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	drv.Activate(ctx, &models.AuditHeader{})
-	drv.Activate(ctx, &models.AuditHint{})
+	drv.Activate(ctx, models.AuditHeader)
+	drv.Activate(ctx, models.AuditHint)
 
 	_, err = c.perform(ctx, drv)
 	if err != nil {

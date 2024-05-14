@@ -39,10 +39,10 @@ func (s SignIn) UI() cli.UI {
 func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
-	drv.Activate(ctx, &models.SignInHeader{})
+	drv.Activate(ctx, models.SignInHeader)
 
 	if s.Hint == nil {
-		s.Hint = &models.SignInHint{}
+		s.Hint = models.SignInHint
 	}
 	drv.Activate(ctx, s.Hint)
 
@@ -83,7 +83,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 
 	var patToken string
 	for patToken == "" {
-		if patToken, err = anc.CreatePATToken(ctx, codes.DeviceCode); err != nil {
+		if patToken, err = anc.CreatePATToken(ctx, codes.DeviceCode); err != nil && err != api.ErrTransient {
 			return err
 		}
 
