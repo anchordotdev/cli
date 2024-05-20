@@ -102,10 +102,6 @@ func (m LclConfig) View() string {
 		)))
 
 		fmt.Fprintln(&b, ui.StepHint("Next, we'll add your personal CA certificates to your system's trust stores."))
-		fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("%s %s",
-			ui.Accentuate("This may require sudo privileges, learn why here: "),
-			ui.URL("https://lcl.host/why-sudo"),
-		)))
 
 		return b.String()
 	}

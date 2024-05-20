@@ -2,8 +2,6 @@ package version
 
 import (
 	"fmt"
-	"os"
-	"runtime"
 	"time"
 
 	"github.com/anchordotdev/cli"
@@ -30,7 +28,7 @@ func VersionCheck(cmd *cobra.Command, args []string) error {
 
 	if release.TagName == nil || *release.TagName != cli.ReleaseTagName() {
 		fmt.Println(ui.StepHint("A new release of the anchor CLI is available."))
-		if !isWindowsRuntime() {
+		if !isWindowsRuntime(cli.ConfigFromCmd(cmd)) {
 			command := "brew update && brew upgrade anchor"
 			if err := clipboard.WriteAll(command); err == nil {
 				fmt.Println(ui.StepAlert(fmt.Sprintf("Copied %s to your clipboard.", ui.Announce(command))))
@@ -45,6 +43,6 @@ func VersionCheck(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func isWindowsRuntime() bool {
-	return os.Getenv("GOOS") == "windows" || runtime.GOOS == "windows"
+func isWindowsRuntime(cfg *cli.Config) bool {
+	return cfg.GOOS() == "windows"
 }

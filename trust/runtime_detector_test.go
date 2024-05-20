@@ -19,10 +19,12 @@ func TestIsVMOrContainer(t *testing.T) {
 			name: "non-vm-or-container-linux",
 
 			cfg: &cli.Config{
-				GOOS: "linux",
-				ProcFS: fstest.MapFS{
-					"version": &fstest.MapFile{
-						Data: unameLinuxHost,
+				Test: cli.ConfigTest{
+					GOOS: "linux",
+					ProcFS: fstest.MapFS{
+						"version": &fstest.MapFile{
+							Data: unameLinuxHost,
+						},
 					},
 				},
 			},
@@ -33,10 +35,12 @@ func TestIsVMOrContainer(t *testing.T) {
 			name: "WSL-1",
 
 			cfg: &cli.Config{
-				GOOS: "linux",
-				ProcFS: fstest.MapFS{
-					"version": &fstest.MapFile{
-						Data: unameWSL1,
+				Test: cli.ConfigTest{
+					GOOS: "linux",
+					ProcFS: fstest.MapFS{
+						"version": &fstest.MapFile{
+							Data: unameWSL1,
+						},
 					},
 				},
 			},
@@ -47,10 +51,12 @@ func TestIsVMOrContainer(t *testing.T) {
 			name: "WSL-2",
 
 			cfg: &cli.Config{
-				GOOS: "linux",
-				ProcFS: fstest.MapFS{
-					"version": &fstest.MapFile{
-						Data: unameWSL2,
+				Test: cli.ConfigTest{
+					GOOS: "linux",
+					ProcFS: fstest.MapFS{
+						"version": &fstest.MapFile{
+							Data: unameWSL2,
+						},
 					},
 				},
 			},

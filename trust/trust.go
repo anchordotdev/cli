@@ -138,7 +138,8 @@ func (c Command) Perform(ctx context.Context, drv *ui.Driver) error {
 
 	for _, store := range stores {
 		drv.Activate(ctx, &models.TrustUpdateStore{
-			Store: store,
+			Config: cfg,
+			Store:  store,
 		})
 		for _, ca := range auditInfo.Missing {
 			if auditInfo.IsPresent(ca, store) {

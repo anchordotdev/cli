@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"github.com/anchordotdev/cli"
@@ -66,7 +65,7 @@ func NewClient(cfg *cli.Config) (*Session, error) {
 		if apiToken, err = kr.Get(keyring.APIToken); err == keyring.ErrNotFound {
 			return anc, ErrSignedOut
 		}
-		if err != nil && gnomeKeyringMissing() {
+		if err != nil && gnomeKeyringMissing(cfg) {
 			return anc, ErrGnomeKeyringRequired
 		}
 
@@ -390,8 +389,8 @@ const NotFoundErr = StatusCodeError(http.StatusNotFound)
 func (err StatusCodeError) StatusCode() int { return int(err) }
 func (err StatusCodeError) Error() string   { return fmt.Sprintf("unexpected %d status response", err) }
 
-func gnomeKeyringMissing() bool {
-	if runtime.GOOS != "linux" {
+func gnomeKeyringMissing(cfg *cli.Config) bool {
+	if cfg.GOOS() != "linux" {
 		return false
 	}
 	if path, _ := exec.LookPath("gnome-keyring-daemon"); path != "" {

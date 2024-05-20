@@ -2,6 +2,7 @@ package lcl
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -29,7 +30,13 @@ var CmdLclSetup = cli.NewCmd[Setup](CmdLcl, "setup", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
 	cmd.Flags().StringVar(&cfg.Lcl.Setup.Language, "language", "", "Language to integrate with Anchor.")
+	cmd.Flags().StringVar(&cfg.Lcl.Setup.Method, "method", "", "Integration method for certificates.")
 })
+
+var (
+	MethodAutomatic = "automatic"
+	MethodManual    = "manual"
+)
 
 type Setup struct {
 	anc     *api.Session
@@ -42,7 +49,7 @@ func (c Setup) UI() cli.UI {
 	}
 }
 
-func (c Setup) run(ctx context.Context, drv *ui.Driver) error {
+func (c *Setup) run(ctx context.Context, drv *ui.Driver) error {
 	var err error
 	cmd := &auth.Client{
 		Anc:    c.anc,
@@ -64,7 +71,7 @@ func (c Setup) run(ctx context.Context, drv *ui.Driver) error {
 	return nil
 }
 
-func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
+func (c *Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
 	drv.Activate(ctx, &models.SetupScan{})
@@ -132,7 +139,7 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		Default: defaultDomain,
 		TLD:     "lcl.host",
 		Prompt:  "What lcl.host domain would you like to use for local application development?",
-		Done:    "Entered %s domain for local application development",
+		Done:    "Entered %s domain for local application development.",
 	})
 
 	var lclDomain string
@@ -176,6 +183,39 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
+	setupMethod := cfg.Lcl.Setup.Method
+	if setupMethod == "" {
+		choicec = make(chan string)
+		drv.Activate(ctx, &models.SetupMethod{
+			ChoiceCh: choicec,
+		})
+
+		select {
+		case setupMethod = <-choicec:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+
+	switch setupMethod {
+	case MethodManual:
+		if err := c.manualMethod(ctx, drv, tlsCert, domains...); err != nil {
+			return err
+		}
+	case MethodAutomatic:
+		setupGuideURL := cfg.AnchorURL + "/" + url.QueryEscape(c.orgSlug) + "/services/" + url.QueryEscape(service.Slug) + "/guide"
+		lclURL := fmt.Sprintf("https://%s:%d", lclDomain, *service.LocalhostPort)
+		if err := c.automaticMethod(ctx, drv, setupGuideURL, lclURL); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("Unknown method: %s. Please choose either `anchor` (recommended) or `mkcert`.", setupMethod)
+	}
+
+	return nil
+}
+
+func (c *Setup) manualMethod(ctx context.Context, drv *ui.Driver, tlsCert *tls.Certificate, domains ...string) error {
 	cmdCert := cert.Provision{
 		Cert: tlsCert,
 	}
@@ -184,7 +224,10 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	setupGuideURL := cfg.AnchorURL + "/" + url.QueryEscape(c.orgSlug) + "/services/" + url.QueryEscape(service.Slug) + "/guide"
+	return nil
+}
+
+func (c *Setup) automaticMethod(ctx context.Context, drv *ui.Driver, setupGuideURL string, LclURL string) error {
 	setupGuideConfirmCh := make(chan struct{})
 
 	drv.Activate(ctx, &models.SetupGuidePrompt{
@@ -199,11 +242,14 @@ func (c Setup) perform(ctx context.Context, drv *ui.Driver) error {
 		return ctx.Err()
 	}
 
+	cfg := cli.ConfigFromContext(ctx)
 	if !cfg.Trust.MockMode {
 		if err := browser.OpenURL(setupGuideURL); err != nil {
 			drv.Activate(ctx, &climodels.Browserless{Url: setupGuideURL})
 		}
 	}
+
+	drv.Activate(ctx, &models.SetupGuideHint{LclUrl: LclURL})
 
 	return nil
 }

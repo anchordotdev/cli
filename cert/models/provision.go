@@ -55,8 +55,9 @@ func (m *Provision) View() string {
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote certificate to %s", ui.Emphasize(m.certFile))))
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote chain to %s", ui.Emphasize(m.chainFile))))
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote key to %s", ui.Emphasize(m.keyFile))))
-	fmt.Fprintln(&b, ui.StepHint("You can use these certificate files to manually configure your application and"))
-	fmt.Fprintln(&b, ui.StepHint("start using HTTPS in your development environment."))
+
+	fmt.Fprintln(&b, ui.StepHint("To use these certificates please reference your language and/or framework docs."))
+	fmt.Fprintln(&b, ui.StepHint("When these certificates expire, rerun `anchor lcl mkcert` to generate new ones."))
 
 	return b.String()
 }

@@ -2,20 +2,13 @@ package trust
 
 import (
 	"io"
-	"os"
-	"runtime"
 	"strings"
 
 	"github.com/anchordotdev/cli"
 )
 
 func isVMOrContainer(cfg *cli.Config) bool {
-	os := cfg.GOOS
-	if os == "" {
-		os = runtime.GOOS
-	}
-
-	switch os {
+	switch cfg.GOOS() {
 	case "linux":
 		// only WSL is detected for now.
 		return isWSL(cfg)
@@ -25,12 +18,7 @@ func isVMOrContainer(cfg *cli.Config) bool {
 }
 
 func isWSL(cfg *cli.Config) bool {
-	procFS := cfg.ProcFS
-	if procFS == nil {
-		procFS = os.DirFS("/proc")
-	}
-
-	f, err := procFS.Open("version")
+	f, err := cfg.ProcFS().Open("version")
 	if err != nil {
 		return false
 	}

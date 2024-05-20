@@ -6,38 +6,39 @@
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
 ─── TrustHint ──────────────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    | We will check your local trust stores, then make any needed updates.
 ─── VMHint ─────────────────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    | We will check your local trust stores, then make any needed updates.
     ! Warning: Running trust inside a VM or container will not update the host system.
     | Rerun this command on your host system to update it's trust stores and enable
     | secure communication, learn more here: https://cl.host/vm-container-setup
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    | We will check your local trust stores, then make any needed updates.
     ! Warning: Running trust inside a VM or container will not update the host system.
     | Rerun this command on your host system to update it's trust stores and enable
     | secure communication, learn more here: https://cl.host/vm-container-setup
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    | We will check your local trust stores, then make any needed updates.
     ! Warning: Running trust inside a VM or container will not update the host system.
     | Rerun this command on your host system to update it's trust stores and enable
     | secure communication, learn more here: https://cl.host/vm-container-setup
     - Compared local and expected CA certificates: found matching certificates.
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    | We will check your local trust stores, then make any needed updates.
     ! Warning: Running trust inside a VM or container will not update the host system.
     | Rerun this command on your host system to update it's trust stores and enable
     | secure communication, learn more here: https://cl.host/vm-container-setup
     - Compared local and expected CA certificates: found matching certificates.
+    | Updates may require sudo privileges, learn why here: https://lcl.host/why-sudo
     ! Press Enter to install missing certificates. (requires sudo)
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
+    | We will check your local trust stores, then make any needed updates.
     ! Warning: Running trust inside a VM or container will not update the host system.
     | Rerun this command on your host system to update it's trust stores and enable
     | secure communication, learn more here: https://cl.host/vm-container-setup

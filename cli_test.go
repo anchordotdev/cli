@@ -73,15 +73,13 @@ func TestError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var err error
-	cfg := cli.Config{}
-	cfg.NonInteractive = true
-	cfg.Test.Browserless = true
-	cfg.Timestamp = Timestamp
-	if err != nil {
-		t.Fatal(err)
-	}
-	ctx = cli.ContextWithConfig(ctx, &cfg)
+	ctx = cli.ContextWithConfig(ctx, &cli.Config{
+		NonInteractive: true,
+		Test: cli.ConfigTest{
+			Browserless: true,
+			Timestamp:   Timestamp,
+		},
+	})
 
 	t.Run(fmt.Sprintf("golden-%s", testTag()), func(t *testing.T) {
 		var returnedError error
@@ -124,15 +122,13 @@ func TestPanic(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var err error
-	cfg := cli.Config{}
-	cfg.NonInteractive = true
-	cfg.Test.Browserless = true
-	cfg.Timestamp = Timestamp
-	if err != nil {
-		t.Fatal(err)
-	}
-	ctx = cli.ContextWithConfig(ctx, &cfg)
+	ctx = cli.ContextWithConfig(ctx, &cli.Config{
+		NonInteractive: true,
+		Test: cli.ConfigTest{
+			Browserless: true,
+			Timestamp:   Timestamp,
+		},
+	})
 
 	t.Run(fmt.Sprintf("golden-%s", testTag()), func(t *testing.T) {
 		var returnedError error

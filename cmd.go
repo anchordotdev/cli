@@ -40,7 +40,7 @@ var rootDef = CmdDef{
 		{
 			Name: "auth",
 
-			Use:   "auth <subcommand> [flags]",
+			Use:   "auth [flags]",
 			Args:  cobra.NoArgs,
 			Short: "Manage Anchor.dev Authentication",
 

@@ -1,7 +1,7 @@
 Manage Anchor.dev Authentication
 
 Usage:
-  anchor auth <subcommand> [flags]
+  anchor auth [flags]
   anchor auth [command]
 
 Available Commands:

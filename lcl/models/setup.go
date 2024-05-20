@@ -155,7 +155,7 @@ func (m *SetupCategory) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s application server type", ui.Emphasize(m.choice))))
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s application server type.", ui.Emphasize(m.choice))))
 
 	return b.String()
 }
@@ -224,6 +224,72 @@ func (m *SetupName) View() string {
 	return b.String()
 }
 
+type SetupMethod struct {
+	ChoiceCh chan<- string
+
+	list   list.Model
+	choice string
+}
+
+func (m *SetupMethod) Init() tea.Cmd {
+	m.list = ui.List([]ui.ListItem[string]{
+		{
+			Key:   "automatic",
+			Value: "Automatic via ACME - Anchor style - Recommended",
+		},
+		{
+			Key:   "manual",
+			Value: "Manually Managed - mkcert style",
+		},
+	})
+	return nil
+}
+
+func (m *SetupMethod) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			var cmd tea.Cmd
+			m.list, cmd = m.list.Update(msg)
+
+			if item, ok := m.list.SelectedItem().(ui.ListItem[string]); ok {
+				m.choice = item.Key
+				if m.ChoiceCh != nil {
+					m.ChoiceCh <- m.choice
+					close(m.ChoiceCh)
+					m.ChoiceCh = nil
+				}
+			}
+
+			return m, cmd
+		case tea.KeyEsc:
+			return m, ui.Exit
+		}
+	}
+
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+	return m, cmd
+}
+
+func (m *SetupMethod) View() string {
+	var b strings.Builder
+
+	if m.ChoiceCh != nil {
+		fmt.Fprintln(&b, ui.StepHint("How would you like to manage your lcl.host certificates?"))
+		fmt.Fprintln(&b, ui.StepHint(" - Anchor style guides you through setup and will automatically renew."))
+		fmt.Fprintln(&b, ui.StepHint(" - Mkcert style leaves setup and renewal up to you."))
+
+		fmt.Fprintln(&b, ui.StepPrompt("What certificate management method?"))
+		fmt.Fprintln(&b, m.list.View())
+		return b.String()
+	}
+
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s certificate management.", ui.Emphasize(m.choice))))
+	return b.String()
+}
+
 type SetupGuidePrompt struct {
 	ConfirmCh chan<- struct{}
 
@@ -277,6 +343,23 @@ func (m SetupGuidePrompt) View() string {
 	} else {
 		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Opened %s.", ui.URL(m.url))))
 	}
+
+	return b.String()
+}
+
+type SetupGuideHint struct {
+	LclUrl string
+}
+
+func (m *SetupGuideHint) Init() tea.Cmd { return nil }
+
+func (m *SetupGuideHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *SetupGuideHint) View() string {
+	var b strings.Builder
+
+	fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("After following the guide, check out your encrypted site at: %s", ui.URL(m.LclUrl))))
+	fmt.Fprintln(&b, ui.StepHint("These certificates will renew automatically, time to enjoy effortless encryption."))
 
 	return b.String()
 }

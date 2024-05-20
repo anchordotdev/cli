@@ -188,7 +188,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates for your local applications, we need to
@@ -202,7 +201,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
@@ -217,7 +215,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
@@ -232,8 +229,8 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
+    | Updates may require sudo privileges, learn why here: https://lcl.host/why-sudo
     ! Press Enter to install missing certificates. (requires sudo)
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
@@ -248,7 +245,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
@@ -263,9 +259,8 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
-    * Updating Mock: installing lcl_config/localhost - AnchorCA ECDSA.
+    * Updating Mock: installing lcl_config/localhost - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates for your local applications, we need to
@@ -279,7 +274,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA]
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
@@ -295,10 +289,9 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA]
-    * Updating Mock: installing lcl_config/localhost - AnchorCA RSA.
+    * Updating Mock: installing lcl_config/localhost - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates for your local applications, we need to
@@ -312,7 +305,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
 ─── LclConfig ──────────────────────────────────────────────────────────────────
@@ -328,7 +320,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
     | Before we move on, let's test your system configuration by trying out HTTPS.
@@ -346,7 +337,6 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
-    | This may require sudo privileges, learn why here:  https://lcl.host/why-sudo
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
     | Before we move on, let's test your system configuration by trying out HTTPS.

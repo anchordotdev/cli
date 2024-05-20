@@ -23,6 +23,11 @@ func TestCmdLclSetup(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--language", "ruby")
 		require.Equal(t, "ruby", cfg.Lcl.Setup.Language)
 	})
+
+	t.Run("--method anchor", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--method", "anchor")
+		require.Equal(t, "anchor", cfg.Lcl.Setup.Method)
+	})
 }
 
 func TestSetup(t *testing.T) {
@@ -86,6 +91,14 @@ func TestSetup(t *testing.T) {
 		if !srv.IsProxy() {
 			t.Skip("provisioning unsupported in mock mode")
 		}
+
+		tm.Send(tea.KeyMsg{
+			Type: tea.KeyEnter,
+		})
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? What certificate management method?",
+		)
 
 		tm.Send(tea.KeyMsg{
 			Type: tea.KeyEnter,

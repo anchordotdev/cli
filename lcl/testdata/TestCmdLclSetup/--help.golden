@@ -6,3 +6,4 @@ Usage:
 Flags:
   -h, --help              help for setup
       --language string   Language to integrate with Anchor.
+      --method string     Integration method for certificates.

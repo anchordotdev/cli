@@ -16,6 +16,7 @@ Flags:
       --domains strings   Domains to create certificate for.
   -h, --help              help for lcl
       --language string   Language to integrate with Anchor.
+      --method string     Integration method for certificates.
       --subca string      SubCA to create certificate for.
 
 Use "anchor lcl [command] --help" for more information about a command.

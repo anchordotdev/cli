@@ -132,9 +132,8 @@ func TestTrust(t *testing.T) {
 		}
 
 		cfg := *cfg
-
-		cfg.GOOS = "linux"
-		cfg.ProcFS = fstest.MapFS{
+		cfg.Test.GOOS = "linux"
+		cfg.Test.ProcFS = fstest.MapFS{
 			"version": &fstest.MapFile{
 				Data: unameWSL2,
 			},

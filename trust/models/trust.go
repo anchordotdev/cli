@@ -2,9 +2,9 @@ package models
 
 import (
 	"fmt"
-	"runtime"
 	"strings"
 
+	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -22,10 +22,7 @@ var (
 	TrustHint = ui.Section{
 		Name: "TrustHint",
 		Model: ui.MessageLines{
-			ui.StepHint(fmt.Sprintf("%s %s",
-				ui.Accentuate("This may require sudo privileges, learn why here: "),
-				ui.URL("https://lcl.host/why-sudo"),
-			)),
+			ui.StepHint("We will check your local trust stores, then make any needed updates."),
 		},
 	}
 )
@@ -55,6 +52,10 @@ func (m *TrustUpdateConfirm) View() string {
 	var b strings.Builder
 
 	if m.ConfirmCh != nil {
+		fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("%s %s",
+			ui.Accentuate("Updates may require sudo privileges, learn why here:"),
+			ui.URL("https://lcl.host/why-sudo"),
+		)))
 		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to install missing certificates. (%s)", ui.Action("Press Enter"), ui.Accentuate("requires sudo"))))
 
 		return b.String()
@@ -64,6 +65,8 @@ func (m *TrustUpdateConfirm) View() string {
 }
 
 type TrustUpdateStore struct {
+	Config *cli.Config
+
 	Store truststore.Store
 
 	installing *truststore.CA
@@ -98,11 +101,11 @@ func (m *TrustUpdateStore) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.installing = nil
 		m.installed[msg.CA.Subject.CommonName] = append(m.installed[msg.CA.Subject.CommonName], msg.CA.PublicKeyAlgorithm.String())
 		return m, nil
-	default:
-		var cmd tea.Cmd
-		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
 	}
+
+	var cmd tea.Cmd
+	m.spinner, cmd = m.spinner.Update(msg)
+	return m, cmd
 }
 
 func (m *TrustUpdateStore) View() string {
@@ -126,18 +129,18 @@ func (m *TrustUpdateStore) View() string {
 
 	if m.installing != nil {
 		// present thumbprint for comparison with pop up prompt
-		if runtime.GOOS == "windows" {
+		if m.Config.GOOS() == "windows" {
 			fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("\"%s\" Thumbprint (sha1): %s",
 				m.installing.Subject.CommonName,
 				m.installing.WindowsThumbprint(),
 			)))
 		}
 
-		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Updating %s: installing %s %s.",
+		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Updating %s: installing %s %s… %s",
 			ui.Emphasize(m.Store.Description()),
 			ui.Underline(m.installing.Subject.CommonName),
 			ui.Whisper(m.installing.PublicKeyAlgorithm.String()),
-		)))
+			m.spinner.View())))
 	}
 
 	return b.String()
