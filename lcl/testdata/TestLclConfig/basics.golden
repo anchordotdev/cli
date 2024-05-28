@@ -340,4 +340,20 @@
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
     | Before we move on, let's test your system configuration by trying out HTTPS.
+─── LclConfigSuccess ───────────────────────────────────────────────────────────
+# Configure System for lcl.host HTTPS Local Development `anchor lcl config`
+    | Before issuing HTTPS certificates for your local applications, we need to
+    | configure your browsers and OS to trust your personal certificates.
+    |
+    | We'll start a local diagnostic web server to guide you through the process.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision your application's resources on Anchor.dev and the HTTPS
+    | certificates for your development environment.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Next, we'll add your personal CA certificates to your system's trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
+    | Before we move on, let's test your system configuration by trying out HTTPS.
     - Success! https://hello-world.lcl.host:4433 works as expected (encrypted with HTTPS).

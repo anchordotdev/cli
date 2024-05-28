@@ -28,6 +28,9 @@ type Server struct {
 
 	rchanmu sync.Mutex
 	rchan   chan string
+
+	tlso sync.Once
+	tlsc chan struct{}
 }
 
 func (s *Server) Start(ctx context.Context) error {
@@ -69,10 +72,16 @@ func (s *Server) Start(ctx context.Context) error {
 	go s.server.Serve(lnHTTP)
 	go s.server.Serve(tls.NewListener(lnTLS, &tls.Config{
 		NextProtos:     []string{"h2", "http/1.1"},
-		GetCertificate: s.GetCertificate,
+		GetCertificate: s.getCertificate,
 	}))
 
+	s.tlsc = make(chan struct{})
+
 	return s.proxy.Start()
+}
+
+func (s *Server) EnableTLS() {
+	s.tlso.Do(func() { close(s.tlsc) })
 }
 
 func (s *Server) Close() error {
@@ -89,6 +98,12 @@ func (s *Server) Close() error {
 	}
 
 	return s.proxy.Wait()
+}
+
+func (s *Server) getCertificate(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
+	<-s.tlsc
+
+	return s.GetCertificate(chi)
 }
 
 func (s *Server) RequestChan() <-chan string {

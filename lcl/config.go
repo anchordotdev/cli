@@ -221,6 +221,8 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		}
 	}
 
+	srvDiag.EnableTLS()
+
 	httpsURL, err := url.Parse("https://" + domain + ":" + diagPort)
 	if err != nil {
 		return err
@@ -261,7 +263,9 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 		}
 	}
 
-	drv.Activate(ctx, new(models.LclConfigSuccess))
+	drv.Activate(ctx, &models.LclConfigSuccess{
+		URL: httpsURL,
+	})
 
 	return nil
 }

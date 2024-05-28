@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/auth/models"
@@ -27,6 +28,11 @@ func (s *SignOut) runTUI(ctx context.Context, drv *ui.Driver) error {
 
 	kr := keyring.Keyring{Config: cfg}
 	err := kr.Delete(keyring.APIToken)
+
+	if errors.Is(err, keyring.ErrNotFound) {
+		drv.Activate(ctx, models.SignOutSignedOut)
+		return nil
+	}
 
 	if err == nil {
 		drv.Activate(ctx, models.SignOutSuccess)

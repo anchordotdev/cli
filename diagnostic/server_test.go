@@ -28,6 +28,8 @@ func TestServerSupportsDualProtocols(t *testing.T) {
 	}
 	defer srv.Close()
 
+	srv.EnableTLS()
+
 	_, port, err := net.SplitHostPort(srv.Addr)
 	if err != nil {
 		t.Fatal(err)

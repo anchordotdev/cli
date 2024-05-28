@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/anchordotdev/cli/ui"
@@ -106,16 +107,11 @@ func (m LclConfig) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Success! %s works as expected (%s).",
-		ui.URL(m.url),
-		ui.Accentuate("encrypted with HTTPS"),
-	)))
-
 	return b.String()
 }
 
 type LclConfigSuccess struct {
-	Org, Realm, CA string
+	URL *url.URL
 }
 
 func (LclConfigSuccess) Init() tea.Cmd { return nil }
@@ -125,7 +121,10 @@ func (m LclConfigSuccess) Update(tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 func (m LclConfigSuccess) View() string {
 	var b strings.Builder
 
-	// TODO: move success part of Diagnostic to here
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Success! %s works as expected (%s).",
+		ui.URL(m.URL.String()),
+		ui.Accentuate("encrypted with HTTPS"),
+	)))
 
 	return b.String()
 }

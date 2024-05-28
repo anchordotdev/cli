@@ -66,7 +66,7 @@ func TestTUIOutput(ctx context.Context, t *testing.T, tui cli.UI) {
 		t.Fatal(err)
 	}
 
-	teatest.RequireEqualOutput(t, []byte(drv.Golden()))
+	TestGolden(t, drv.Golden())
 }
 
 func testTUI(ctx context.Context, t *testing.T, tui cli.UI) (*ui.Driver, chan error) {

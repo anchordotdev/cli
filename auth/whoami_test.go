@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
@@ -27,7 +26,9 @@ func TestWhoAmI(t *testing.T) {
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("signed-out", func(t *testing.T) {
-		uitest.TestTUIError(ctx, t, new(WhoAmI).UI(), api.ErrSignedOut)
+		cmd := WhoAmI{}
+
+		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})
 
 	t.Run("signed-in", func(t *testing.T) {

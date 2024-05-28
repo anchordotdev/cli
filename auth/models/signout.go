@@ -14,6 +14,14 @@ var (
 		},
 	}
 
+	SignOutSignedOut = ui.Section{
+		Name: "SignOutSignedOut",
+		Model: ui.MessageLines{
+			ui.StepDone("Not signed in."),
+			ui.StepHint("Run `anchor auth signin` to sign in."),
+		},
+	}
+
 	SignOutSuccess = ui.Section{
 		Name: "SignOutSuccess",
 		Model: ui.MessageLines{

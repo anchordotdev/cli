@@ -24,7 +24,9 @@ func TestSignout(t *testing.T) {
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("signed-out", func(t *testing.T) {
-		uitest.TestTUIError(ctx, t, new(SignOut).UI(), "secret not found in keyring")
+		cmd := SignOut{}
+
+		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})
 
 	t.Run("signed-in", func(t *testing.T) {
