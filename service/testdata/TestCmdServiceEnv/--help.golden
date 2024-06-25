@@ -1,0 +1,11 @@
+Fetch Environment Variables for Service
+
+Usage:
+  anchor service env [flags]
+
+Flags:
+  -h, --help             help for env
+      --method string    Integration method for environment variables.
+  -o, --org string       Organization to trust.
+  -r, --realm string     Realm to trust.
+  -s, --service string   Service for ENV.

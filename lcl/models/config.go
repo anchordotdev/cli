@@ -27,8 +27,8 @@ var (
 	LclConfigHint = ui.Section{
 		Name: "LclConfigHint",
 		Model: ui.MessageLines{
-			ui.StepHint("Before issuing HTTPS certificates for your local applications, we need to"),
-			ui.StepHint("configure your browsers and OS to trust your personal certificates."),
+			ui.StepHint("Before issuing HTTPS certificates, we need to configure your browsers"),
+			ui.StepHint("and OS to trust your personal certificates."),
 			ui.Whisper("    |"), // whisper instead of stephint to avoid whitespace errors from git + golden
 			ui.StepHint("We'll start a local diagnostic web server to guide you through the process."),
 		},
@@ -84,7 +84,7 @@ func (m LclConfig) View() string {
 	}
 
 	if m.Scheme == "https" {
-		fmt.Fprintln(&b, ui.StepHint("Before we move on, let's test your system configuration by trying out HTTPS."))
+		fmt.Fprintln(&b, ui.StepHint("Before we move on, let's test HTTPS."))
 	}
 
 	if m.confirmCh != nil {

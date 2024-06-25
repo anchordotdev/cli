@@ -2,16 +2,16 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"go/build"
 	"net/url"
 	"os"
-	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
 	"github.com/anchordotdev/cli/models"
+	"github.com/anchordotdev/cli/stacktrace"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/cli/browser"
 	"github.com/spf13/cobra"
@@ -66,55 +66,7 @@ func ContextWithConfig(ctx context.Context, cfg *Config) context.Context {
 	return context.WithValue(ctx, ContextKey("Config"), cfg)
 }
 
-var (
-	stackHexRegexp = regexp.MustCompile(`0x[0-9a-f]{2,}\??`)
-	stackNilRegexp = regexp.MustCompile(`0x0`)
-
-	stackPathReplacer *strings.Replacer
-)
-
-func init() {
-	goPaths := strings.Split(os.Getenv("GOPATH"), string(os.PathListSeparator))
-	if len(goPaths) == 0 {
-		goPaths = append(goPaths, build.Default.GOPATH)
-	}
-	if goPaths[0] == "" {
-		goPaths[0] = build.Default.GOPATH
-	}
-
-	joinedGoPaths := strings.Join(goPaths, ",<gopath>,") + ",<gopath>"
-	replacements := strings.Split(joinedGoPaths, ",")
-	replacements = append(replacements, runtime.GOROOT(), "<goroot>")
-
-	if pwd, _ := os.Getwd(); pwd != "" {
-		replacements = append(replacements, pwd, "<pwd>")
-	}
-
-	stackPathReplacer = strings.NewReplacer(replacements...)
-}
-
-func normalizeStack(stack string) string {
-	// TODO: more nuanced replace for other known values like true/false, maybe empty string?
-	stack = stackPathReplacer.Replace(stack)
-	stack = stackHexRegexp.ReplaceAllString(stack, "<hex>")
-	stack = stackNilRegexp.ReplaceAllString(stack, "<nil>")
-	stack = strings.TrimRight(stack, "\n")
-
-	lines := strings.Split(stack, "\n")
-	for i, line := range lines {
-		if strings.Contains(line, "<goroot>") {
-			// for lines like: `<goroot>/src/runtime/debug/stack.go:24 +<hex>`
-			lines[i] = fmt.Sprintf("%s:<line> +<hex>", strings.Split(line, ":")[0])
-		}
-		if strings.Contains(line, "in goroutine") {
-			lines[i] = fmt.Sprintf("%s in gouroutine <int>", strings.Split(line, " in goroutine ")[0])
-		}
-	}
-
-	return strings.Join(lines, "\n")
-}
-
-func ReportError(ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args []string, msg any, stack string) {
+func ReportError(ctx context.Context, err error, drv *ui.Driver, cmd *cobra.Command, args []string) {
 	cfg := ConfigFromContext(ctx)
 
 	var flags []string
@@ -123,7 +75,7 @@ func ReportError(ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args [
 	})
 
 	q := url.Values{}
-	q.Add("title", fmt.Sprintf("Error: %s", msg))
+	q.Add("title", fmt.Sprintf("Error: %s", err.Error()))
 
 	var body strings.Builder
 
@@ -145,9 +97,12 @@ func ReportError(ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args [
 	fmt.Fprintf(&body, "**Arguments:** `[%s]`\n", strings.Join(args, ", "))
 	fmt.Fprintf(&body, "**Flags:** `[%s]`\n", strings.Join(flags, ", "))
 	fmt.Fprintf(&body, "**Timestamp:** `%s`\n", cfg.Timestamp().Format(time.RFC3339Nano))
-	if stack != "" {
-		fmt.Fprintf(&body, "**Stack:**\n```\n%s\n```\n", normalizeStack(stack))
+
+	var stackerr stacktrace.Error
+	if errors.As(err, &stackerr) {
+		fmt.Fprintf(&body, "**Stack:**\n```\n%s\n```\n", stackerr.Stack)
 	}
+
 	fmt.Fprintf(&body, "**Stdout:**\n```\n%s\n```\n", strings.TrimRight(drv.ErrorView(), "\n"))
 	q.Add("body", body.String())
 
@@ -156,7 +111,7 @@ func ReportError(ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args [
 		ConfirmCh: reportErrorConfirmCh,
 		Cmd:       cmd,
 		Args:      args,
-		Msg:       msg,
+		Msg:       err.Error(),
 	})
 
 	if !cfg.NonInteractive {

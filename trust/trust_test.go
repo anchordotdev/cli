@@ -2,6 +2,7 @@ package trust
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"testing/fstest"
@@ -10,6 +11,7 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/cmdtest"
+	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
@@ -94,10 +96,11 @@ func TestTrust(t *testing.T) {
 	}
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
-	t.Run("basics", func(t *testing.T) {
-		if !srv.IsProxy() {
-			t.Skip("trust unsupported in mock mode")
+	t.Run(fmt.Sprintf("basics-%s", uitest.TestTagOS()), func(t *testing.T) {
+		if srv.IsProxy() {
+			t.Skip("trust skipped in proxy mode to avoid golden conflicts")
 		}
+
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
@@ -105,13 +108,11 @@ func TestTrust(t *testing.T) {
 
 		cmd := Command{}
 
-		uitest.TestTUI(ctx, t)
-
 		errc := make(chan error, 1)
 		go func() {
 			errc <- cmd.UI().RunTUI(ctx, drv)
 
-			tm.Quit()
+			errc <- tm.Quit()
 		}()
 
 		uitest.WaitForGoldenContains(t, drv, errc,
@@ -126,10 +127,37 @@ func TestTrust(t *testing.T) {
 		uitest.TestGolden(t, drv.Golden())
 	})
 
-	t.Run("wsl-vm", func(t *testing.T) {
-		if !srv.IsProxy() {
-			t.Skip("trust unsupported in mock mode")
+	t.Run("noop", func(t *testing.T) {
+		if srv.IsProxy() {
+			t.Skip("trust skipped in proxy mode to avoid golden conflicts")
 		}
+
+		// truststore.MockCAs should still be set from basic
+
+		cmd := Command{}
+
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		errc := make(chan error, 1)
+		go func() {
+			errc <- cmd.UI().RunTUI(ctx, drv)
+
+			errc <- tm.Quit()
+		}()
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
+	})
+
+	t.Run("wsl-vm", func(t *testing.T) {
+		if srv.IsProxy() {
+			t.Skip("trust skipped in proxy mode to avoid golden conflicts")
+		}
+
+		truststore.MockCAs = []*truststore.CA{}
+		t.Cleanup(func() {
+			truststore.MockCAs = []*truststore.CA{}
+		})
 
 		cfg := *cfg
 		cfg.Test.GOOS = "linux"
@@ -145,8 +173,6 @@ func TestTrust(t *testing.T) {
 		drv, tm := uitest.TestTUI(ctx, t)
 
 		cmd := Command{}
-
-		uitest.TestTUI(ctx, t)
 
 		errc := make(chan error, 1)
 		go func() {

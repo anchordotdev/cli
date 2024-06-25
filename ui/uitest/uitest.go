@@ -2,8 +2,10 @@ package uitest
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -23,6 +25,15 @@ import (
 func init() {
 	lipgloss.SetColorProfile(termenv.Ascii) // no color for consistent golden file
 	lipgloss.SetHasDarkBackground(false)    // dark background for consistent golden file
+}
+
+func TestTagOS() string {
+	switch runtime.GOOS {
+	case "darwin", "linux":
+		return "unix"
+	default:
+		return runtime.GOOS
+	}
 }
 
 func TestTUI(ctx context.Context, t *testing.T) (*ui.Driver, *teatest.TestModel) {
@@ -78,9 +89,18 @@ func testTUI(ctx context.Context, t *testing.T, tui cli.UI) (*ui.Driver, chan er
 	errc := make(chan error, 1)
 	go func() {
 		defer close(errc)
-		defer tm.Quit()
 
-		errc <- tui.RunTUI(ctx, drv)
+		err := tui.RunTUI(ctx, drv)
+		if err != nil {
+			var uierr ui.Error
+			if errors.As(err, &uierr) {
+				drv.Activate(context.Background(), uierr.Model)
+				err = uierr.Err
+			}
+		}
+
+		errc <- err
+		errc <- tm.Quit()
 	}()
 
 	tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
@@ -108,7 +128,7 @@ func WaitForGoldenContains(t *testing.T, drv *ui.Driver, errc chan error, want s
 		time.Sleep(waitInterval)
 	}
 
-	t.Fatalf("WaitFor: condition not met after %s;\n\nWant:\n\n%s\n\nGot:\n\n%s", waitDuration, want, drv.Golden())
+	t.Fatalf("WaitFor: condition not met after %s.\n\nWant:\n\n%s\n\nGot:\n\n%s", waitDuration, want, drv.Golden())
 }
 
 func TestGolden(t *testing.T, got string) {
@@ -116,7 +136,11 @@ func TestGolden(t *testing.T, got string) {
 
 	got = strings.ReplaceAll(got, "\r\n", "\n")
 
-	goldenPath := filepath.Join("testdata", t.Name()+".golden")
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	goldenPath := filepath.Join(wd, "testdata", t.Name()+".golden")
 
 	update, err := pflag.CommandLine.GetBool("update")
 	if err != nil {
@@ -141,6 +165,6 @@ func TestGolden(t *testing.T, got string) {
 
 	diff := udiff.Unified("want", "got", want, got)
 	if diff != "" {
-		t.Fatalf("`%s` does not match, expected:\n\n%s\n\ngot:\n\n%s\n\ndiff:\n\n%s", goldenPath, want, got, diff)
+		t.Fatalf("`%s` does not match.\n\nWant:\n\n%s\n\nGot:\n\n%s\n\nDiff:\n\n%s", goldenPath, want, got, diff)
 	}
 }

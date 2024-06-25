@@ -16,6 +16,7 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/keyring"
+	"github.com/anchordotdev/cli/version"
 	"golang.org/x/exp/slices"
 )
 
@@ -38,13 +39,16 @@ type Session struct {
 }
 
 // TODO: rename to NewSession
-func NewClient(cfg *cli.Config) (*Session, error) {
+func NewClient(ctx context.Context, cfg *cli.Config) (*Session, error) {
 	anc := &Session{
 		Client: &http.Client{
 			Transport: urlRewriter{
 				RoundTripper: responseChecker{
 					RoundTripper: userAgentSetter{
-						RoundTripper: new(http.Transport),
+						RoundTripper: preferSetter{
+							cfg:          cfg,
+							RoundTripper: new(http.Transport),
+						},
 					},
 				},
 				URL: cfg.API.URL,
@@ -81,6 +85,12 @@ func NewClient(cfg *cli.Config) (*Session, error) {
 		PAT:          apiToken,
 	}
 
+	if info, err := anc.UserInfo(ctx); err == nil {
+		if err := version.MinimumVersionCheck(info.MinimumCliVersion); err != nil {
+			return nil, err
+		}
+	}
+
 	return anc, nil
 }
 
@@ -100,6 +110,18 @@ func (s *Session) AttachService(ctx context.Context, chainSlug string, domains [
 		return nil, err
 	}
 	return &attachOutput, nil
+}
+
+func getServiceAttachmentsPath(orgAPID, serviceAPID string) string {
+	return fmt.Sprintf("/orgs/%s/services/%s/attachments", url.QueryEscape(orgAPID), url.QueryEscape(serviceAPID))
+}
+
+func (s *Session) GetServiceAttachments(ctx context.Context, orgAPID string, serviceAPID string) ([]Attachment, error) {
+	var attachments Attachments
+	if err := s.get(ctx, getServiceAttachmentsPath(orgAPID, serviceAPID), &attachments); err != nil {
+		return nil, err
+	}
+	return attachments.Items, nil
 }
 
 func (s *Session) CreatePATToken(ctx context.Context, deviceCode string) (string, error) {
@@ -159,7 +181,9 @@ func (s *Session) CreateEAB(ctx context.Context, chainSlug, orgSlug, realmSlug, 
 	eabInput.Relationships.Chain.Slug = chainSlug
 	eabInput.Relationships.Organization.Slug = orgSlug
 	eabInput.Relationships.Realm.Slug = realmSlug
-	eabInput.Relationships.Service.Slug = &serviceSlug
+	eabInput.Relationships.Service = &RelationshipsServiceSlug{
+		Slug: serviceSlug,
+	}
 	eabInput.Relationships.SubCa.Slug = subCASlug
 
 	var eabOutput Eab
@@ -221,6 +245,26 @@ func (s *Session) GenerateUserFlowCodes(ctx context.Context, source string) (*Au
 		codes.VerificationUri += "?signup_src=" + source
 	}
 	return &codes, nil
+}
+
+func (s *Session) GetOrgs(ctx context.Context) ([]Organization, error) {
+	var orgs Organizations
+	if err := s.get(ctx, "/orgs", &orgs); err != nil {
+		return nil, err
+	}
+	return orgs.Items, nil
+}
+
+func getOrgRealmsPath(orgApid string) string {
+	return "/orgs/" + url.QueryEscape(orgApid) + "/realms"
+}
+
+func (s *Session) GetOrgRealms(ctx context.Context, orgApid string) ([]Realm, error) {
+	var realms Realms
+	if err := s.get(ctx, getOrgRealmsPath(orgApid), &realms); err != nil {
+		return nil, err
+	}
+	return realms.Items, nil
 }
 
 func getOrgServicesPath(orgSlug string) string {
@@ -360,6 +404,36 @@ func (r urlRewriter) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.URL = u.JoinPath(req.URL.Path)
 
 	return r.RoundTripper.RoundTrip(req)
+}
+
+type preferSetter struct {
+	http.RoundTripper
+
+	cfg *cli.Config
+}
+
+func (s preferSetter) RoundTrip(req *http.Request) (*http.Response, error) {
+	path := req.URL.Path
+
+	var value []string
+
+	if s.cfg.Test.Prefer[path].Code != 0 {
+		value = append(value, fmt.Sprintf("code=%d", s.cfg.Test.Prefer[path].Code))
+	}
+
+	if s.cfg.Test.Prefer[path].Dynamic {
+		value = append(value, fmt.Sprintf("dynamic=%t", s.cfg.Test.Prefer[path].Dynamic))
+	}
+
+	if s.cfg.Test.Prefer[path].Example != "" {
+		value = append(value, fmt.Sprintf("example=%s", s.cfg.Test.Prefer[path].Example))
+	}
+
+	if len(value) > 0 {
+		req.Header.Set("Prefer", strings.Join(value, " "))
+	}
+
+	return s.RoundTripper.RoundTrip(req)
 }
 
 type userAgentSetter struct {

@@ -24,8 +24,7 @@ var (
 	SetupHint = ui.Section{
 		Name: "SetupHint",
 		Model: ui.MessageLines{
-			ui.StepHint("We'll start by scanning your current directory, then ask you questions about"),
-			ui.StepHint("your local application so that we can generate setup instructions for you."),
+			ui.StepHint("We'll gather details from you and your system to customize setup instructions."),
 		},
 	}
 )
@@ -79,8 +78,8 @@ func (m *SetupCategory) Init() tea.Cmd {
 	var items []ui.ListItem[string]
 	for _, match := range m.Results[detection.High] {
 		item := ui.ListItem[string]{
-			Key:   match.AnchorCategory.Key,
-			Value: ui.Titlize(match.Detector.GetTitle()),
+			Key:    match.AnchorCategory.Key,
+			String: ui.Titlize(match.Detector.GetTitle()),
 		}
 
 		items = append(items, item)
@@ -88,16 +87,16 @@ func (m *SetupCategory) Init() tea.Cmd {
 
 	for _, match := range m.Results[detection.Medium] {
 		item := ui.ListItem[string]{
-			Key:   match.AnchorCategory.Key,
-			Value: match.Detector.GetTitle(),
+			Key:    match.AnchorCategory.Key,
+			String: match.Detector.GetTitle(),
 		}
 
 		items = append(items, item)
 	}
 	for _, match := range m.Results[detection.Low] {
 		item := ui.ListItem[string]{
-			Key:   match.AnchorCategory.Key,
-			Value: ui.Whisper(match.Detector.GetTitle()),
+			Key:    match.AnchorCategory.Key,
+			String: ui.Whisper(match.Detector.GetTitle()),
 		}
 
 		items = append(items, item)
@@ -105,8 +104,8 @@ func (m *SetupCategory) Init() tea.Cmd {
 
 	for _, match := range m.Results[detection.None] {
 		item := ui.ListItem[string]{
-			Key:   match.AnchorCategory.Key,
-			Value: ui.Whisper(match.Detector.GetTitle()),
+			Key:    match.AnchorCategory.Key,
+			String: ui.Whisper(match.Detector.GetTitle()),
 		}
 
 		items = append(items, item)
@@ -234,25 +233,25 @@ type SetupMethod struct {
 func (m *SetupMethod) Init() tea.Cmd {
 	m.list = ui.List([]ui.ListItem[string]{
 		{
-			Key:   "automatic",
-			Value: "Automatic via ACME - Anchor style - Recommended",
+			Key:    "automatic",
+			String: "Automatic via ACME - Anchor style - Recommended",
 		},
 		{
-			Key:   "manual",
-			Value: "Manually Managed - mkcert style",
+			Key:    "manual",
+			String: "Manually Managed - mkcert style",
 		},
 	})
 	return nil
 }
 
 func (m *SetupMethod) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyEnter:
-			var cmd tea.Cmd
-			m.list, cmd = m.list.Update(msg)
-
 			if item, ok := m.list.SelectedItem().(ui.ListItem[string]); ok {
 				m.choice = item.Key
 				if m.ChoiceCh != nil {
@@ -261,15 +260,11 @@ func (m *SetupMethod) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.ChoiceCh = nil
 				}
 			}
-
-			return m, cmd
 		case tea.KeyEsc:
 			return m, ui.Exit
 		}
 	}
 
-	var cmd tea.Cmd
-	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
 
@@ -328,15 +323,11 @@ func (m SetupGuidePrompt) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.Header("Next Steps"))
-	fmt.Fprintln(&b, ui.StepHint("Now that you have local HTTPS setup, let's automate certificate provisioning"))
-	fmt.Fprintln(&b, ui.StepHint("so you never have to manually provision future certificates again."))
-	fmt.Fprintln(&b, ui.StepHint(""))
-	fmt.Fprintln(&b, ui.StepHint("We've generated an Anchor.dev setup guide for your application with"))
-	fmt.Fprintln(&b, ui.StepHint("instructions for automating certificate provisioning inside your application."))
+	fmt.Fprintln(&b, ui.StepHint("Now follow your customized Anchor.dev setup guide to automate certificate"))
+	fmt.Fprintln(&b, ui.StepHint("management so you'll never have to manually provision certificates again."))
 
 	if m.confirmCh != nil {
-		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to open %s.",
+		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to open %s in your browser.",
 			ui.Action("Press Enter"),
 			ui.URL(m.url),
 		)))
@@ -358,8 +349,9 @@ func (m *SetupGuideHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, ni
 func (m *SetupGuideHint) View() string {
 	var b strings.Builder
 
-	fmt.Fprintln(&b, ui.StepHint(fmt.Sprintf("After following the guide, check out your encrypted site at: %s", ui.URL(m.LclUrl))))
-	fmt.Fprintln(&b, ui.StepHint("These certificates will renew automatically, time to enjoy effortless encryption."))
+	fmt.Fprintln(&b, ui.Header("Next Steps"))
+	fmt.Fprintln(&b, ui.StepNext(fmt.Sprintf("After following the guide, check out your encrypted site at: %s", ui.URL(m.LclUrl))))
+	fmt.Fprintln(&b, ui.StepNext("These certificates will renew automatically, time to enjoy effortless encryption."))
 
 	return b.String()
 }

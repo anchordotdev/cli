@@ -7,66 +7,39 @@
 ─── TrustHint ──────────────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-─── VMHint ─────────────────────────────────────────────────────────────────────
-# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
 ─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     * Fetching organizations…⠋
 ─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
 ─── SelectorFetcher[github.com/anchordotdev/cli/api.Realm,github.com/anchordotd…
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     * Fetching realms…⠋
 ─── SelectorFetcher[github.com/anchordotdev/cli/api.Realm,github.com/anchordotd…
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
@@ -75,28 +48,20 @@
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
+    | "oas-examples - AnchorCA" Thumbprint (sha1): BA470EAC 5067C499 99F3F5A1 ACE9E8CA 48E2731C
     * Updating Mock: installing oas-examples - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
@@ -104,20 +69,15 @@
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
+    | "oas-examples - AnchorCA" Thumbprint (sha1): E1CE91B0 FC124890 24F7583B 8F0844EE 2291BE47
     * Updating Mock: installing oas-examples - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     | We will check your local trust stores, then make any needed updates.
-    ! Warning: Running trust inside a VM or container will not update the host system.
-    | Rerun this command on your host system to update it's trust stores and enable
-    | secure communication, learn more here: https://cl.host/vm-container-setup
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.

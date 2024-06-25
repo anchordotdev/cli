@@ -19,6 +19,7 @@ import (
 	"github.com/anchordotdev/cli/diagnostic"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/trust"
+	trustmodels "github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
@@ -209,6 +210,8 @@ func (c LclConfig) perform(ctx context.Context, drv *ui.Driver) error {
 			drv.Activate(ctx, new(models.LclConfigSuccess))
 			return nil
 		}
+
+		drv.Activate(ctx, trustmodels.TrustHeader)
 
 		cmdTrust := &trust.Command{
 			Anc:       c.anc,

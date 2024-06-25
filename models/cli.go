@@ -38,7 +38,7 @@ func (m *ReportError) View() string {
 	var b strings.Builder
 
 	fmt.Fprintln(&b, ui.Header(fmt.Sprintf("%s %s %s",
-		ui.Error("Error!"),
+		ui.Danger("Error!"),
 		m.Msg,
 		ui.Whisper(fmt.Sprintf("`%s`", m.Cmd.CalledAs())),
 	)))

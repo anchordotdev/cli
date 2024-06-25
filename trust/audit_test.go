@@ -75,7 +75,7 @@ func TestAudit(t *testing.T) {
 	}
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
-	anc, err := api.NewClient(cfg)
+	anc, err := api.NewClient(ctx, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -4,19 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/stacktrace"
 	_ "github.com/anchordotdev/cli/testflags"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/anchordotdev/cli/ui/uitest"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
 	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/require"
 )
 
 func setupCleanup(t *testing.T) {
@@ -37,15 +38,6 @@ func setupCleanup(t *testing.T) {
 		cli.Version.Os, cli.Version.Arch = cliOS, cliArch
 		cli.Executable = cliExecutable
 	})
-}
-
-func testTag() string {
-	switch runtime.GOOS {
-	case "darwin", "linux":
-		return "unix"
-	default:
-		return runtime.GOOS
-	}
 }
 
 var CmdError = cli.NewCmd[ErrorCommand](nil, "error", func(cmd *cobra.Command) {})
@@ -81,22 +73,22 @@ func TestError(t *testing.T) {
 		},
 	})
 
-	t.Run(fmt.Sprintf("golden-%s", testTag()), func(t *testing.T) {
-		var returnedError error
-
+	t.Run(fmt.Sprintf("golden-%s", uitest.TestTagOS()), func(t *testing.T) {
 		drv, tm := uitest.TestTUI(ctx, t)
 
 		cmd := ErrorCommand{}
+		err := stacktrace.CapturePanic(func() error { return cmd.UI().RunTUI(ctx, drv) })
 
-		defer func() {
-			require.Error(t, returnedError)
-			require.EqualError(t, returnedError, testErr.Error())
+		if want, got := testErr, err; !reflect.DeepEqual(want, got) {
+			t.Fatalf("want return err %+v, got %+v", want, got)
+		}
 
-			tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
-			uitest.TestGolden(t, drv.Golden())
-		}()
-		defer cli.Cleanup(&returnedError, nil, ctx, drv, CmdError, []string{})
-		returnedError = cmd.UI().RunTUI(ctx, drv)
+		cli.ReportError(ctx, err, drv, CmdError, nil)
+
+		drv.Program.Quit()
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
 	})
 }
 
@@ -130,22 +122,22 @@ func TestPanic(t *testing.T) {
 		},
 	})
 
-	t.Run(fmt.Sprintf("golden-%s", testTag()), func(t *testing.T) {
-		var returnedError error
-
+	t.Run(fmt.Sprintf("golden-%s", uitest.TestTagOS()), func(t *testing.T) {
 		drv, tm := uitest.TestTUI(ctx, t)
 
 		cmd := PanicCommand{}
+		err := stacktrace.CapturePanic(func() error { return cmd.UI().RunTUI(ctx, drv) })
 
-		defer func() {
-			require.Error(t, returnedError)
-			require.EqualError(t, returnedError, "test panic")
+		if want, got := "test panic", err.Error(); want != got {
+			t.Fatalf("want return err %q, got %q", want, got)
+		}
 
-			tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
-			uitest.TestGolden(t, drv.Golden())
-		}()
-		defer cli.Cleanup(&returnedError, nil, ctx, drv, CmdPanic, []string{})
-		_ = cmd.UI().RunTUI(ctx, drv)
+		cli.ReportError(ctx, err, drv, CmdError, nil)
+
+		drv.Program.Quit()
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
 	})
 }
 

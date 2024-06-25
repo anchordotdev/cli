@@ -15,25 +15,26 @@ var (
 	header = lipgloss.NewStyle().Bold(true)
 	hint   = lipgloss.NewStyle().Faint(true).SetString("|")
 
-	Header    = header.Copy().SetString("#").Render
-	Skip      = header.Copy().Faint(true).SetString("# Skipped:").Render
-	Hint      = hint.Copy().Render
+	Header    = header.SetString("#").Render
+	Skip      = header.Faint(true).SetString("# Skipped:").Render
+	Hint      = hint.Render
 	Underline = lipgloss.NewStyle().Underline(true).Render
-	Warning   = header.Copy().SetString(bgBanana(fgMidnight("!")) + fgBanana(" Warning:")).Render
+	Warning   = header.SetString(bgBanana(fgMidnight("!")) + fgBanana(" Warning:")).Render
 
 	// https://github.com/charmbracelet/lipgloss/blob/v0.9.1/style.go#L149
 
 	StepAlert      = lipgloss.NewStyle().SetString("    " + Announce("!")).Render
 	StepDone       = lipgloss.NewStyle().SetString("    -").Render
-	StepHint       = hint.Copy().SetString("    |").Render
+	StepHint       = hint.SetString("    |").Render
+	StepNext       = hint.SetString("    -").Render
 	StepInProgress = lipgloss.NewStyle().SetString("    *").Render
 	StepPrompt     = lipgloss.NewStyle().SetString("    " + Prompt.Render("?")).Render
-	StepWarning    = header.Copy().SetString("    " + bgBanana(fgMidnight("!")) + fgBanana(" Warning:")).Render
+	StepWarning    = header.SetString("    " + bgBanana(fgMidnight("!")) + fgBanana(" Warning:")).Render
 
 	Accentuate         = lipgloss.NewStyle().Italic(true).Render
 	Action             = lipgloss.NewStyle().Bold(true).Foreground(colorBrandPrimary).Render
 	Announce           = lipgloss.NewStyle().Background(colorBrandSecondary).Render
-	Error              = lipgloss.NewStyle().Bold(true).Foreground(colorDanger).Render
+	Danger             = lipgloss.NewStyle().Bold(true).Foreground(colorDanger).Render
 	Emphasize          = lipgloss.NewStyle().Bold(true).Render
 	EmphasizeUnderline = lipgloss.NewStyle().Bold(true).Underline(true).Render
 	Titlize            = lipgloss.NewStyle().Bold(true).Render
@@ -70,11 +71,12 @@ func WaitingSpinner() spinner.Model {
 }
 
 type ListItem[T any] struct {
-	Key   T
-	Value string
+	Key    string
+	String string
+	Value  T
 }
 
-func (li ListItem[T]) FilterValue() string { return li.Value }
+func (li ListItem[T]) FilterValue() string { return li.Key }
 
 type itemDelegate[T any] struct{}
 
@@ -88,9 +90,9 @@ func (d itemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 	}
 
 	if index == m.Index() {
-		fmt.Fprintf(w, Action(fmt.Sprintf("    > %s", i.Value)))
+		fmt.Fprint(w, Action(fmt.Sprintf("    > %s", i.String)))
 	} else {
-		fmt.Fprintf(w, fmt.Sprintf("      %s", i.Value))
+		fmt.Fprintf(w, "      %s", i.String)
 	}
 }
 

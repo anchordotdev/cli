@@ -69,6 +69,6 @@ func (m *AuditResources) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone("Checked resources on Anchor.dev: found provisioned resources."))
+	fmt.Fprintln(&b, ui.StepDone("Checked resources on Anchor.dev: no provisioning needed."))
 	return b.String()
 }

@@ -1,0 +1,9 @@
+─── WhoAmIHeader ───────────────────────────────────────────────────────────────
+# Identify Current Anchor.dev Account `anchor auth whoami`
+─── WhoAmIChecker ──────────────────────────────────────────────────────────────
+# Identify Current Anchor.dev Account `anchor auth whoami`
+    * Identifying Anchor.dev account… ⠋
+─── MinimumVersionCheck ────────────────────────────────────────────────────────
+# Identify Current Anchor.dev Account `anchor auth whoami`
+    * Identifying Anchor.dev account… ⠋
+This version of the Anchor CLI is out-of-date, please update.

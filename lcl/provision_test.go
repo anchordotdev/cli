@@ -30,7 +30,7 @@ func TestProvision(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	anc, err := api.NewClient(cfg)
+	anc, err := api.NewClient(ctx, cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

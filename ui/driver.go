@@ -191,7 +191,12 @@ func (d *Driver) View() string {
 		}
 
 		separator := fmt.Sprintf("─── %s ", section)
-		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
+		if separatorRuneCount := utf8.RuneCountInString(separator); separatorRuneCount < 80 {
+			separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
+		} else {
+			runes := []rune(separator)
+			separator = string(runes[:79]) + "…"
+		}
 		d.lastView = normalizedOut
 
 		d.goldenMutex.Lock()

@@ -26,10 +26,7 @@ var (
 	LclPreamble = ui.Section{
 		Name: "LclPreamble",
 		Model: ui.MessageLines{
-			ui.Hint("Let's set up lcl.host HTTPS in your local development environment!"),
-			ui.Hint(""),
-			ui.Hint("lcl.host (made by the team at Anchor) adds HTTPS in a fast and totally free way"),
-			ui.Hint("to local applications & services."),
+			ui.Hint("Let's set up fast and totally free lcl.host HTTPS!"),
 		},
 	}
 
@@ -43,8 +40,7 @@ var (
 	LclHint = ui.Section{
 		Name: "LclHint",
 		Model: ui.MessageLines{
-			ui.StepHint("Once setup finishes, you'll have a secure context in your browsers and local"),
-			ui.StepHint("system so you can use HTTPS locally."),
+			ui.StepHint("After setup, you can use HTTPS locally in your browsers and other programs."),
 		},
 	}
 )
@@ -84,8 +80,7 @@ func (m *ProvisionService) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *ProvisionService) View() string {
 	var b strings.Builder
 
-	fmt.Fprintln(&b, ui.StepHint("Now we'll provision your application's resources on Anchor.dev and the HTTPS"))
-	fmt.Fprintln(&b, ui.StepHint("certificates for your development environment."))
+	fmt.Fprintln(&b, ui.StepHint("Now we'll provision Anchor.dev resources and HTTPS certificates for you."))
 
 	if m.finished {
 		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Created %s [%s] %s resources on Anchor.dev.",

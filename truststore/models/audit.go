@@ -49,6 +49,6 @@ func (m *TrustStoreAudit) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone("Compared local and expected CA certificates: found matching certificates."))
+	fmt.Fprintln(&b, ui.StepDone("Compared local and expected CA certificates: no updates needed."))
 	return b.String()
 }

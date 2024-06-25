@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -13,6 +14,7 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
+	"github.com/anchordotdev/cli/component"
 	"github.com/anchordotdev/cli/ext509"
 	"github.com/anchordotdev/cli/ext509/oid"
 	"github.com/anchordotdev/cli/trust/models"
@@ -65,22 +67,51 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	return nil
 }
 
-func (c Command) Perform(ctx context.Context, drv *ui.Driver) error {
+func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
+	var err error
 	cfg := cli.ConfigFromContext(ctx)
 
 	if isVMOrContainer(cfg) {
 		drv.Activate(ctx, &models.VMHint{})
 	}
 
-	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
-
-	var err error
-	if c.OrgSlug == "" && c.RealmSlug == "" {
-		c.OrgSlug, c.RealmSlug, err = fetchOrgAndRealm(ctx, c.Anc)
+	if c.OrgSlug == "" {
+		c.OrgSlug = cfg.Trust.Org
+	}
+	if c.OrgSlug == "" {
+		choicec, err := component.OrgSelector(ctx, drv, c.Anc,
+			"Which organization do you want to trust?",
+		)
 		if err != nil {
 			return err
 		}
+		select {
+		case org := <-choicec:
+			c.OrgSlug = org.Slug
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
+
+	if c.RealmSlug == "" {
+		c.RealmSlug = cfg.Trust.Realm
+	}
+	if c.RealmSlug == "" {
+		choicec, err := component.RealmSelector(ctx, drv, c.Anc, c.OrgSlug,
+			fmt.Sprintf("Which %s realm do you want to trust?", ui.Emphasize(c.OrgSlug)),
+		)
+		if err != nil {
+			return err
+		}
+		select {
+		case realm := <-choicec:
+			c.RealmSlug = realm.Slug
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+
+	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
 
 	cas, err := fetchExpectedCAs(ctx, c.Anc, c.OrgSlug, c.RealmSlug)
 	if err != nil {
@@ -111,6 +142,10 @@ func (c Command) Perform(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 	drv.Send(truststoremodels.AuditInfoMsg(auditInfo))
+
+	if len(auditInfo.Missing) == 0 {
+		return nil
+	}
 
 	confirmCh := make(chan struct{})
 	drv.Activate(ctx, &models.TrustUpdateConfirm{

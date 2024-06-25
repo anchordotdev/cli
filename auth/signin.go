@@ -46,7 +46,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 	drv.Activate(ctx, s.Hint)
 
-	anc, err := api.NewClient(cfg)
+	anc, err := api.NewClient(ctx, cfg)
 	if err != nil && !errors.Is(err, api.ErrSignedOut) {
 		return err
 	}
@@ -93,7 +93,7 @@ func (s *SignIn) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	}
 	cfg.API.Token = patToken
 
-	anc, err = api.NewClient(cfg)
+	anc, err = api.NewClient(ctx, cfg)
 	if err != nil {
 		return err
 	}

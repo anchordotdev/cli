@@ -2,11 +2,10 @@ package cli
 
 import (
 	"context"
-	"fmt"
-	"runtime/debug"
-	"strings"
+	"errors"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/anchordotdev/cli/stacktrace"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/joeshaw/envdecode"
 	"github.com/mcuadros/go-defaults"
@@ -113,6 +112,13 @@ var rootDef = CmdDef{
 					Short: "Configure System for lcl.host Local Development",
 				},
 				{
+					Name: "env",
+
+					Use:   "env [flags]",
+					Args:  cobra.NoArgs,
+					Short: "Generate lcl.host ENV",
+				},
+				{
 					Name: "mkcert",
 
 					Use:   "mkcert [flags]",
@@ -125,6 +131,22 @@ var rootDef = CmdDef{
 					Use:   "setup [flags]",
 					Args:  cobra.NoArgs,
 					Short: "Setup lcl.host Application",
+				},
+			},
+		},
+		{
+			Name: "service",
+
+			Use:   "service [flags]",
+			Args:  cobra.NoArgs,
+			Short: "Manage services",
+			SubDefs: []CmdDef{
+				{
+					Name: "env",
+
+					Use:   "env [flags]",
+					Args:  cobra.NoArgs,
+					Short: "Fetch Environment Variables for Service",
 				},
 			},
 		},
@@ -227,7 +249,7 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 		ctx := ContextWithConfig(context.Background(), cfg)
 		cmd.SetContext(ctx)
 
-		cmd.SetErrPrefix(ui.Error("Error!"))
+		cmd.SetErrPrefix(ui.Danger("Error!"))
 
 		fn(cmd)
 
@@ -249,6 +271,11 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 			defer cancel(nil)
 
 			drv, prg := ui.NewDriverTUI(ctx)
+			defer func() {
+				// release/restore
+				drv.Program.Quit()
+				drv.Program.Wait()
+			}()
 
 			errc := make(chan error)
 
@@ -261,13 +288,27 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 				errc <- err
 			}()
 
-			defer Cleanup(&returnedError, errc, ctx, drv, cmd, args)
-			if err := t.UI().RunTUI(ctx, drv); err != nil && err != context.Canceled {
+			if err := stacktrace.CapturePanic(func() error { return t.UI().RunTUI(ctx, drv) }); err != nil {
+				var uierr ui.Error
+				if errors.As(err, &uierr) {
+					drv.Activate(context.Background(), uierr.Model)
+					err = uierr.Err
+				}
+
+				if err != nil && err != context.Canceled {
+					ReportError(ctx, err, drv, cmd, args)
+				}
 				return err
 			}
 
+			drv.Program.Quit()
+			if err := <-errc; err != nil && err != context.Canceled {
+				ReportError(ctx, err, drv, cmd, args)
+			}
 			return nil
 		}
+
+		new(cmdWrapper).wrap(cmd)
 
 		return cmd
 	}
@@ -281,32 +322,39 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 	return cmd
 }
 
-func Cleanup(returnedError *error, errc chan error, ctx context.Context, drv *ui.Driver, cmd *cobra.Command, args []string) {
-	var stack string
+func NewTestCmd(cmd *cobra.Command) *cobra.Command {
+	return constructorByCommands[cmd]()
+}
 
-	panicMsg := recover()
-	if panicMsg != nil {
-		lines := strings.Split(string(debug.Stack()), "\n")
-		// omit lines: 0 go routine, 2-3 stack call, 4-5 cleanup call
-		stack = strings.Join(lines[5:], "\n")
+type cmdWrapper struct {
+	err error
+}
 
-		*returnedError = fmt.Errorf("%s", panicMsg)
+func (w *cmdWrapper) wrap(cmd *cobra.Command) {
+	if fn := cmd.PersistentPreRunE; fn != nil {
+		cmd.PersistentPreRunE = w.runFunc(fn)
 	}
-
-	if *returnedError != nil {
-		ReportError(ctx, drv, cmd, args, *returnedError, stack)
+	if fn := cmd.PreRunE; fn != nil {
+		cmd.PreRunE = w.runFunc(fn)
 	}
-
-	// release/restore
-	drv.Program.Quit()
-	drv.Program.Wait()
-
-	// FIXME: handle UI errors?
-	if errc != nil {
-		*returnedError = <-errc
+	if fn := cmd.RunE; fn != nil {
+		cmd.RunE = w.runFunc(fn)
+	}
+	if fn := cmd.PostRunE; fn != nil {
+		cmd.PostRunE = w.runFunc(fn)
+	}
+	if fn := cmd.PersistentPostRunE; fn != nil {
+		cmd.PersistentPostRunE = w.runFunc(fn)
 	}
 }
 
-func NewTestCmd(cmd *cobra.Command) *cobra.Command {
-	return constructorByCommands[cmd]()
+func (w *cmdWrapper) runFunc(fn func(cmd *cobra.Command, args []string) error) func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, args []string) error {
+		if w.err != nil {
+			return w.err
+		}
+
+		w.err = fn(cmd, args)
+		return w.err
+	}
 }

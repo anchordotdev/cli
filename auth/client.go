@@ -25,7 +25,7 @@ func (c Client) Perform(ctx context.Context, drv *ui.Driver) (*api.Session, erro
 	drv.Activate(ctx, &models.Client{})
 
 	if c.Anc == nil {
-		c.Anc, newClientErr = api.NewClient(cfg)
+		c.Anc, newClientErr = api.NewClient(ctx, cfg)
 		if newClientErr != nil && !errors.Is(newClientErr, api.ErrSignedOut) {
 			return nil, newClientErr
 		}
@@ -56,7 +56,7 @@ func (c Client) Perform(ctx context.Context, drv *ui.Driver) (*api.Session, erro
 			return nil, err
 		}
 
-		c.Anc, err = api.NewClient(cfg)
+		c.Anc, err = api.NewClient(ctx, cfg)
 		if err != nil {
 			return nil, err
 		}

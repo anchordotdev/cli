@@ -136,7 +136,7 @@ func TestLcl(t *testing.T) {
 		go func() {
 			errc <- cmd.UI().RunTUI(ctx, drv)
 
-			tm.Quit()
+			errc <- tm.Quit()
 		}()
 
 		// wait for prompt
@@ -230,6 +230,12 @@ func TestLcl(t *testing.T) {
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What certificate management method?",
+		)
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"Automatic via ACME - Anchor style - Recommended",
+		)
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"Manually Managed - mkcert style",
 		)
 
 		tm.Send(tea.KeyMsg{

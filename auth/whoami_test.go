@@ -42,4 +42,19 @@ func TestWhoAmI(t *testing.T) {
 
 		uitest.TestTUIOutput(ctx, t, cmd.UI())
 	})
+
+	t.Run("signed-in-but-out-of-date-cli-release", func(t *testing.T) {
+		apiToken, err := srv.GeneratePAT("anky@anchor.dev")
+		if err != nil {
+			t.Fatal(err)
+		}
+		cfg.API.Token = apiToken
+
+		defer func(prev string) { cli.Version.Version = prev }(cli.Version.Version)
+		cli.Version.Version = "0.0.0"
+
+		cmd := WhoAmI{}
+
+		uitest.TestTUIOutput(ctx, t, cmd.UI())
+	})
 }

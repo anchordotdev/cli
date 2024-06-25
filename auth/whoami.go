@@ -30,7 +30,7 @@ func (c *WhoAmI) runTUI(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, models.WhoAmIHeader)
 	drv.Activate(ctx, &models.WhoAmIChecker{})
 
-	anc, err := api.NewClient(cfg)
+	anc, err := api.NewClient(ctx, cfg)
 	if errors.Is(err, api.ErrSignedOut) {
 		drv.Send(models.UserWhoAmISignedOutMsg(true))
 		return nil

@@ -53,6 +53,13 @@ type Config struct {
 			Org   string `desc:"organization" flag:"org,o" env:"ORG" json:"org" toml:"org"`
 			Realm string `desc:"realm" flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
 		} `cmd:"probe"`
+
+		Env struct {
+			Method  string `desc:"Integration method for environment variables."`
+			Org     string `desc:"organization" flag:"org,o" env:"ORG" json:"org" toml:"org"`
+			Realm   string `desc:"realm" flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
+			Service string `desc:"service" flag:"service,s" env:"SERVICE" json:"service" toml:"service"`
+		} `cmd:"env"`
 	} `cmd:"service"`
 
 	Trust struct {
@@ -93,11 +100,19 @@ type Config struct {
 
 // values used for testing
 type ConfigTest struct {
+	Prefer map[string]ConfigTestPrefer `desc:"values for prism prefer header"`
+
 	Browserless bool      `desc:"run as though browserless"`
 	GOOS        string    `desc:"change OS identifier in tests"`
 	ProcFS      fs.FS     `desc:"change the proc filesystem in tests"`
 	SkipRunE    bool      `desc:"skip RunE for testing purposes"`
 	Timestamp   time.Time `desc:"timestamp to use/display in tests"`
+}
+
+type ConfigTestPrefer struct {
+	Code    int    `desc:"override response status"`
+	Dynamic bool   `desc:"set dynamic mocking"`
+	Example string `desc:"override example"`
 }
 
 func (c Config) GOOS() string {

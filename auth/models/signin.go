@@ -58,12 +58,12 @@ func (m *SignInPrompt) View() string {
 		} else {
 			fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("Copy your user code: %s", ui.Announce(m.UserCode))))
 		}
-		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to open %s in your browser", ui.Action("Press Enter"), ui.URL(m.VerificationURL))))
+		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to open %s in your browser.", ui.Action("Press Enter"), ui.URL(m.VerificationURL))))
 		return b.String()
 	}
 
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Copied your user code %s to your clipboard.", ui.Emphasize(m.UserCode))))
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Opened %s in your browser", ui.URL(m.VerificationURL))))
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Opened %s in your browser.", ui.URL(m.VerificationURL))))
 
 	return b.String()
 }

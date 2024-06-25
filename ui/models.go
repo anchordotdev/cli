@@ -7,6 +7,21 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type Error struct {
+	tea.Model
+
+	Err error // reported error
+}
+
+func (e Error) Error() string {
+	if e.Err == nil {
+		return ""
+	}
+	return e.Err.Error()
+}
+
+func (e Error) Unwrap() error { return e.Err }
+
 type MessageLines []string
 
 func (MessageLines) Init() tea.Cmd { return nil }

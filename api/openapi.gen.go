@@ -41,6 +41,26 @@ const (
 	ServiceServerTypeRuby       ServiceServerType = "ruby"
 )
 
+// Attachment defines model for attachment.
+type Attachment struct {
+	// Domains A list of domains for this attachment.
+	Domains []string `json:"domains"`
+
+	// Relationships Values used as parameters when referencing related resources.
+	Relationships struct {
+		Chain        RelationshipsChainApid         `json:"chain"`
+		Organization RelationshipsOrganizationApid  `json:"organization"`
+		Realm        RelationshipsRealmApid         `json:"realm"`
+		Service      RelationshipsServiceApid       `json:"service"`
+		SubCa        RelationshipsSubCaApidNullable `json:"sub_ca"`
+	} `json:"relationships"`
+}
+
+// Attachments defines model for attachments.
+type Attachments struct {
+	Items []Attachment `json:"items"`
+}
+
 // AuthCliCodesResponse defines model for auth_cli_codes_response.
 type AuthCliCodesResponse struct {
 	// DeviceCode Unique code associated with origin device for CLI auth flow.
@@ -68,16 +88,12 @@ type AuthCliPatTokensResponse struct {
 // Chain defines model for chain.
 type Chain struct {
 	// Name The name of the chain.
-	Name          string `json:"name"`
+	Name string `json:"name"`
+
+	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Org struct {
-			// Slug A value used as a parameter when referencing this org.
-			Slug string `json:"slug"`
-		} `json:"org"`
-		Realm struct {
-			// Slug A value used as a parameter when referencing this realm.
-			Slug string `json:"slug"`
-		} `json:"realm"`
+		Org   RelationshipsOrganizationSlug `json:"org"`
+		Realm RelationshipsRealmSlug        `json:"realm"`
 	} `json:"relationships"`
 
 	// Slug A value used as a parameter when referencing this chain.
@@ -87,17 +103,13 @@ type Chain struct {
 // Client defines model for client.
 type Client struct {
 	// Name A name for the client.
-	Name          string `json:"name"`
-	Relationships *struct {
-		Organization *struct {
-			// Slug A value used as a parameter when referencing this organization.
-			Slug string `json:"slug"`
-		} `json:"organization,omitempty"`
-		Service *struct {
-			// Slug A value used as a parameter when referencing this service.
-			Slug string `json:"slug"`
-		} `json:"service,omitempty"`
-	} `json:"relationships,omitempty"`
+	Name string `json:"name"`
+
+	// Relationships Values used as parameters when referencing related resources.
+	Relationships struct {
+		Organization *RelationshipsOrganizationSlug `json:"organization,omitempty"`
+		Service      *RelationshipsServiceSlug      `json:"service,omitempty"`
+	} `json:"relationships"`
 
 	// Slug A value used as a parameter when referencing this client.
 	Slug string `json:"slug"`
@@ -159,28 +171,15 @@ type Eab struct {
 	HmacKey string `json:"hmac_key"`
 
 	// Kid EAB key identifier
-	Kid           string `json:"kid"`
+	Kid string `json:"kid"`
+
+	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Chain struct {
-			// Slug A value used as a parameter when referencing this chain.
-			Slug string `json:"slug"`
-		} `json:"chain"`
-		Organization struct {
-			// Slug A value used as a parameter when referencing this organization.
-			Slug string `json:"slug"`
-		} `json:"organization"`
-		Realm struct {
-			// Slug A value used as a parameter when referencing this realm.
-			Slug string `json:"slug"`
-		} `json:"realm"`
-		Service struct {
-			// Slug A value used as a parameter when referencing this service.
-			Slug string `json:"slug"`
-		} `json:"service"`
-		SubCa struct {
-			// Slug A value used as a parameter when referencing this sub_ca.
-			Slug string `json:"slug"`
-		} `json:"sub_ca"`
+		Chain        RelationshipsChainSlug        `json:"chain"`
+		Organization RelationshipsOrganizationSlug `json:"organization"`
+		Realm        RelationshipsRealmSlug        `json:"realm"`
+		Service      RelationshipsServiceSlug      `json:"service"`
+		SubCa        RelationshipsSubCaSlug        `json:"sub_ca"`
 	} `json:"relationships"`
 }
 
@@ -199,9 +198,109 @@ type Error struct {
 	Type string `json:"type"`
 }
 
+// Organization defines model for organization.
+type Organization struct {
+	// Apid A value used as a parameter when referencing this organization.
+	Apid string `json:"apid"`
+
+	// Name The name for this organization.
+	Name string `json:"name"`
+
+	// Slug The slugified name for this organization.
+	Slug string `json:"slug"`
+}
+
+// Organizations defines model for organizations.
+type Organizations struct {
+	Items []Organization `json:"items"`
+}
+
+// Realm defines model for realm.
+type Realm struct {
+	// Apid A value used as a parameter when referencing this realm.
+	Apid string `json:"apid"`
+
+	// Name The name for this realm.
+	Name string `json:"name"`
+
+	// Relationships Values used as parameters when referencing related resources.
+	Relationships struct {
+		Organization RelationshipsOrganizationApid `json:"organization"`
+	} `json:"relationships"`
+
+	// Slug The slugified name for this realm.
+	Slug string `json:"slug"`
+}
+
+// Realms defines model for realms.
+type Realms struct {
+	Items []Realm `json:"items"`
+}
+
+// RelationshipsChainApid defines model for relationships_chain_apid.
+type RelationshipsChainApid struct {
+	// Apid A value used as a parameter when referencing this chain.
+	Apid string `json:"apid"`
+}
+
+// RelationshipsChainSlug defines model for relationships_chain_slug.
+type RelationshipsChainSlug struct {
+	// Slug A value used as a parameter when referencing this chain.
+	Slug string `json:"slug"`
+}
+
+// RelationshipsOrganizationApid defines model for relationships_organization_apid.
+type RelationshipsOrganizationApid struct {
+	// Apid A value used as a parameter when referencing this organization.
+	Apid string `json:"apid"`
+}
+
+// RelationshipsOrganizationSlug defines model for relationships_organization_slug.
+type RelationshipsOrganizationSlug struct {
+	// Slug A value used as a parameter when referencing this organization.
+	Slug string `json:"slug"`
+}
+
+// RelationshipsRealmApid defines model for relationships_realm_apid.
+type RelationshipsRealmApid struct {
+	// Apid A value used as a parameter when referencing this realm.
+	Apid string `json:"apid"`
+}
+
+// RelationshipsRealmSlug defines model for relationships_realm_slug.
+type RelationshipsRealmSlug struct {
+	// Slug A value used as a parameter when referencing this realm.
+	Slug string `json:"slug"`
+}
+
+// RelationshipsServiceApid defines model for relationships_service_apid.
+type RelationshipsServiceApid struct {
+	// Apid A value used as a parameter when referencing this service.
+	Apid string `json:"apid"`
+}
+
+// RelationshipsServiceSlug defines model for relationships_service_slug.
+type RelationshipsServiceSlug struct {
+	// Slug A value used as a parameter when referencing this service.
+	Slug string `json:"slug"`
+}
+
+// RelationshipsSubCaApidNullable defines model for relationships_sub_ca_apid_nullable.
+type RelationshipsSubCaApidNullable struct {
+	// Apid A value used as a parameter when referencing this sub_ca.
+	Apid *string `json:"apid"`
+}
+
+// RelationshipsSubCaSlug defines model for relationships_sub_ca_slug.
+type RelationshipsSubCaSlug struct {
+	// Slug A value used as a parameter when referencing this sub_ca.
+	Slug string `json:"slug"`
+}
+
 // Root defines model for root.
 type Root struct {
-	PersonalOrg struct {
+	MinimumCliVersion string `json:"minimum_cli_version"`
+	PersonalOrg       struct {
 		Slug string `json:"slug"`
 	} `json:"personal_org"`
 	Whoami string `json:"whoami"`
@@ -213,12 +312,11 @@ type Service struct {
 	LocalhostPort *int `json:"localhost_port"`
 
 	// Name A name for the service.
-	Name          string `json:"name"`
+	Name string `json:"name"`
+
+	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Organization struct {
-			// Slug A value used as a parameter when referencing this organization.
-			Slug string `json:"slug"`
-		} `json:"organization"`
+		Organization RelationshipsOrganizationSlug `json:"organization"`
 	} `json:"relationships"`
 
 	// ServerType A server type for the service.
@@ -251,70 +349,38 @@ type QueryCaParam = string
 // ServicesXtach200 defines model for services_xtach_200.
 type ServicesXtach200 struct {
 	// Domains A list of domains for this attachment.
-	Domains       []string `json:"domains"`
+	Domains []string `json:"domains"`
+
+	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Chain struct {
-			// Slug A value used as a parameter when referencing this chain.
-			Slug string `json:"slug"`
-		} `json:"chain"`
-		Organization struct {
-			// Slug A value used as a parameter when referencing this organization.
-			Slug string `json:"slug"`
-		} `json:"organization"`
-		Realm *struct {
-			// Slug A value used as a parameter when referencing this realm.
-			Slug string `json:"slug"`
-		} `json:"realm,omitempty"`
-		Service struct {
-			// Slug A value used as a parameter when referencing this services
-			Slug string `json:"slug"`
-		} `json:"service"`
-		SubCa struct {
-			// Slug A value used as a parameter when referencing this sub_ca
-			Slug string `json:"slug"`
-		} `json:"sub_ca"`
+		Chain        RelationshipsChainSlug        `json:"chain"`
+		Organization RelationshipsOrganizationSlug `json:"organization"`
+		Realm        *RelationshipsRealmSlug       `json:"realm,omitempty"`
+		Service      RelationshipsServiceSlug      `json:"service"`
+		SubCa        RelationshipsSubCaSlug        `json:"sub_ca"`
 	} `json:"relationships"`
 }
 
 // ServicesXtach defines model for services_xtach.
 type ServicesXtach struct {
 	// Domains A list of domains for this attachment.
-	Domains       []string `json:"domains"`
+	Domains []string `json:"domains"`
+
+	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Chain struct {
-			// Slug A value used as a parameter when referencing this chain.
-			Slug string `json:"slug"`
-		} `json:"chain"`
-		Realm struct {
-			// Slug A value used as a parameter when referencing this realm.
-			Slug string `json:"slug"`
-		} `json:"realm"`
+		Chain RelationshipsChainSlug `json:"chain"`
+		Realm RelationshipsRealmSlug `json:"realm"`
 	} `json:"relationships"`
 }
 
 // CreateEabTokenJSONBody defines parameters for CreateEabToken.
 type CreateEabTokenJSONBody struct {
 	Relationships struct {
-		Chain struct {
-			// Slug A value used as a parameter when referencing this chain.
-			Slug string `json:"slug"`
-		} `json:"chain"`
-		Organization struct {
-			// Slug A value used as a parameter when referencing this organization.
-			Slug string `json:"slug"`
-		} `json:"organization"`
-		Realm struct {
-			// Slug A value used as a parameter when referencing this realm.
-			Slug string `json:"slug"`
-		} `json:"realm"`
-		Service struct {
-			// Slug A value used as a parameter when referencing this service.
-			Slug *string `json:"slug,omitempty"`
-		} `json:"service,omitempty"`
-		SubCa struct {
-			// Slug A value used as a parameter when referencing this sub_ca.
-			Slug string `json:"slug"`
-		} `json:"sub_ca"`
+		Chain        RelationshipsChainSlug        `json:"chain"`
+		Organization RelationshipsOrganizationSlug `json:"organization"`
+		Realm        RelationshipsRealmSlug        `json:"realm"`
+		Service      *RelationshipsServiceSlug     `json:"service,omitempty"`
+		SubCa        RelationshipsSubCaSlug        `json:"sub_ca"`
 	} `json:"relationships"`
 }
 
@@ -327,12 +393,8 @@ type CreateCliTokenJSONBody struct {
 // CreateClientJSONBody defines parameters for CreateClient.
 type CreateClientJSONBody struct {
 	Relationships *struct {
-		Organization *struct {
-			Slug string `json:"slug"`
-		} `json:"organization,omitempty"`
-		Service *struct {
-			Slug string `json:"slug"`
-		} `json:"service,omitempty"`
+		Organization *RelationshipsOrganizationSlug `json:"organization,omitempty"`
+		Service      *RelationshipsServiceSlug      `json:"service,omitempty"`
 	} `json:"relationships,omitempty"`
 	ServerType *string `json:"server_type,omitempty"`
 	Type       *string `json:"type,omitempty"`
@@ -347,32 +409,24 @@ type GetCredentialsParams struct {
 // AttachOrgServiceJSONBody defines parameters for AttachOrgService.
 type AttachOrgServiceJSONBody struct {
 	// Domains A list of domains for this attachment.
-	Domains       []string `json:"domains"`
+	Domains []string `json:"domains"`
+
+	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Chain struct {
-			// Slug A value used as a parameter when referencing this chain.
-			Slug string `json:"slug"`
-		} `json:"chain"`
-		Realm struct {
-			// Slug A value used as a parameter when referencing this realm.
-			Slug string `json:"slug"`
-		} `json:"realm"`
+		Chain RelationshipsChainSlug `json:"chain"`
+		Realm RelationshipsRealmSlug `json:"realm"`
 	} `json:"relationships"`
 }
 
 // DetachOrgServiceJSONBody defines parameters for DetachOrgService.
 type DetachOrgServiceJSONBody struct {
 	// Domains A list of domains for this attachment.
-	Domains       []string `json:"domains"`
+	Domains []string `json:"domains"`
+
+	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Chain struct {
-			// Slug A value used as a parameter when referencing this chain.
-			Slug string `json:"slug"`
-		} `json:"chain"`
-		Realm struct {
-			// Slug A value used as a parameter when referencing this realm.
-			Slug string `json:"slug"`
-		} `json:"realm"`
+		Chain RelationshipsChainSlug `json:"chain"`
+		Realm RelationshipsRealmSlug `json:"realm"`
 	} `json:"relationships"`
 }
 
@@ -381,10 +435,7 @@ type CreateServiceJSONBody struct {
 	LocalhostPort *int   `json:"localhost_port,omitempty"`
 	Name          string `json:"name"`
 	Relationships struct {
-		Organization struct {
-			// Slug A value used as a parameter when referencing this organization.
-			Slug string `json:"slug"`
-		} `json:"organization"`
+		Organization RelationshipsOrganizationSlug `json:"organization"`
 	} `json:"relationships"`
 	ServerType string `json:"server_type"`
 }
