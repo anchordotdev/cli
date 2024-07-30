@@ -108,11 +108,16 @@ func TestLcl(t *testing.T) {
 	httpURL := "http://hello-world.lcl.host:" + diagPort
 	httpsURL := "https://hello-world.lcl.host:" + diagPort
 
+	// ensure lcl has no leftover data
+	err = srv.RecreateUser("lcl_setup")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort + "/"
+	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
 	cfg.Lcl.DiagnosticAddr = diagAddr
-	cfg.Lcl.Service = "hi-ankydotdev"
 	cfg.Lcl.Subdomain = "hi-ankydotdev"
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
@@ -199,43 +204,29 @@ func TestLcl(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		// setup
+
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What application server type?",
 		)
 
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What is the application name?",
 		)
 
 		tm.Type("test-app")
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What lcl.host domain would you like to use for local application development?",
 		)
 
-		if !srv.IsProxy() {
-			t.Skip("provisioning unsupported in mock mode")
-		}
-
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
-			"? What certificate management method?",
-		)
-		uitest.WaitForGoldenContains(t, drv, errc,
-			"Automatic via ACME - Anchor style - Recommended",
-		)
-		uitest.WaitForGoldenContains(t, drv, errc,
-			"Manually Managed - mkcert style",
+			"? How would you like to manage your lcl.host certificates?",
 		)
 
 		tm.Send(tea.KeyMsg{

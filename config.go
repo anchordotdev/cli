@@ -20,7 +20,9 @@ type Config struct {
 	}
 
 	Lcl struct {
-		Service   string `desc:"Name for lcl.host diagnostic service." flag:"service" env:"SERVICE" json:"service" toml:"service"`
+		Org       string `desc:"Organization for lcl.host local development environment management." flag:"org,o" env:"ORG" json:"org" toml:"org"`
+		Realm     string `desc:"Realm for lcl.host local development environment management." flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
+		Service   string `desc:"Service for lcl.host local development environment management." flag:"service" env:"SERVICE" json:"service" toml:"service"`
 		Subdomain string `desc:"Subdomain for lcl.host diagnostic service." flag:"subdomain" env:"SUBDOMAIN" json:"subdomain" toml:"subdomain"`
 
 		DiagnosticAddr string `default:":4433" desc:"Local server address" flag:"addr,a" env:"ADDR" json:"address" toml:"address"`

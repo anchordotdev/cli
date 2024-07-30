@@ -1,0 +1,387 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── SetupHeader ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+─── SetupHint ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    * Fetching realms…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    * Fetching services…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    ? Which lcl_setup/localhost service's lcl.host local development environment do you want to setup?
+    > test-app (test-app)
+      Create New Service 
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    ? Which lcl_setup/localhost service's lcl.host local development environment do you want to setup?
+      test-app (test-app)
+    > Create New Service 
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+─── SetupScan ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    * Scanning current directory for local application…⠋
+─── SetupScan ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+─── SetupCategory ──────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    ? What application server type?
+    > Go        
+      JavaScript
+      Python    
+      Ruby      
+      Custom    
+─── SetupCategory ──────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? lcl
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? T 
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? Te 
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? Tes 
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? Test 
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? Test  
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? Test A 
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? Test Ap 
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? Test App 
+─── SetupName ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    ? What lcl.host domain would you like to use for local application development?
+    | We'll ignore any characters that are not valid in a domain.
+    ? test-app.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+─── DomainResolver ─────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    * Resolving test-app.lcl.host domain…⠋
+─── DomainResolver ─────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+─── ProvisionService ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Creating Test App [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev… ⠋
+─── ProvisionService ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created Test App [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+─── SetupMethod ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created Test App [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+    ? How would you like to manage your lcl.host certificates?
+    > ACME Automated - Anchor style guides you through setup and automates renewal - Recommended
+      Manual - mkcert style leaves setup and renewal up to you                                  
+─── SetupMethod ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created Test App [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+    ? How would you like to manage your lcl.host certificates?
+      ACME Automated - Anchor style guides you through setup and automates renewal - Recommended
+    > Manual - mkcert style leaves setup and renewal up to you                                  
+─── SetupMethod ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created Test App [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+    - Entered manual certificate management.
+─── Provision ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created Test App [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+    - Entered manual certificate management.
+                                           
+# Provision Certificate `anchor lcl mkcert`
+    * Provisioning certificate for [test-app.lcl.host, test-app.localhost]… ⠋
+─── Provision ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered Test App application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created Test App [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+    - Entered manual certificate management.
+                                           
+# Provision Certificate `anchor lcl mkcert`
+    - Provisioned certificate for [test-app.lcl.host, test-app.localhost].
+    - Wrote certificate to ./test-app.lcl.host+1-cert.pem
+    - Wrote chain to ./test-app.lcl.host+1-chain.pem
+    - Wrote key to ./test-app.lcl.host+1-key.pem
+            
+# Next Steps
+    - To use these certificates please reference your language and/or framework docs.
+    - When these expire, run `anchor lcl mkcert --domains test-app.lcl.host,test-app.localhost --org lcl_setup --realm localhost --service test-app` to generate new ones.

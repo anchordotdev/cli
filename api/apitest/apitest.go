@@ -32,9 +32,6 @@ type Server struct {
 	URL       string
 	RailsPort string
 
-	proxy   bool
-	verbose bool
-
 	stopfn func()
 	waitfn func()
 }
@@ -44,8 +41,28 @@ func (s *Server) Close() {
 	s.waitfn()
 }
 
+func (s *Server) IsMock() bool {
+	return !proxy
+}
+
 func (s *Server) IsProxy() bool {
 	return proxy
+}
+
+func (s *Server) RecreateUser(username string) error {
+	if !s.IsProxy() {
+		return nil
+	}
+
+	cmd := exec.Command("script/clitest-recreate-user", username)
+	cmd.Dir = s.RootDir
+
+	_, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Server) GeneratePAT(email string) (string, error) {
@@ -97,7 +114,7 @@ func (s *Server) StartMock(ctx context.Context) error {
 
 	s.URL = "http://" + host + ":" + port + "/v0"
 	s.stopfn = stopfn
-	s.waitfn = func() { waitfn() }
+	s.waitfn = func() { _ = waitfn() }
 
 	return nil
 }
@@ -113,7 +130,7 @@ func (s *Server) StartProxy(ctx context.Context) error {
 
 	addrRails, waitRails, err := s.startRails(ctx)
 	if err != nil {
-		lock.Unlock()
+		_ = lock.Unlock()
 		stopfn()
 		return err
 	}
@@ -131,7 +148,7 @@ func (s *Server) StartProxy(ctx context.Context) error {
 
 	addr, waitPrism, err := s.startProxy(ctx, host+":"+port)
 	if err != nil {
-		lock.Unlock()
+		_ = lock.Unlock()
 		stopfn()
 		return err
 	}
@@ -142,7 +159,7 @@ func (s *Server) StartProxy(ctx context.Context) error {
 	group.Go(func() error { return s.waitTCP(addrRails) })
 
 	if err := group.Wait(); err != nil {
-		lock.Unlock()
+		_ = lock.Unlock()
 		stopfn()
 		return err
 	}
@@ -165,9 +182,8 @@ func (s *Server) StartProxy(ctx context.Context) error {
 	s.URL = "http://" + host + ":" + port + "/v0"
 	s.stopfn = stopfn
 	s.waitfn = func() {
-		defer lock.Unlock()
-
-		group.Wait()
+		_ = group.Wait()
+		_ = lock.Unlock()
 	}
 
 	return nil

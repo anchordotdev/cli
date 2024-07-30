@@ -63,7 +63,6 @@ type Platform struct {
 	SysFS  CmdFS
 
 	inito               sync.Once
-	nssBrowsers         string
 	certutilInstallHelp string
 	firefoxProfiles     []string
 }

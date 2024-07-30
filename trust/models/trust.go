@@ -22,7 +22,7 @@ var (
 	TrustHint = ui.Section{
 		Name: "TrustHint",
 		Model: ui.MessageLines{
-			ui.StepHint("We will check your local trust stores, then make any needed updates."),
+			ui.StepHint("We'll check your local trust stores and make any needed updates."),
 		},
 	}
 )

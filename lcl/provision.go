@@ -45,19 +45,21 @@ func (p *Provision) run(ctx context.Context, drv *ui.Driver, anc *api.Session, s
 	// FIXME: we need to lookup and pass the chain and/or make it non-optional
 	chainParam := "ca"
 
-	attach, err := anc.AttachService(ctx, chainParam, p.Domains, p.orgSlug, p.realmSlug, serviceParam)
+	attach, err := anc.AttachService(ctx, chainParam, p.Domains, p.orgSlug, p.realmSlug, srv.Slug)
 	if err != nil {
 		return nil, nil, err
 	}
+	subCaSubjectUID := attach.Relationships.SubCa.Slug
 
 	cmdMkCert := &MkCert{
-		anc:             anc,
-		chainSlug:       attach.Relationships.Chain.Slug,
-		domains:         p.Domains,
-		orgSlug:         p.orgSlug,
-		realmSlug:       p.realmSlug,
-		serviceSlug:     serviceParam,
-		subCaSubjectUID: attach.Relationships.SubCa.Slug,
+		anc:         anc,
+		domains:     p.Domains,
+		OrgAPID:     p.orgSlug,
+		RealmAPID:   p.realmSlug,
+		ServiceAPID: srv.Slug,
+
+		ChainAPID: attach.Relationships.Chain.Slug,
+		SubCaAPID: subCaSubjectUID,
 	}
 
 	tlsCert, err := cmdMkCert.perform(ctx, drv)

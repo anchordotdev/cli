@@ -20,9 +20,19 @@ func TestCmdLclMkCert(t *testing.T) {
 		require.Equal(t, []string{"test.lcl.host", "test.localhost"}, cfg.Lcl.MkCert.Domains)
 	})
 
-	t.Run("--subca 1234:ABCD:EF123", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--subca", "1234:ABCD:EF123")
-		require.Equal(t, "1234:ABCD:EF123", cfg.Lcl.MkCert.SubCa)
+	t.Run("--org test-org", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--org", "test-org")
+		require.Equal(t, "test-org", cfg.Lcl.Org)
+	})
+
+	t.Run("--service test-service", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--service", "test-service")
+		require.Equal(t, "test-service", cfg.Lcl.Service)
+	})
+
+	t.Run("--realm test-realm", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--realm", "test-realm")
+		require.Equal(t, "test-realm", cfg.Lcl.Realm)
 	})
 }
 
@@ -54,8 +64,7 @@ func TestLclMkcert(t *testing.T) {
 		defer cancel()
 
 		cmd := MkCert{
-			domains:         []string{"hi-lcl-mkcert.lcl.host", "hi-lcl-mkcert.localhost"},
-			subCaSubjectUID: "ABCD:EF12:23456",
+			domains: []string{"hi-lcl-mkcert.lcl.host", "hi-lcl-mkcert.localhost"},
 		}
 
 		uitest.TestTUIOutput(ctx, t, cmd.UI())

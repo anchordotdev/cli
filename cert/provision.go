@@ -16,13 +16,25 @@ import (
 
 type Provision struct {
 	Cert *tls.Certificate
+
+	Domains     []string
+	OrgAPID     string
+	RealmAPID   string
+	ServiceAPID string
 }
 
-func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...string) error {
+func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver) error {
+	return p.Perform(ctx, drv)
+}
+
+func (p *Provision) Perform(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
 	drv.Activate(ctx, &models.Provision{
-		Domains: domains,
+		Domains:     p.Domains,
+		OrgAPID:     p.OrgAPID,
+		RealmAPID:   p.RealmAPID,
+		ServiceAPID: p.ServiceAPID,
 	})
 
 	// TODO: as a stand-alone command, it makes no sense to expect a cert as an
@@ -32,7 +44,7 @@ func (p *Provision) RunTUI(ctx context.Context, drv *ui.Driver, domains ...strin
 	cert := p.Cert
 
 	prefix := cert.Leaf.Subject.CommonName
-	if num := len(domains); num > 1 {
+	if num := len(p.Domains); num > 1 {
 		prefix += "+" + strconv.Itoa(num-1)
 	}
 

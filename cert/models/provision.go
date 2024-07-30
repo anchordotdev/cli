@@ -10,7 +10,10 @@ import (
 )
 
 type Provision struct {
-	Domains []string
+	Domains     []string
+	OrgAPID     string
+	RealmAPID   string
+	ServiceAPID string
 
 	certFile, chainFile, keyFile string
 
@@ -56,8 +59,16 @@ func (m *Provision) View() string {
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote chain to %s", ui.Emphasize(m.chainFile))))
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Wrote key to %s", ui.Emphasize(m.keyFile))))
 
-	fmt.Fprintln(&b, ui.StepHint("To use these certificates please reference your language and/or framework docs."))
-	fmt.Fprintln(&b, ui.StepHint("When these certificates expire, rerun `anchor lcl mkcert` to generate new ones."))
+	fmt.Fprintln(&b, ui.Header("Next Steps"))
+	fmt.Fprintln(&b, ui.StepNext("To use these certificates please reference your language and/or framework docs."))
+	fmt.Fprintln(&b, ui.StepNext(
+		fmt.Sprintf("When these expire, run `anchor lcl mkcert --domains %s --org %s --realm %s --service %s` to generate new ones.",
+			strings.Join(m.Domains, ","),
+			m.OrgAPID,
+			m.RealmAPID,
+			m.ServiceAPID,
+		),
+	))
 
 	return b.String()
 }

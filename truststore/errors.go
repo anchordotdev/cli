@@ -19,10 +19,10 @@ type Op string
 
 const (
 	OpCheck     Op = "check"
-	OpInstall      = "install"
-	OpList         = "list"
-	OpSudo         = "sudo"
-	OpUninstall    = "uninstall"
+	OpInstall   Op = "install"
+	OpList      Op = "list"
+	OpSudo      Op = "sudo"
+	OpUninstall Op = "uninstall"
 )
 
 type Error struct {

@@ -21,28 +21,18 @@ var TrustCleanHeader = ui.Section{
 
 type TrustCleanHint struct {
 	CertStates, TrustStores []string
-
-	spinner spinner.Model
 }
 
-func (c *TrustCleanHint) Init() tea.Cmd {
-	c.spinner = ui.WaitingSpinner()
+func (c *TrustCleanHint) Init() tea.Cmd { return nil }
 
-	return c.spinner.Tick
-}
-
-func (c *TrustCleanHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	c.spinner, cmd = c.spinner.Update(msg)
-	return c, cmd
-}
+func (c *TrustCleanHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return c, nil }
 
 func (c *TrustCleanHint) View() string {
 	states := strings.Join(c.CertStates, ", ")
 	stores := strings.Join(c.TrustStores, ", ")
 
 	var b strings.Builder
-	fmt.Fprintln(&b, ui.Hint(fmt.Sprintf("Removing %s CA certificates from the %s store(s).", states, stores)))
+	fmt.Fprintln(&b, ui.Hint(fmt.Sprintf("We'll remove %s CA certificates from the %s store(s).", states, stores)))
 
 	return b.String()
 }

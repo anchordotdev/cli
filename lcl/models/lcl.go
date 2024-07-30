@@ -40,7 +40,7 @@ var (
 	LclHint = ui.Section{
 		Name: "LclHint",
 		Model: ui.MessageLines{
-			ui.StepHint("After setup, you can use HTTPS locally in your browsers and other programs."),
+			ui.StepHint("We'll set you up to use HTTPS locally in your browsers and other programs."),
 		},
 	}
 )
@@ -199,7 +199,7 @@ func (m *DomainInput) View() string {
 
 	if m.InputCh != nil {
 		fmt.Fprintln(&b, ui.StepPrompt(m.Prompt))
-		fmt.Fprintln(&b, ui.StepHint("We will ignore any characters that are not valid in a domain."))
+		fmt.Fprintln(&b, ui.StepHint("We'll ignore any characters that are not valid in a domain."))
 		fmt.Fprintln(&b, ui.StepPrompt(m.input.View()))
 	} else {
 		fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf(m.Done, ui.Emphasize(m.Domain))))

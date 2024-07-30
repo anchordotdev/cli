@@ -1,0 +1,166 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── SetupHeader ────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+─── SetupHint ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+─── SetupScan ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    * Scanning current directory for local application…⠋
+─── SetupScan ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+─── SetupCategory ──────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    ? What application server type?
+    > Go        
+      JavaScript
+      Python    
+      Ruby      
+      Custom    
+─── SetupCategory ──────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? lcl
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? t 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? te 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? tes 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? test 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? test- 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? test-a 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? test-ap 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    ? What is the application name?
+    ? test-app 
+─── SetupName ──────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+─── DomainInput ────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    ? What lcl.host domain would you like to use for local application development?
+    | We will ignore any characters that are not valid in a domain.
+    ? test-app.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    - Entered test-app.lcl.host domain for local application development.
+─── DomainResolver ─────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    - Entered test-app.lcl.host domain for local application development.
+    * Resolving test-app.lcl.host domain…⠋
+─── DomainResolver ─────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+─── ProvisionService ───────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Creating test-app [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev… ⠋
+─── ProvisionService ───────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created test-app [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+─── SetupMethod ────────────────────────────────────────────────────────────────
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll gather details from you and your system to customize setup instructions.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created test-app [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+    ? How would you like to manage your lcl.host certificates?
+    > ACME Automated - Anchor style guides you through setup and automates renewal - Recommended
+      Manual - mkcert style leaves setup and renewal up to you                                  

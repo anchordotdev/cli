@@ -3,25 +3,31 @@
 ─── Client ─────────────────────────────────────────────────────────────────────
     * Checking authentication: testing credentials remotely…⠋
 ─── AuditHeader ────────────────────────────────────────────────────────────────
+                                                                       
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
 ─── AuditHint ──────────────────────────────────────────────────────────────────
+                                                                       
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
-    | We'll begin by checking your system to determine what you need for your setup.
+    | We'll determine what needs setup on your system.
 ─── AuditResources ─────────────────────────────────────────────────────────────
+                                                                       
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
-    | We'll begin by checking your system to determine what you need for your setup.
+    | We'll determine what needs setup on your system.
     * Checking resources on Anchor.dev…⠋
 ─── AuditResources ─────────────────────────────────────────────────────────────
+                                                                       
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
-    | We'll begin by checking your system to determine what you need for your setup.
+    | We'll determine what needs setup on your system.
     - Checked resources on Anchor.dev: need to provision resources.
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                       
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
-    | We'll begin by checking your system to determine what you need for your setup.
+    | We'll determine what needs setup on your system.
     - Checked resources on Anchor.dev: need to provision resources.
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                       
 # Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
-    | We'll begin by checking your system to determine what you need for your setup.
+    | We'll determine what needs setup on your system.
     - Checked resources on Anchor.dev: need to provision resources.
     - Compared local and expected CA certificates: need to install 2 missing certificates.

@@ -13,7 +13,7 @@ var (
 	LclConfigSkip = ui.Section{
 		Name: "LclConfigSkip",
 		Model: ui.MessageLines{
-			ui.Skip("Configure System for lcl.host Local Development `anchor lcl config`"),
+			ui.Skip("Configure System for lcl.host HTTPS Local Development `anchor lcl config`"),
 		},
 	}
 

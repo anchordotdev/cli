@@ -42,19 +42,18 @@ type Session struct {
 func NewClient(ctx context.Context, cfg *cli.Config) (*Session, error) {
 	anc := &Session{
 		Client: &http.Client{
-			Transport: urlRewriter{
-				RoundTripper: responseChecker{
-					RoundTripper: userAgentSetter{
-						RoundTripper: preferSetter{
-							cfg:          cfg,
-							RoundTripper: new(http.Transport),
-						},
-					},
+			Transport: Middlewares{
+				urlRewriter{
+					url: cfg.API.URL,
 				},
-				URL: cfg.API.URL,
-			},
+				responseChecker,
+				userAgentSetter,
+				preferSetter{
+					cfg: cfg,
+				},
+				autoRetrier,
+			}.RoundTripper(new(http.Transport)),
 		},
-
 		cfg: cfg,
 	}
 
@@ -271,12 +270,12 @@ func getOrgServicesPath(orgSlug string) string {
 	return "/orgs/" + url.QueryEscape(orgSlug) + "/services"
 }
 
-func (s *Session) GetOrgServices(ctx context.Context, orgSlug string) ([]Service, error) {
+func (s *Session) GetOrgServices(ctx context.Context, orgSlug string, filters ...Filter[Service]) ([]Service, error) {
 	var svc Services
 	if err := s.get(ctx, getOrgServicesPath(orgSlug), &svc); err != nil {
 		return nil, err
 	}
-	return svc.Items, nil
+	return Filters[Service](filters).Apply(svc.Items), nil
 }
 
 func getServicePath(orgSlug, serviceSlug string) string {
@@ -361,8 +360,33 @@ func (r basicAuther) RoundTrip(req *http.Request) (*http.Response, error) {
 	return r.RoundTripper.RoundTrip(req)
 }
 
-type responseChecker struct {
-	http.RoundTripper
+type Middleware interface {
+	RoundTripper(next http.RoundTripper) http.RoundTripper
+}
+
+type Middlewares []Middleware
+
+func (m Middlewares) RoundTripper(tport *http.Transport) http.RoundTripper {
+	rm := slices.Clone(m)
+	slices.Reverse(rm)
+
+	var next http.RoundTripper = tport
+	for _, mw := range rm {
+		next = mw.RoundTripper(next)
+	}
+	return next
+}
+
+type RoundTripFunc func(*http.Request) (*http.Response, error)
+
+func (fn RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return fn(req)
+}
+
+type MiddlewareFunc func(next http.RoundTripper) http.RoundTripper
+
+func (fn MiddlewareFunc) RoundTripper(next http.RoundTripper) http.RoundTripper {
+	return fn(next)
 }
 
 var jsonMediaTypes = mediaTypes{
@@ -370,81 +394,98 @@ var jsonMediaTypes = mediaTypes{
 	"application/problem+json",
 }
 
-func (r responseChecker) RoundTrip(req *http.Request) (*http.Response, error) {
-	res, err := r.RoundTripper.RoundTrip(req)
-	if err != nil {
-		return nil, fmt.Errorf("request error %s %s: %w", req.Method, req.URL.Path, err)
-	}
+var responseChecker = MiddlewareFunc(func(next http.RoundTripper) http.RoundTripper {
+	return RoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		res, err := next.RoundTrip(req)
+		if err != nil {
+			return nil, fmt.Errorf("request error %s %s: %w", req.Method, req.URL.Path, err)
+		}
 
-	requestId := res.Header.Get("X-Request-Id")
+		requestId := res.Header.Get("X-Request-Id")
 
-	switch res.StatusCode {
-	case http.StatusForbidden:
-		return nil, ErrSignedOut
-	case http.StatusInternalServerError:
-		return nil, fmt.Errorf("request [%s] failed: 500 Internal Server Error", requestId)
-	}
-	if contentType := res.Header.Get("Content-Type"); !jsonMediaTypes.Matches(contentType) {
-		return nil, fmt.Errorf("request [%s]: %d response, expected json content-type, got: %q", requestId, res.StatusCode, contentType)
-	}
-	return res, nil
-}
+		switch res.StatusCode {
+		case http.StatusForbidden:
+			return nil, ErrSignedOut
+		case http.StatusInternalServerError:
+			return nil, fmt.Errorf("request [%s] failed: 500 Internal Server Error", requestId)
+		}
+		if contentType := res.Header.Get("Content-Type"); !jsonMediaTypes.Matches(contentType) {
+			return nil, fmt.Errorf("request [%s]: %d response, expected json content-type, got: %q", requestId, res.StatusCode, contentType)
+		}
+		return res, nil
+	})
+})
 
 type urlRewriter struct {
-	http.RoundTripper
-
-	URL string
+	url string
 }
 
-func (r urlRewriter) RoundTrip(req *http.Request) (*http.Response, error) {
-	u, err := url.Parse(r.URL)
-	if err != nil {
-		return nil, err
-	}
-	req.URL = u.JoinPath(req.URL.Path)
+func (r urlRewriter) RoundTripper(next http.RoundTripper) http.RoundTripper {
+	return RoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		u, err := url.Parse(r.url)
+		if err != nil {
+			return nil, err
+		}
+		req.URL = u.JoinPath(req.URL.Path)
 
-	return r.RoundTripper.RoundTrip(req)
+		return next.RoundTrip(req)
+	})
 }
 
 type preferSetter struct {
-	http.RoundTripper
-
 	cfg *cli.Config
 }
 
-func (s preferSetter) RoundTrip(req *http.Request) (*http.Response, error) {
-	path := req.URL.Path
+func (s preferSetter) RoundTripper(next http.RoundTripper) http.RoundTripper {
+	return RoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		path := req.URL.Path
 
-	var value []string
+		var value []string
 
-	if s.cfg.Test.Prefer[path].Code != 0 {
-		value = append(value, fmt.Sprintf("code=%d", s.cfg.Test.Prefer[path].Code))
-	}
+		if s.cfg.Test.Prefer[path].Code != 0 {
+			value = append(value, fmt.Sprintf("code=%d", s.cfg.Test.Prefer[path].Code))
+		}
 
-	if s.cfg.Test.Prefer[path].Dynamic {
-		value = append(value, fmt.Sprintf("dynamic=%t", s.cfg.Test.Prefer[path].Dynamic))
-	}
+		if s.cfg.Test.Prefer[path].Dynamic {
+			value = append(value, fmt.Sprintf("dynamic=%t", s.cfg.Test.Prefer[path].Dynamic))
+		}
 
-	if s.cfg.Test.Prefer[path].Example != "" {
-		value = append(value, fmt.Sprintf("example=%s", s.cfg.Test.Prefer[path].Example))
-	}
+		if s.cfg.Test.Prefer[path].Example != "" {
+			value = append(value, fmt.Sprintf("example=%s", s.cfg.Test.Prefer[path].Example))
+		}
 
-	if len(value) > 0 {
-		req.Header.Set("Prefer", strings.Join(value, " "))
-	}
+		if len(value) > 0 {
+			req.Header.Set("Prefer", strings.Join(value, " "))
+		}
 
-	return s.RoundTripper.RoundTrip(req)
+		return next.RoundTrip(req)
+	})
 }
 
-type userAgentSetter struct {
-	http.RoundTripper
-}
+var userAgentSetter = MiddlewareFunc(func(next http.RoundTripper) http.RoundTripper {
+	return RoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		req.Header.Set("User-Agent", cli.UserAgent())
 
-func (s userAgentSetter) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("User-Agent", cli.UserAgent())
+		return next.RoundTrip(req)
+	})
+})
 
-	return s.RoundTripper.RoundTrip(req)
-}
+var autoRetrier = MiddlewareFunc(func(next http.RoundTripper) http.RoundTripper {
+	return RoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		res, err := next.RoundTrip(req)
+		if res == nil {
+			return res, err
+		}
+
+		switch res.StatusCode {
+		case http.StatusBadGateway, http.StatusServiceUnavailable:
+			// TODO: configure a backoff/sleep here?
+			return next.RoundTrip(req)
+		default:
+			return res, err
+		}
+	})
+})
 
 type mediaTypes []string
 
@@ -471,4 +512,15 @@ func gnomeKeyringMissing(cfg *cli.Config) bool {
 		return false
 	}
 	return true
+}
+
+type Filter[T any] func(s []T) []T
+
+type Filters[T any] []Filter[T]
+
+func (f Filters[T]) Apply(s []T) []T {
+	for _, fn := range f {
+		s = fn(s)
+	}
+	return s
 }

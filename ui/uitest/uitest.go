@@ -113,22 +113,31 @@ var (
 	waitInterval = 50 * time.Millisecond
 )
 
+func WaitFinished(t *testing.T, drv *ui.Driver, doneCh chan bool) {
+	t.Helper()
+
+	select {
+	case <-time.After(waitDuration):
+		t.Fatalf("WaitForFinished: timeout after %s.\n\nGot:\n\n%s", waitDuration, drv.Golden())
+	case <-doneCh:
+	}
+}
+
 func WaitForGoldenContains(t *testing.T, drv *ui.Driver, errc chan error, want string) {
 	t.Helper()
 
-	if len(errc) > 0 {
-		t.Fatal(<-errc)
-	}
-
 	start := time.Now()
 	for time.Since(start) <= waitDuration {
+		if len(errc) > 0 {
+			t.Fatalf("WaitForGoldenContains error: %v\n\nGot:\n\n%s", <-errc, drv.Golden())
+		}
 		if strings.Contains(drv.Golden(), want) {
 			return
 		}
 		time.Sleep(waitInterval)
 	}
 
-	t.Fatalf("WaitFor: condition not met after %s.\n\nWant:\n\n%s\n\nGot:\n\n%s", waitDuration, want, drv.Golden())
+	t.Fatalf("WaitForGoldenContains: timeout after %s.\n\nWant:\n\n%s\n\nGot:\n\n%s", waitDuration, want, drv.Golden())
 }
 
 func TestGolden(t *testing.T, got string) {

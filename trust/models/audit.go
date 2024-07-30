@@ -21,7 +21,7 @@ var (
 	TrustAuditHint = ui.Section{
 		Name: "TrustAuditHint",
 		Model: ui.MessageLines{
-			ui.StepHint("We will compare your CA certificates from Anchor and your local trust stores."),
+			ui.StepHint("We'll compare your CA certificates from Anchor and your local trust stores."),
 		},
 	}
 )

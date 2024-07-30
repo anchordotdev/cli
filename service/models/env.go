@@ -21,7 +21,7 @@ var (
 	ServiceEnvHint = ui.Section{
 		Name: "ServiceEnvHint",
 		Model: ui.MessageLines{
-			ui.StepHint("Environment variables provide your configuration and credentials."),
+			ui.StepHint("We'll set your environment variables to provide configuration and credentials."),
 		},
 	}
 )
@@ -63,8 +63,6 @@ func (m *EnvFetch) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Fetched %s environment variables.", ui.Emphasize(m.Service))))
-
 	return b.String()
 }
 
@@ -78,12 +76,16 @@ type EnvMethod struct {
 func (m *EnvMethod) Init() tea.Cmd {
 	m.list = ui.List([]ui.ListItem[string]{
 		{
-			Key:    "clipboard",
-			String: "Add to your clipboard",
+			Key:    "export",
+			String: "Add export commands to your clipboard.",
 		},
 		{
 			Key:    "dotenv",
-			String: "Write to .env file",
+			String: "Add dotenv contents to your clipboard.",
+		},
+		{
+			Key:    "display",
+			String: "Display export commands. ! WARNING: could be observed by others.",
 		},
 	})
 	return nil
@@ -122,7 +124,12 @@ func (m *EnvMethod) View() string {
 		return b.String()
 	}
 
-	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s environment variable management.", ui.Emphasize(m.choice))))
+	fmt.Fprintln(&b, ui.StepDone(
+		fmt.Sprintf("Selected %s environment variable method. %s",
+			ui.Emphasize(m.choice),
+			ui.Whisper(fmt.Sprintf("You can also use `--method %s`.", m.choice)),
+		),
+	))
 	return b.String()
 }
 
@@ -140,21 +147,22 @@ func (m *EnvClipboard) View() string {
 
 	if !m.InClipboard {
 		// FIXME: handling for clipboard errors
-		fmt.Fprintln(&b, ui.StepAlert("Unable to copy env to your clipboard."))
+		fmt.Fprintln(&b, ui.StepAlert("Unable to copy export commands to your clipboard."))
 	}
 
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf(
-		"Copied %s env to your clipboard.",
+		"Copied %s export commands to your clipboard.",
 		ui.Emphasize(m.Service))))
 
-	fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to load env in current session.",
+	fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s to load your environment variables.",
 		ui.Action("Paste and press enter"))))
 
 	return b.String()
 }
 
 type EnvDotenv struct {
-	Service string
+	InClipboard bool
+	Service     string
 }
 
 func (m *EnvDotenv) Init() tea.Cmd { return nil }
@@ -164,10 +172,40 @@ func (m *EnvDotenv) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 func (m *EnvDotenv) View() string {
 	var b strings.Builder
 
+	if !m.InClipboard {
+		// FIXME: handling for clipboard errors
+		fmt.Fprintln(&b, ui.StepAlert("Unable to copy dotenv contents to your clipboard."))
+	}
+
 	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf(
-		"Wrote %s env to %s.",
-		ui.Emphasize(m.Service),
-		ui.Whisper("`.env`"))))
+		"Copied %s dotenv contents to your clipboard.",
+		ui.Emphasize(m.Service))))
+
+	fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s into your dotenv so your server will find them next restart.",
+		ui.Action("Paste"))))
+
+	return b.String()
+}
+
+type EnvDisplay struct {
+	EnvString string
+	Service   string
+}
+
+func (m *EnvDisplay) Init() tea.Cmd { return nil }
+
+func (m *EnvDisplay) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
+
+func (m *EnvDisplay) View() string {
+	var b strings.Builder
+
+	fmt.Fprintf(&b, "\n%s\n", m.EnvString)
+
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf(
+		"Displayed %s export commands.",
+		ui.Emphasize(m.Service))))
+
+	fmt.Fprintln(&b, ui.StepAlert("Be sure to load these into your environment."))
 
 	return b.String()
 }
@@ -184,8 +222,9 @@ func (m *EnvNextSteps) View() string {
 	var b strings.Builder
 
 	fmt.Fprintln(&b, ui.Header("Next Steps"))
-	fmt.Fprintln(&b, ui.StepNext(fmt.Sprintf("(Re)Start your server and check out your encrypted site at: %s", ui.URL(m.LclUrl))))
-	fmt.Fprintln(&b, ui.StepNext("These certificates will renew automatically, time to enjoy effortless encryption."))
+	fmt.Fprintln(&b, ui.StepAlert(ui.Action("(Re)Start your server.")))
+	fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s: %s", ui.Action("Check out your encrypted site"), ui.URL(m.LclUrl))))
+	fmt.Fprintln(&b, ui.StepHint("These certificates will renew automatically, time to enjoy effortless encryption."))
 
 	return b.String()
 }

@@ -6,7 +6,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -22,7 +22,6 @@ type Platform struct {
 	SysFS  CmdFS
 
 	inito                sync.Once
-	nssBrowsers          string
 	certutilInstallHelp  string
 	trustFilenamePattern string
 	trustCommand         []string
@@ -114,7 +113,7 @@ func (s *Platform) checkCA(ca *CA) (bool, error) {
 }
 
 func (s *Platform) installCA(ca *CA) (bool, error) {
-	cert, err := ioutil.ReadFile(ca.FilePath)
+	cert, err := os.ReadFile(ca.FilePath)
 	if err != nil {
 		return false, fatalErr(err, "failed to read root certificate")
 	}

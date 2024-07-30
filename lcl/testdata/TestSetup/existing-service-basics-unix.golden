@@ -1,0 +1,312 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── SetupHeader ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+─── SetupHint ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    * Fetching realms…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    * Fetching services…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    ? Which org-slug/realm-slug service's lcl.host local development environment do you want to setup?
+    > service-name (service-name)
+      Create New Service         
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+─── TrustHeader ────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+─── TrustHint ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    * Comparing local and expected CA certificates…⠋
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    | Updates may require sudo privileges, learn why here: https://lcl.host/why-sudo
+    ! Press Enter to install missing certificates. (requires sudo)
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    * Updating Mock: installing oas-examples - AnchorCA ECDSA… ⠋
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
+    * Updating Mock: installing oas-examples - AnchorCA RSA… ⠋
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+─── ServiceEnvHeader ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+─── ServiceEnvHint ─────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+─── EnvFetch ───────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    * Fetching service-name environment variables…⠋
+─── EnvFetch ───────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+─── EnvMethod ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    ? How would you like to manage your environment variables?
+    > Add export commands to your clipboard.                          
+      Add dotenv contents to your clipboard.                          
+      Display export commands. ! WARNING: could be observed by others.
+─── EnvMethod ──────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    - Selected export environment variable method. You can also use `--method export`.
+─── EnvClipboard ───────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    - Selected export environment variable method. You can also use `--method export`.
+    - Copied service-name export commands to your clipboard.
+    ! Paste and press enter to load your environment variables.
+─── EnvNextSteps ───────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+    - Updated Mock: installed oas-examples - AnchorCA [ECDSA, RSA]
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    - Selected export environment variable method. You can also use `--method export`.
+    - Copied service-name export commands to your clipboard.
+    ! Paste and press enter to load your environment variables.
+            
+# Next Steps
+    ! (Re)Start your server.
+    ! Check out your encrypted site: https://service.lcl.host:4433
+    | These certificates will renew automatically, time to enjoy effortless encryption.

@@ -24,7 +24,7 @@ var (
 	SetupHint = ui.Section{
 		Name: "SetupHint",
 		Model: ui.MessageLines{
-			ui.StepHint("We'll gather details from you and your system to customize setup instructions."),
+			ui.StepHint("We'll integrate your application and system for HTTPS local development."),
 		},
 	}
 )
@@ -233,12 +233,12 @@ type SetupMethod struct {
 func (m *SetupMethod) Init() tea.Cmd {
 	m.list = ui.List([]ui.ListItem[string]{
 		{
-			Key:    "automatic",
-			String: "Automatic via ACME - Anchor style - Recommended",
+			Key:    "automated",
+			String: "ACME Automated - Anchor style guides you through setup and automates renewal - Recommended",
 		},
 		{
 			Key:    "manual",
-			String: "Manually Managed - mkcert style",
+			String: "Manual - mkcert style leaves setup and renewal up to you",
 		},
 	})
 	return nil
@@ -272,11 +272,7 @@ func (m *SetupMethod) View() string {
 	var b strings.Builder
 
 	if m.ChoiceCh != nil {
-		fmt.Fprintln(&b, ui.StepHint("How would you like to manage your lcl.host certificates?"))
-		fmt.Fprintln(&b, ui.StepHint(" - Anchor style guides you through setup and will automatically renew."))
-		fmt.Fprintln(&b, ui.StepHint(" - Mkcert style leaves setup and renewal up to you."))
-
-		fmt.Fprintln(&b, ui.StepPrompt("What certificate management method?"))
+		fmt.Fprintln(&b, ui.StepPrompt("How would you like to manage your lcl.host certificates?"))
 		fmt.Fprintln(&b, m.list.View())
 		return b.String()
 	}

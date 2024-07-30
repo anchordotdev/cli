@@ -82,9 +82,13 @@ func TestLclConfig(t *testing.T) {
 
 		errc := make(chan error, 1)
 		go func() {
-			errc <- cmd.UI().RunTUI(ctx, drv)
+			defer close(errc)
 
-			tm.Quit()
+			if err := cmd.UI().RunTUI(ctx, drv); err != nil {
+				errc <- err
+				return
+			}
+			errc <- tm.Quit()
 		}()
 
 		// wait for prompt

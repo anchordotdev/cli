@@ -3,100 +3,115 @@
 ─── Client ─────────────────────────────────────────────────────────────────────
     * Checking authentication: testing credentials remotely…⠋
 ─── ServiceEnvHeader ───────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
 ─── ServiceEnvHint ─────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
+    | We'll set your environment variables to provide configuration and credentials.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     * Fetching organizations…⠋
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Realm,github.com/anchordotd…
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     * Fetching realms…⠋
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Realm,github.com/anchordotd…
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Service,github.com/anchordo…
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     * Fetching services…⠋
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Service,github.com/anchordo…
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
 ─── EnvFetch ───────────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
     * Fetching service-name environment variables…⠋
 ─── EnvFetch ───────────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
-    - Fetched service-name environment variables.
 ─── EnvMethod ──────────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
-    - Fetched service-name environment variables.
     ? How would you like to manage your environment variables?
-    > Add to your clipboard
-      Write to .env file   
+    > Add export commands to your clipboard.                          
+      Add dotenv contents to your clipboard.                          
+      Display export commands. ! WARNING: could be observed by others.
 ─── EnvMethod ──────────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
-    - Fetched service-name environment variables.
     ? How would you like to manage your environment variables?
-      Add to your clipboard
-    > Write to .env file   
+      Add export commands to your clipboard.                          
+    > Add dotenv contents to your clipboard.                          
+      Display export commands. ! WARNING: could be observed by others.
 ─── EnvMethod ──────────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
-    - Fetched service-name environment variables.
-    - Entered dotenv environment variable management.
+    - Selected dotenv environment variable method. You can also use `--method dotenv`.
 ─── EnvDotenv ──────────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
-    - Fetched service-name environment variables.
-    - Entered dotenv environment variable management.
-    - Wrote service-name env to `.env`.
+    - Selected dotenv environment variable method. You can also use `--method dotenv`.
+    - Copied service-name dotenv contents to your clipboard.
+    ! Paste into your dotenv so your server will find them next restart.
 ─── EnvNextSteps ───────────────────────────────────────────────────────────────
+                                                              
 # Fetch Environment Variables for Service `anchor service env`
-    | Environment variables provide your configuration and credentials.
+    | We'll set your environment variables to provide configuration and credentials.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Using service-name, the only available service. You can also use `--service service-name`.
-    - Fetched service-name environment variables.
-    - Entered dotenv environment variable management.
-    - Wrote service-name env to `.env`.
+    - Selected dotenv environment variable method. You can also use `--method dotenv`.
+    - Copied service-name dotenv contents to your clipboard.
+    ! Paste into your dotenv so your server will find them next restart.
+            
 # Next Steps
-    - (Re)Start your server and check out your encrypted site at: https://service.lcl.host:4433
-    - These certificates will renew automatically, time to enjoy effortless encryption.
+    ! (Re)Start your server.
+    ! Check out your encrypted site: https://service.lcl.host:4433
+    | These certificates will renew automatically, time to enjoy effortless encryption.

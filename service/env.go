@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"os"
 	"sort"
 	"strings"
 
@@ -27,12 +26,11 @@ var (
 		cmd.Flags().StringVarP(&cfg.Service.Env.Org, "org", "o", "", "Organization to trust.")
 		cmd.Flags().StringVarP(&cfg.Service.Env.Realm, "realm", "r", "", "Realm to trust.")
 		cmd.Flags().StringVarP(&cfg.Service.Env.Service, "service", "s", "", "Service for ENV.")
-
-		cmd.Hidden = true
 	})
 
-	MethodClipboard = "clipboard"
-	MethodDotenv    = "dotenv"
+	MethodExport  = "export"
+	MethodDotenv  = "dotenv"
+	MethodDisplay = "display"
 )
 
 type Env struct {
@@ -73,62 +71,20 @@ func (c *Env) run(ctx context.Context, drv *ui.Driver) error {
 func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
-	if c.ChainAPID == "" {
-		c.ChainAPID = "ca"
+	chainAPID := c.chainAPID()
+	orgAPID, err := c.orgAPID(ctx, cfg, drv)
+	if err != nil {
+		return err
 	}
 
-	if c.OrgAPID == "" {
-		c.OrgAPID = cfg.Service.Env.Org
-	}
-	if c.OrgAPID == "" {
-		choicec, err := component.OrgSelector(ctx, drv, c.Anc,
-			"Which organization's env do you want to fetch?",
-		)
-		if err != nil {
-			return err
-		}
-		select {
-		case org := <-choicec:
-			c.OrgAPID = org.Slug
-		case <-ctx.Done():
-			return ctx.Err()
-		}
+	realmAPID, err := c.realmAPID(ctx, cfg, drv, orgAPID)
+	if err != nil {
+		return err
 	}
 
-	if c.RealmAPID == "" {
-		c.RealmAPID = cfg.Service.Env.Realm
-	}
-	if c.RealmAPID == "" {
-		choicec, err := component.RealmSelector(ctx, drv, c.Anc, c.OrgAPID,
-			fmt.Sprintf("Which %s realm's env do you want to fetch?", ui.Emphasize(c.OrgAPID)),
-		)
-		if err != nil {
-			return err
-		}
-		select {
-		case realm := <-choicec:
-			c.RealmAPID = realm.Apid
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
-
-	if c.ServiceAPID == "" {
-		c.ServiceAPID = cfg.Service.Env.Service
-	}
-	if c.ServiceAPID == "" {
-		choicec, err := component.ServiceSelector(ctx, drv, c.Anc, c.OrgAPID,
-			fmt.Sprintf("Which %s/%s service do you want to fetch?", ui.Emphasize(c.OrgAPID), ui.Emphasize(c.RealmAPID)),
-		)
-		if err != nil {
-			return err
-		}
-		select {
-		case service := <-choicec:
-			c.ServiceAPID = service.Slug
-		case <-ctx.Done():
-			return ctx.Err()
-		}
+	serviceAPID, err := c.serviceAPID(ctx, cfg, drv, orgAPID, realmAPID)
+	if err != nil {
+		return err
 	}
 
 	if c.whoami == "" {
@@ -140,28 +96,28 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	drv.Activate(ctx, &models.EnvFetch{
-		Service: c.ServiceAPID,
+		Service: serviceAPID,
 	})
 
 	env := make(map[string]string)
 
 	env["ACME_CONTACT"] = c.whoami
-	env["ACME_DIRECTORY_URL"] = cfg.AnchorURL + "/" + url.QueryEscape(c.OrgAPID) + "/" + url.QueryEscape(c.RealmAPID) + "/x509/" + c.ChainAPID + "/acme"
+	env["ACME_DIRECTORY_URL"] = cfg.AnchorURL + "/" + url.QueryEscape(orgAPID) + "/" + url.QueryEscape(realmAPID) + "/x509/" + chainAPID + "/acme"
 
-	attachments, err := c.Anc.GetServiceAttachments(ctx, c.OrgAPID, c.ServiceAPID)
+	attachments, err := c.Anc.GetServiceAttachments(ctx, orgAPID, serviceAPID)
 	if err != nil {
 		return err
 	}
 	var attachment *api.Attachment
 	for _, a := range attachments {
-		if a.Relationships.Chain.Apid == c.ChainAPID && a.Relationships.Realm.Apid == c.RealmAPID && a.Relationships.SubCa.Apid != nil {
+		if a.Relationships.Chain.Apid == chainAPID && a.Relationships.Realm.Apid == realmAPID && a.Relationships.SubCa.Apid != nil {
 			attachment = &a
 			break
 		}
 	}
 
 	if attachment != nil {
-		eab, err := c.Anc.CreateEAB(ctx, c.ChainAPID, c.OrgAPID, c.RealmAPID, c.ServiceAPID, *attachment.Relationships.SubCa.Apid)
+		eab, err := c.Anc.CreateEAB(ctx, chainAPID, orgAPID, realmAPID, serviceAPID, *attachment.Relationships.SubCa.Apid)
 		if err != nil {
 			return err
 		}
@@ -169,7 +125,7 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 		env["ACME_HMAC_KEY"] = eab.HmacKey
 	}
 
-	service, err := c.Anc.GetService(ctx, c.OrgAPID, c.ServiceAPID)
+	service, err := c.Anc.GetService(ctx, orgAPID, serviceAPID)
 	if err != nil {
 		return err
 	}
@@ -196,18 +152,23 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	switch envMethod {
-	case MethodClipboard:
-		err := c.clipboardMethod(ctx, drv, env)
+	case MethodExport:
+		err := c.exportMethod(ctx, drv, env, serviceAPID)
 		if err != nil {
 			return err
 		}
 	case MethodDotenv:
-		err := c.dotenvMethod(ctx, drv, env)
+		err := c.dotenvMethod(ctx, drv, env, serviceAPID)
+		if err != nil {
+			return err
+		}
+	case MethodDisplay:
+		err := c.displayMethod(ctx, drv, env, serviceAPID)
 		if err != nil {
 			return err
 		}
 	default:
-		return fmt.Errorf("Unknown method: %s. Please choose either `clipboard` or `dotenv`.", envMethod)
+		return fmt.Errorf("Unknown method: %s. Please choose either `export` or `dotenv`.", envMethod)
 	}
 
 	var lclDomain string
@@ -226,7 +187,7 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	return nil
 }
 
-func (c *Env) clipboardMethod(ctx context.Context, drv *ui.Driver, env map[string]string) error {
+func (c *Env) exportMethod(ctx context.Context, drv *ui.Driver, env map[string]string, serviceAPID string) error {
 	var b strings.Builder
 
 	var keys []string
@@ -241,13 +202,13 @@ func (c *Env) clipboardMethod(ctx context.Context, drv *ui.Driver, env map[strin
 
 	drv.Activate(ctx, &models.EnvClipboard{
 		InClipboard: (clipboardErr == nil),
-		Service:     c.ServiceAPID,
+		Service:     serviceAPID,
 	})
 
 	return nil
 }
 
-func (c *Env) dotenvMethod(ctx context.Context, drv *ui.Driver, env map[string]string) error {
+func (c *Env) dotenvMethod(ctx context.Context, drv *ui.Driver, env map[string]string, serviceAPID string) error {
 	var b bytes.Buffer
 
 	var keys []string
@@ -258,14 +219,112 @@ func (c *Env) dotenvMethod(ctx context.Context, drv *ui.Driver, env map[string]s
 	for _, key := range keys {
 		fmt.Fprintf(&b, "%s=\"%s\"\n", key, env[key])
 	}
-	err := os.WriteFile(".env", b.Bytes(), 0644)
-	if err != nil {
-		return err
-	}
+	clipboardErr := clipboard.WriteAll(b.String())
 
 	drv.Activate(ctx, &models.EnvDotenv{
-		Service: c.ServiceAPID,
+		InClipboard: (clipboardErr == nil),
+		Service:     serviceAPID,
 	})
 
 	return nil
+}
+
+func (c *Env) displayMethod(ctx context.Context, drv *ui.Driver, env map[string]string, serviceAPID string) error {
+	var b strings.Builder
+
+	var keys []string
+	for key := range env {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		fmt.Fprintf(&b, "export %s=\"%s\"\n", key, env[key])
+	}
+
+	drv.Activate(ctx, &models.EnvDisplay{
+		EnvString: b.String(),
+		Service:   serviceAPID,
+	})
+
+	return nil
+}
+
+func (c *Env) chainAPID() string {
+	if c.ChainAPID != "" {
+		return c.ChainAPID
+	}
+
+	return "ca"
+}
+
+func (c *Env) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if c.OrgAPID != "" {
+		return c.OrgAPID, nil
+	}
+	if cfg.Service.Env.Org != "" {
+		return cfg.Service.Env.Org, nil
+	}
+
+	selector := &component.Selector[api.Organization]{
+		Prompt: "Which organization's env do you want to fetch?",
+		Flag:   "--org",
+
+		Fetcher: &component.Fetcher[api.Organization]{
+			FetchFn: func() ([]api.Organization, error) { return c.Anc.GetOrgs(ctx) },
+		},
+	}
+
+	org, err := selector.Choice(ctx, drv)
+	if err != nil {
+		return "", err
+	}
+	return org.Apid, nil
+}
+
+func (c *Env) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
+	if c.RealmAPID != "" {
+		return c.RealmAPID, nil
+	}
+	if cfg.Service.Env.Realm != "" {
+		return cfg.Service.Env.Realm, nil
+	}
+
+	selector := &component.Selector[api.Realm]{
+		Prompt: fmt.Sprintf("Which %s realm's env do you want to fetch?", ui.Emphasize(orgAPID)),
+		Flag:   "--realm",
+
+		Fetcher: &component.Fetcher[api.Realm]{
+			FetchFn: func() ([]api.Realm, error) { return c.Anc.GetOrgRealms(ctx, orgAPID) },
+		},
+	}
+
+	realm, err := selector.Choice(ctx, drv)
+	if err != nil {
+		return "", err
+	}
+	return realm.Apid, nil
+}
+
+func (c *Env) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID, realmAPID string) (string, error) {
+	if c.ServiceAPID != "" {
+		return c.ServiceAPID, nil
+	}
+	if cfg.Service.Env.Service != "" {
+		return cfg.Service.Env.Service, nil
+	}
+
+	selector := &component.Selector[api.Service]{
+		Prompt: fmt.Sprintf("Which %s/%s service do you want to fetch?", ui.Emphasize(orgAPID), ui.Emphasize(realmAPID)),
+		Flag:   "--service",
+
+		Fetcher: &component.Fetcher[api.Service]{
+			FetchFn: func() ([]api.Service, error) { return c.Anc.GetOrgServices(ctx, orgAPID, api.NonDiagnosticServices) },
+		},
+	}
+
+	service, err := selector.Choice(ctx, drv)
+	if err != nil {
+		return "", err
+	}
+	return service.Slug, nil
 }

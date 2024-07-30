@@ -295,16 +295,20 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 					err = uierr.Err
 				}
 
-				if err != nil && err != context.Canceled {
+				if err != nil && isReportable(err) {
 					ReportError(ctx, err, drv, cmd, args)
 				}
 				return err
 			}
 
 			drv.Program.Quit()
-			if err := <-errc; err != nil && err != context.Canceled {
-				ReportError(ctx, err, drv, cmd, args)
+			if err := <-errc; err != nil {
+				if isReportable(err) {
+					ReportError(ctx, err, drv, cmd, args)
+				}
+				return err
 			}
+
 			return nil
 		}
 

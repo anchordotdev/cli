@@ -7,3 +7,6 @@ Flags:
   -h, --help              help for setup
       --language string   Language to integrate with Anchor.
       --method string     Integration method for certificates.
+  -o, --org string        Organization for lcl.host application setup.
+  -r, --realm string      Realm for lcl.host application setup.
+  -s, --service string    Service for lcl.host application setup.

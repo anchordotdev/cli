@@ -1,6 +1,8 @@
 ─── SignOutHeader ──────────────────────────────────────────────────────────────
+                                               
 # Signout from Anchor.dev `anchor auth signout`
 ─── SignOutSignedOut ───────────────────────────────────────────────────────────
+                                               
 # Signout from Anchor.dev `anchor auth signout`
     - Not signed in.
     | Run `anchor auth signin` to sign in.

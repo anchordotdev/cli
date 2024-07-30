@@ -2,7 +2,9 @@ package trust
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
@@ -144,7 +146,7 @@ func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
 			drv.Send(models.CACleaningMsg{Store: store})
 
 			if _, err := store.UninstallCA(ca); err != nil {
-				return err
+				return classifyError(err)
 			}
 
 			drv.Send(models.CACleanedMsg{Store: store})
@@ -152,4 +154,20 @@ func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	return nil
+}
+
+func classifyError(err error) error {
+	// TODO: should these be a ui.Error's?
+	switch {
+	case strings.HasSuffix(err.Error(), "sudo: 3 incorrect password attempts"):
+		return cli.UserError{
+			Err: fmt.Errorf("sudo failed: invalid password, please try again with the correct password."),
+		}
+	case strings.HasSuffix(strings.TrimSpace(err.Error()), "SecTrustSettingsRemoveTrustSettings: The authorization was canceled by the user."):
+		return cli.UserError{
+			Err: fmt.Errorf("remove cert failed: action canceled."),
+		}
+	default:
+		return err
+	}
 }

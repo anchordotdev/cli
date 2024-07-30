@@ -156,7 +156,7 @@ func (s *Brew) UninstallCA(ca *CA) (bool, error) {
 	}
 
 	if err := s.DataFS.AppendToFile(tmpf, ndata); err != nil {
-		s.DataFS.Remove(tmpf)
+		_ = s.DataFS.Remove(tmpf)
 		return false, err
 	}
 	if err := s.DataFS.Rename(tmpf, s.certPath); err != nil {

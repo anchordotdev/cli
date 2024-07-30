@@ -3,122 +3,137 @@
 ─── Client ─────────────────────────────────────────────────────────────────────
     * Checking authentication: testing credentials remotely…⠋
 ─── LclConfigHeader ────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
 ─── LclConfigHint ──────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hi-lcl_config.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? h.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? he.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hel.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hell.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hello.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hello-.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hello-w.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hello-wo.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hello-wor.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hello-worl.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
     |
     | We'll start a local diagnostic web server to guide you through the process.
     ? What lcl.host domain would you like to use for diagnostics?
-    | We will ignore any characters that are not valid in a domain.
+    | We'll ignore any characters that are not valid in a domain.
     ? hello-world.lcl.host
 ─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -126,6 +141,7 @@
     | We'll start a local diagnostic web server to guide you through the process.
     - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
 ─── DomainResolver ─────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -134,6 +150,7 @@
     - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
     * Resolving hello-world.lcl.host domain…⠋
 ─── DomainResolver ─────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -142,6 +159,7 @@
     - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
     - Resolved hello-world.lcl.host domain: success!
 ─── ProvisionService ───────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -152,6 +170,7 @@
     | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
     - Creating hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev… ⠋
 ─── ProvisionService ───────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -162,6 +181,7 @@
     | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
 ─── LclConfig ──────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -173,6 +193,7 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     ! Press Enter to open http://hello-world.lcl.host:4433 in your browser.
 ─── LclConfig ──────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -185,6 +206,7 @@
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
 ─── TrustHeader ────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -196,8 +218,10 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -209,9 +233,11 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -223,9 +249,11 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -237,11 +265,13 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     | Updates may require sudo privileges, learn why here: https://lcl.host/why-sudo
     ! Press Enter to install missing certificates. (requires sudo)
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -253,9 +283,11 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -267,10 +299,12 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     * Updating Mock: installing lcl_config/localhost - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -282,10 +316,12 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA]
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -297,11 +333,13 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA]
     * Updating Mock: installing lcl_config/localhost - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -313,10 +351,12 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
 ─── LclConfig ──────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -328,12 +368,14 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
     | Before we move on, let's test HTTPS.
     ! Press Enter to open https://hello-world.lcl.host:4433 in your browser.
 ─── LclConfig ──────────────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -345,11 +387,13 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
     | Before we move on, let's test HTTPS.
 ─── LclConfigSuccess ───────────────────────────────────────────────────────────
+                                                                           
 # Configure System for lcl.host HTTPS Local Development `anchor lcl config`
     | Before issuing HTTPS certificates, we need to configure your browsers
     | and OS to trust your personal certificates.
@@ -361,6 +405,7 @@
     - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
     - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
     | Next, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]

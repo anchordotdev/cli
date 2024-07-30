@@ -3,21 +3,26 @@
 ─── Client ─────────────────────────────────────────────────────────────────────
     * Checking authentication: testing credentials remotely…⠋
 ─── TrustAuditHeader ───────────────────────────────────────────────────────────
+                                                                         
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
 ─── TrustAuditHint ─────────────────────────────────────────────────────────────
+                                                                         
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
-    | We will compare your CA certificates from Anchor and your local trust stores.
+    | We'll compare your CA certificates from Anchor and your local trust stores.
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                         
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
-    | We will compare your CA certificates from Anchor and your local trust stores.
+    | We'll compare your CA certificates from Anchor and your local trust stores.
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                         
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
-    | We will compare your CA certificates from Anchor and your local trust stores.
+    | We'll compare your CA certificates from Anchor and your local trust stores.
     - Compared local and expected CA certificates: need to install 1 missing certificates.
 ─── TrustAuditInfo ─────────────────────────────────────────────────────────────
+                                                                         
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
-    | We will compare your CA certificates from Anchor and your local trust stores.
+    | We'll compare your CA certificates from Anchor and your local trust stores.
     - Compared local and expected CA certificates: need to install 1 missing certificates.
     - VALID - oas-examples - AnchorCA ECDSA: trusted by [Mock]
     - MISSING - oas-examples - AnchorCA RSA: missing from [Mock]

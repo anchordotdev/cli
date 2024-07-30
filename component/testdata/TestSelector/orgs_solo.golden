@@ -1,4 +1,4 @@
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
     * Fetching organizations…⠋
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
     - Using solo-org-slug, the only available organization. You can also use `--org solo-org-slug`.

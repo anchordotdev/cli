@@ -15,8 +15,8 @@ var (
 	header = lipgloss.NewStyle().Bold(true)
 	hint   = lipgloss.NewStyle().Faint(true).SetString("|")
 
-	Header    = header.SetString("#").Render
-	Skip      = header.Faint(true).SetString("# Skipped:").Render
+	Header    = header.SetString("\n#").Render
+	Skip      = header.Faint(true).SetString("\n# Skipped:").Render
 	Hint      = hint.Render
 	Underline = lipgloss.NewStyle().Underline(true).Render
 	Warning   = header.SetString(bgBanana(fgMidnight("!")) + fgBanana(" Warning:")).Render

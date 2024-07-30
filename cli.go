@@ -128,3 +128,25 @@ func ReportError(ctx context.Context, err error, drv *ui.Driver, cmd *cobra.Comm
 		}
 	}
 }
+
+type UserError struct {
+	Err error
+}
+
+func (u UserError) Error() string { return u.Err.Error() }
+
+func isReportable(err error) bool {
+	switch err.(type) {
+	case UserError:
+		return false
+	case ui.Error:
+		return false
+	}
+
+	switch err {
+	case context.Canceled:
+		return false
+	}
+
+	return true
+}

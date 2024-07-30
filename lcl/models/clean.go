@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/anchordotdev/cli/ui"
-	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -18,27 +17,17 @@ var LclCleanHeader = ui.Section{
 
 type LclCleanHint struct {
 	TrustStores []string
-
-	spinner spinner.Model
 }
 
-func (c *LclCleanHint) Init() tea.Cmd {
-	c.spinner = ui.WaitingSpinner()
+func (c *LclCleanHint) Init() tea.Cmd { return nil }
 
-	return c.spinner.Tick
-}
-
-func (c *LclCleanHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	c.spinner, cmd = c.spinner.Update(msg)
-	return c, cmd
-}
+func (c *LclCleanHint) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return c, nil }
 
 func (c *LclCleanHint) View() string {
 	stores := strings.Join(c.TrustStores, ", ")
 
 	var b strings.Builder
-	fmt.Fprintln(&b, ui.Hint(fmt.Sprintf("Removing lcl.host CA certificates from the %s store(s).", stores)))
+	fmt.Fprintln(&b, ui.Hint(fmt.Sprintf("We'll remove lcl.host CA certificates from the %s store(s).", stores)))
 
 	return b.String()
 }

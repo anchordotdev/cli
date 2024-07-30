@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/base64"
+	"fmt"
 	"time"
 
 	"golang.org/x/crypto/acme"
@@ -12,6 +13,7 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
+	"github.com/anchordotdev/cli/component"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
@@ -19,6 +21,10 @@ import (
 
 var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
+
+	cmd.Flags().StringVarP(&cfg.Lcl.Org, "org", "o", "", "Organization for lcl.host local development environment management.")
+	cmd.Flags().StringVarP(&cfg.Lcl.Realm, "realm", "r", "", "Realm for lcl.host local development environment management.")
+	cmd.Flags().StringVarP(&cfg.Lcl.Service, "service", "s", "", "Service for lcl.host local development environment management.")
 
 	// config
 	cmd.Flags().StringVarP(&cfg.Lcl.DiagnosticAddr, "addr", "a", ":4433", "Address for local diagnostic web server.")
@@ -34,6 +40,8 @@ var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
 
 type Command struct {
 	anc *api.Session
+
+	OrgAPID, RealmAPID string
 }
 
 func (c Command) UI() cli.UI {
@@ -44,6 +52,8 @@ func (c Command) UI() cli.UI {
 
 func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	var err error
+	cfg := cli.ConfigFromContext(ctx)
+
 	cmd := &auth.Client{
 		Anc:    c.anc,
 		Hint:   models.LclSignInHint,
@@ -58,22 +68,22 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, models.LclHeader)
 	drv.Activate(ctx, models.LclHint)
 
-	userInfo, err := c.anc.UserInfo(ctx)
+	orgAPID, err := c.orgAPID(ctx, cfg, drv)
 	if err != nil {
 		return err
 	}
 
-	orgSlug := userInfo.PersonalOrg.Slug
-	realmSlug := "localhost"
+	realmAPID, err := c.realmAPID(ctx, cfg, drv, orgAPID)
+	if err != nil {
+		return err
+	}
 
 	// run audit command
 	drv.Activate(ctx, models.AuditHeader)
 	drv.Activate(ctx, models.AuditHint)
 
 	cmdAudit := &Audit{
-		anc:       c.anc,
-		orgSlug:   orgSlug,
-		realmSlug: realmSlug,
+		anc: c.anc,
 	}
 
 	lclAuditResult, err := cmdAudit.perform(ctx, drv)
@@ -89,9 +99,7 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 		drv.Activate(ctx, models.LclConfigHint)
 
 		cmdConfig := &LclConfig{
-			anc:       c.anc,
-			orgSlug:   orgSlug,
-			realmSlug: realmSlug,
+			anc: c.anc,
 		}
 
 		if err := cmdConfig.perform(ctx, drv); err != nil {
@@ -104,8 +112,10 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, models.SetupHint)
 
 	cmdSetup := &Setup{
-		anc:     c.anc,
-		orgSlug: orgSlug,
+		OrgAPID:     orgAPID,
+		RealmAPID:   realmAPID,
+		ServiceAPID: cfg.Lcl.Service, // TODO: cfg access here looks wrong
+		anc:         c.anc,
 	}
 
 	err = cmdSetup.perform(ctx, drv)
@@ -114,6 +124,54 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	return nil
+}
+
+func (c *Command) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if c.OrgAPID != "" {
+		return c.OrgAPID, nil
+	}
+	if cfg.Lcl.Org != "" {
+		return cfg.Lcl.Org, nil
+	}
+
+	selector := &component.Selector[api.Organization]{
+		Prompt: "Which organization do you want to manage your local development environment for?",
+		Flag:   "--org",
+
+		Fetcher: &component.Fetcher[api.Organization]{
+			FetchFn: func() ([]api.Organization, error) { return c.anc.GetOrgs(ctx) },
+		},
+	}
+
+	org, err := selector.Choice(ctx, drv)
+	if err != nil {
+		return "", err
+	}
+	return org.Apid, nil
+}
+
+func (c *Command) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
+	if c.RealmAPID != "" {
+		return c.RealmAPID, nil
+	}
+	if cfg.Lcl.Realm != "" {
+		return cfg.Lcl.Realm, nil
+	}
+
+	selector := &component.Selector[api.Realm]{
+		Prompt: fmt.Sprintf("Which %s realm do you want to manage your local development environment for?", ui.Emphasize(orgAPID)),
+		Flag:   "--realm",
+
+		Fetcher: &component.Fetcher[api.Realm]{
+			FetchFn: func() ([]api.Realm, error) { return c.anc.GetOrgRealms(ctx, orgAPID) },
+		},
+	}
+
+	realm, err := selector.Choice(ctx, drv)
+	if err != nil {
+		return "", err
+	}
+	return realm.Apid, nil
 }
 
 func provisionCert(eab *api.Eab, domains []string, acmeURL string) (*tls.Certificate, error) {

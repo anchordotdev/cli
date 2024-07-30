@@ -22,7 +22,7 @@ var (
 	AuditHint = ui.Section{
 		Name: "AuditHint",
 		Model: ui.MessageLines{
-			ui.StepHint("We'll begin by checking your system to determine what you need for your setup."),
+			ui.StepHint("We'll determine what needs setup on your system."),
 		},
 	}
 )

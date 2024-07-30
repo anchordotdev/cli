@@ -1,0 +1,8 @@
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+    ! No organizations found!
+─── FetcherNoneFound ───────────────────────────────────────────────────────────
+    ! No organizations found!
+                                             
+# Error! Cannot proceed without organization.

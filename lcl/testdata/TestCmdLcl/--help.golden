@@ -17,6 +17,9 @@ Flags:
   -h, --help              help for lcl
       --language string   Language to integrate with Anchor.
       --method string     Integration method for certificates.
+  -o, --org string        Organization for lcl.host local development environment management.
+  -r, --realm string      Realm for lcl.host local development environment management.
+  -s, --service string    Service for lcl.host local development environment management.
       --subca string      SubCA to create certificate for.
 
 Use "anchor lcl [command] --help" for more information about a command.

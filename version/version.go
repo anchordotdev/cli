@@ -70,7 +70,11 @@ func MinimumVersionCheck(minimumVersion string) error {
 			Model: ui.Section{
 				Name: "MinimumVersionCheck",
 				Model: ui.MessageLines{
-					ui.Danger(fmt.Sprintf("This version of the Anchor CLI is out-of-date, please update.")),
+					ui.Header(
+						fmt.Sprintf("%s This version of the Anchor CLI is out-of-date, please update.",
+							ui.Danger("Error!"),
+						),
+					),
 				},
 			},
 		}

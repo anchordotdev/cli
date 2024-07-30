@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/inetaf/tcpproxy"
+	"golang.org/x/sync/errgroup"
 )
 
 var discardLogger = log.New(io.Discard, "", 0)
@@ -24,7 +25,8 @@ type Server struct {
 	proxy  *tcpproxy.Proxy
 	server *http.Server
 
-	ln net.Listener
+	ln   net.Listener
+	errg errgroup.Group
 
 	rchanmu sync.Mutex
 	rchan   chan string
@@ -69,14 +71,17 @@ func (s *Server) Start(ctx context.Context) error {
 		ErrorLog:    discardLogger,
 	}
 
-	go s.server.Serve(lnHTTP)
-	go s.server.Serve(tls.NewListener(lnTLS, &tls.Config{
-		NextProtos:     []string{"h2", "http/1.1"},
-		GetCertificate: s.getCertificate,
-	}))
+	s.errg.Go(func() error {
+		return s.server.Serve(lnHTTP)
+	})
+	s.errg.Go(func() error {
+		return s.server.Serve(tls.NewListener(lnTLS, &tls.Config{
+			NextProtos:     []string{"h2", "http/1.1"},
+			GetCertificate: s.getCertificate,
+		}))
+	})
 
 	s.tlsc = make(chan struct{})
-
 	return s.proxy.Start()
 }
 
@@ -94,6 +99,10 @@ func (s *Server) Close() error {
 	}
 
 	if err := s.server.Shutdown(context.Background()); err != nil {
+		return err
+	}
+
+	if err := s.errg.Wait(); err != nil {
 		return err
 	}
 
@@ -116,10 +125,11 @@ func (s *Server) RequestChan() <-chan string {
 }
 
 func (s *Server) serveHTTP(w http.ResponseWriter, r *http.Request) {
+	var body string
 	if r.TLS != nil {
 		s.notifyRequest("https")
 
-		w.Write([]byte(`<html>
+		body = `<html>
   <body>
     <iframe src="` + s.lclHostURL("/secure") + `" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;">
       <p>Congrats!</p>
@@ -127,11 +137,11 @@ func (s *Server) serveHTTP(w http.ResponseWriter, r *http.Request) {
       <p>You can now close this tab and return to the CLI.</p>
     </iframe>
   </body>
-</html>`))
+</html>`
 	} else {
 		s.notifyRequest("http")
 
-		w.Write([]byte(`<html>
+		body = `<html>
   <body>
     <iframe src="` + s.lclHostURL("/notsecure") + `" frameborder="0" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;">
       <p>Welcome!</p>
@@ -139,8 +149,10 @@ func (s *Server) serveHTTP(w http.ResponseWriter, r *http.Request) {
       <p>You can now close this tab and return to the CLI.</p>
     </iframe>
   </body>
-</html>`))
+</html>`
 	}
+
+	_, _ = w.Write([]byte(body))
 }
 
 func (s *Server) notifyRequest(scheme string) {

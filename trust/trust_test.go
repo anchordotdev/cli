@@ -110,8 +110,12 @@ func TestTrust(t *testing.T) {
 
 		errc := make(chan error, 1)
 		go func() {
-			errc <- cmd.UI().RunTUI(ctx, drv)
+			defer close(errc)
 
+			if err := cmd.UI().RunTUI(ctx, drv); err != nil {
+				errc <- err
+				return
+			}
 			errc <- tm.Quit()
 		}()
 
@@ -140,8 +144,12 @@ func TestTrust(t *testing.T) {
 
 		errc := make(chan error, 1)
 		go func() {
-			errc <- cmd.UI().RunTUI(ctx, drv)
+			defer close(errc)
 
+			if err := cmd.UI().RunTUI(ctx, drv); err != nil {
+				errc <- err
+				return
+			}
 			errc <- tm.Quit()
 		}()
 
@@ -176,9 +184,13 @@ func TestTrust(t *testing.T) {
 
 		errc := make(chan error, 1)
 		go func() {
-			errc <- cmd.UI().RunTUI(ctx, drv)
+			defer close(errc)
 
-			tm.Quit()
+			if err := cmd.UI().RunTUI(ctx, drv); err != nil {
+				errc <- err
+				return
+			}
+			errc <- tm.Quit()
 		}()
 
 		uitest.WaitForGoldenContains(t, drv, errc,

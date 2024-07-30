@@ -2,34 +2,19 @@ package component_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
-	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/component"
+	"github.com/anchordotdev/cli/ui"
 	"github.com/anchordotdev/cli/ui/uitest"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
 )
-
-var srv = &apitest.Server{
-	Host:    "api.anchor.lcl.host",
-	RootDir: "../..",
-}
-
-func TestMain(m *testing.M) {
-	if err := srv.Start(context.Background()); err != nil {
-		panic(err)
-	}
-
-	defer os.Exit(m.Run())
-
-	srv.Close()
-}
 
 func TestSelector(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -63,12 +48,20 @@ func TestSelector(t *testing.T) {
 
 		errc := make(chan error, 1)
 		go func() {
-			choicec, err := component.OrgSelector(ctx, drv, anc, "Which organization do you want for this test?")
-			if err != nil {
-				errc <- err
+			selector := component.Selector[api.Organization]{
+				Prompt: "Which organization do you want for this test?",
+				Flag:   "--org",
+
+				Fetcher: &component.Fetcher[api.Organization]{
+					FetchFn: func() ([]api.Organization, error) { return anc.GetOrgs(ctx) },
+				},
 			}
 
-			org := <-choicec
+			org, err := selector.Choice(ctx, drv)
+			if err != nil {
+				errc <- err
+				return
+			}
 
 			if want, got := "solo-org-slug", org.Slug; want != got {
 				errc <- fmt.Errorf("Want org choice: %q, Got: %q", want, got)
@@ -102,13 +95,22 @@ func TestSelector(t *testing.T) {
 		choicec := make(chan api.Organization, 1)
 		errc := make(chan error, 1)
 		go func() {
-			selectorChoicec, err := component.OrgSelector(ctx, drv, anc, "Which organization do you want for this test?")
-			if err != nil {
-				errc <- err
+			selector := component.Selector[api.Organization]{
+				Prompt: "Which organization do you want for this test?",
+				Flag:   "--org",
+
+				Fetcher: &component.Fetcher[api.Organization]{
+					FetchFn: func() ([]api.Organization, error) { return anc.GetOrgs(ctx) },
+				},
 			}
 
-			choicec <- <-selectorChoicec
+			org, err := selector.Choice(ctx, drv)
+			if err != nil {
+				errc <- err
+				return
+			}
 
+			choicec <- *org
 			errc <- tm.Quit()
 		}()
 
@@ -133,4 +135,50 @@ func TestSelector(t *testing.T) {
 		uitest.TestGolden(t, drv.Golden())
 	})
 
+	t.Run("orgs empty", func(t *testing.T) {
+		if srv.IsProxy() {
+			t.Skip("selector tests unsupported in proxy mode")
+		}
+
+		cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
+			"/v0/orgs": {
+				Example: "empty",
+			},
+		}
+		ctx = cli.ContextWithConfig(ctx, cfg)
+
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		errc := make(chan error, 1)
+		go func() {
+			selector := component.Selector[api.Organization]{
+				Prompt: "Which organization do you want for this test?",
+				Flag:   "--org",
+
+				Fetcher: &component.Fetcher[api.Organization]{
+					FetchFn: func() ([]api.Organization, error) { return anc.GetOrgs(ctx) },
+				},
+			}
+
+			org, err := selector.Choice(ctx, drv)
+			if org != nil {
+				errc <- fmt.Errorf("want nil org, got %v", org)
+			}
+			var uierr ui.Error
+			if errors.As(err, &uierr) {
+				drv.Activate(context.Background(), uierr.Model)
+				errc <- uierr
+			}
+
+			errc <- tm.Quit()
+		}()
+
+		err := <-errc
+		if err == nil {
+			t.Fatal("want ui.Error, got nil")
+		}
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
+	})
 }

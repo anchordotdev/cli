@@ -3,79 +3,93 @@
 ─── Client ─────────────────────────────────────────────────────────────────────
     * Checking authentication: testing credentials remotely…⠋
 ─── TrustHeader ────────────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
 ─── TrustHint ──────────────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
+    | We'll check your local trust stores and make any needed updates.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     * Fetching organizations…⠋
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Realm,github.com/anchordotd…
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     * Fetching realms…⠋
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Realm,github.com/anchordotd…
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     | Updates may require sudo privileges, learn why here: https://lcl.host/why-sudo
     ! Press Enter to install missing certificates. (requires sudo)
 ─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     * Updating Mock: installing oas-examples - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
     * Updating Mock: installing oas-examples - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                    
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    | We will check your local trust stores, then make any needed updates.
+    | We'll check your local trust stores and make any needed updates.
     - Using org-slug, the only available organization. You can also use `--org org-slug`.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.

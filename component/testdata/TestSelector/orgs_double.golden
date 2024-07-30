@@ -1,4 +1,4 @@
-─── SelectorFetcher[github.com/anchordotdev/cli/api.Organization,github.com/anc…
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
     * Fetching organizations…⠋
 ─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
     ? Which organization do you want for this test?

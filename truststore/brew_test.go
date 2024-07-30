@@ -9,7 +9,9 @@ import (
 
 func TestBrew(t *testing.T) {
 	testFS := make(TestFS, 1)
-	testFS.AppendToFile("cert.pem", nil)
+	if err := testFS.AppendToFile("cert.pem", nil); err != nil {
+		t.Fatal(err)
+	}
 
 	store := &Brew{
 		RootDir: "/",

@@ -75,45 +75,19 @@ func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
 		drv.Activate(ctx, &models.VMHint{})
 	}
 
-	if c.OrgSlug == "" {
-		c.OrgSlug = cfg.Trust.Org
-	}
-	if c.OrgSlug == "" {
-		choicec, err := component.OrgSelector(ctx, drv, c.Anc,
-			"Which organization do you want to trust?",
-		)
-		if err != nil {
-			return err
-		}
-		select {
-		case org := <-choicec:
-			c.OrgSlug = org.Slug
-		case <-ctx.Done():
-			return ctx.Err()
-		}
+	orgSlug, err := c.orgSlug(ctx, cfg, drv)
+	if err != nil {
+		return err
 	}
 
-	if c.RealmSlug == "" {
-		c.RealmSlug = cfg.Trust.Realm
-	}
-	if c.RealmSlug == "" {
-		choicec, err := component.RealmSelector(ctx, drv, c.Anc, c.OrgSlug,
-			fmt.Sprintf("Which %s realm do you want to trust?", ui.Emphasize(c.OrgSlug)),
-		)
-		if err != nil {
-			return err
-		}
-		select {
-		case realm := <-choicec:
-			c.RealmSlug = realm.Slug
-		case <-ctx.Done():
-			return ctx.Err()
-		}
+	realmSlug, err := c.realmSlug(ctx, cfg, drv, orgSlug)
+	if err != nil {
+		return err
 	}
 
 	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
 
-	cas, err := fetchExpectedCAs(ctx, c.Anc, c.OrgSlug, c.RealmSlug)
+	cas, err := fetchExpectedCAs(ctx, c.Anc, orgSlug, realmSlug)
 	if err != nil {
 		return err
 	}
@@ -182,7 +156,7 @@ func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
 			}
 			drv.Send(models.TrustStoreInstallingCAMsg{CA: *ca})
 			if ok, err := store.InstallCA(ca); err != nil {
-				return err
+				return classifyError(err)
 			} else if !ok {
 				panic("impossible")
 			}
@@ -191,6 +165,55 @@ func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	return nil
+}
+
+func (c *Command) orgSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if c.OrgSlug != "" {
+		return c.OrgSlug, nil
+	}
+	if cfg.Trust.Org != "" {
+		return cfg.Trust.Org, nil
+	}
+
+	selector := &component.Selector[api.Organization]{
+		Prompt: "Which organization do you want to trust?",
+		Flag:   "--org",
+
+		Fetcher: &component.Fetcher[api.Organization]{
+			FetchFn: func() ([]api.Organization, error) { return c.Anc.GetOrgs(ctx) },
+		},
+	}
+
+	org, err := selector.Choice(ctx, drv)
+	if err != nil {
+		return "", err
+	}
+	return org.Apid, nil
+}
+
+func (c *Command) realmSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgSlug string) (string, error) {
+	if c.RealmSlug != "" {
+		return c.RealmSlug, nil
+	}
+	if cfg.Trust.Realm != "" {
+		return cfg.Trust.Realm, nil
+	}
+
+	selector := &component.Selector[api.Realm]{
+
+		Prompt: fmt.Sprintf("Which %s realm do you want to trust?", ui.Emphasize(orgSlug)),
+		Flag:   "--realm",
+
+		Fetcher: &component.Fetcher[api.Realm]{
+			FetchFn: func() ([]api.Realm, error) { return c.Anc.GetOrgRealms(ctx, orgSlug) },
+		},
+	}
+
+	realm, err := selector.Choice(ctx, drv)
+	if err != nil {
+		return "", err
+	}
+	return realm.Apid, nil
 }
 
 func fetchOrgAndRealm(ctx context.Context, anc *api.Session) (string, string, error) {

@@ -5,8 +5,8 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"math/big"
+	"os"
 	"path/filepath"
 	"syscall"
 	"unsafe"
@@ -69,7 +69,7 @@ func (s *Platform) checkCA(ca *CA) (bool, error) {
 
 func (s *Platform) installCA(ca *CA) (bool, error) {
 	// Load cert
-	cert, err := ioutil.ReadFile(ca.FilePath)
+	cert, err := os.ReadFile(ca.FilePath)
 	if err != nil {
 		return false, fatalErr(err, "failed to read root certificate")
 	}
