@@ -27,6 +27,13 @@ var (
 			ui.StepHint("We'll integrate your application and system for HTTPS local development."),
 		},
 	}
+
+	SetupAnchorTOML = ui.Section{
+		Name: "AnchorTOML",
+		Model: ui.MessageLines{
+			ui.StepNext("Be sure to add anchor.toml to your version control system."),
+		},
+	}
 )
 
 type SetupScan struct {

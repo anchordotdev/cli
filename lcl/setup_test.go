@@ -8,6 +8,7 @@ import (
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/cmdtest"
+	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
@@ -19,15 +20,28 @@ func TestCmdLclSetup(t *testing.T) {
 		cmdtest.TestHelp(t, CmdLclSetup, "lcl", "setup", "--help")
 	})
 
-	t.Run("--language ruby", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--language", "ruby")
-		require.Equal(t, "ruby", cfg.Lcl.Setup.Language)
+	t.Run("--category ruby", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--category", "ruby")
+		require.Equal(t, "ruby", cfg.Service.Category)
 	})
 
-	t.Run("--method anchor", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--method", "anchor")
-		require.Equal(t, "anchor", cfg.Lcl.Setup.Method)
+	t.Run("--cert-style acme", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--method", "acme")
+		require.Equal(t, "acme", cfg.Service.CertStyle)
 	})
+
+	// alias
+
+	t.Run("--language python", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--language", "python")
+		require.Equal(t, "python", cfg.Service.Category)
+	})
+
+	t.Run("--method acme", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--method", "acme")
+		require.Equal(t, "acme", cfg.Service.CertStyle)
+	})
+
 }
 
 func TestSetup(t *testing.T) {
@@ -40,9 +54,10 @@ func TestSetup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cfg := new(cli.Config)
+	cfg := cmdtest.Config(ctx)
 	cfg.API.URL = srv.URL
-	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
+	cfg.Test.ACME.URL = "http://anchor.lcl.host:" + srv.RailsPort
+	cfg.Test.LclHostPort = 4321
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
@@ -51,7 +66,10 @@ func TestSetup(t *testing.T) {
 	}
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
-	setupGuideURL := cfg.AnchorURL + "lcl_setup/services/test-app/guide"
+	truststore.ResetMockCAs()
+	t.Cleanup(truststore.ResetMockCAs)
+
+	setupGuideURL := cfg.SetupGuideURL("lcl_setup", "test-app")
 
 	t.Run("create-service-automated-basics", func(t *testing.T) {
 		if srv.IsMock() {
@@ -94,24 +112,13 @@ func TestSetup(t *testing.T) {
 			"? How would you like to manage your lcl.host certificates?",
 		)
 
-		// FIXME: partial golden test unless/until setup guide port fixed
-		uitest.TestGolden(t, drv.Golden())
-		t.Skip("Pending workaround for consistent setup guide port value")
-
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
-
-		uitest.TestGolden(t, drv.Golden())
-		t.Skip("Pending workaround for consistent setup guide port value")
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
-			fmt.Sprintf("! Press Enter to open %s.", setupGuideURL),
+			fmt.Sprintf("! Press Enter to open %s in your browser.", setupGuideURL),
 		)
 
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
 		uitest.TestGolden(t, drv.Golden())
@@ -192,12 +199,6 @@ func TestSetup(t *testing.T) {
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? Which org-slug/realm-slug service's lcl.host local development environment do you want to setup?",
-		)
-
-		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
-
-		uitest.WaitForGoldenContains(t, drv, errc,
-			"! Press Enter to install missing certificates. (requires sudo)",
 		)
 
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})

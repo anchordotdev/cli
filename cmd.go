@@ -5,20 +5,20 @@ import (
 	"errors"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/stacktrace"
 	"github.com/anchordotdev/cli/ui"
-	"github.com/joeshaw/envdecode"
-	"github.com/mcuadros/go-defaults"
 	"github.com/spf13/cobra"
 )
 
 type CmdDef struct {
 	Name string
 
-	Use   string
-	Args  cobra.PositionalArgs
-	Short string
-	Long  string
+	Aliases []string
+	Args    cobra.PositionalArgs
+	Long    string
+	Short   string
+	Use     string
 
 	SubDefs []CmdDef
 }
@@ -98,18 +98,19 @@ var rootDef = CmdDef{
 					Short: "Audit lcl.host HTTPS Local Development Environment",
 				},
 				{
+					Name: "bootstrap",
+
+					Aliases: []string{"config"},
+					Use:     "bootstrap [flags]",
+					Args:    cobra.NoArgs,
+					Short:   "Initial System Configuration for lcl.host Local Development",
+				},
+				{
 					Name: "clean",
 
 					Use:   "clean [flags]",
 					Args:  cobra.NoArgs,
 					Short: "Clean lcl.host CA Certificates from the Local Trust Store(s)",
-				},
-				{
-					Name: "config",
-
-					Use:   "config [flags]",
-					Args:  cobra.NoArgs,
-					Short: "Configure System for lcl.host Local Development",
 				},
 				{
 					Name: "env",
@@ -131,6 +132,13 @@ var rootDef = CmdDef{
 					Use:   "setup [flags]",
 					Args:  cobra.NoArgs,
 					Short: "Setup lcl.host Application",
+				},
+				{
+					Name: "trust",
+
+					Use:   "trust [flags]",
+					Args:  cobra.NoArgs,
+					Short: "Install CA Certificates for lcl.host Local Development",
 				},
 			},
 		},
@@ -232,32 +240,36 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 	}
 
 	constructor := func() *cobra.Command {
-		cfg := new(Config)
-		defaults.SetDefaults(cfg)
-		if err := envdecode.Decode(cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
-			panic(err)
-		}
-
 		cmd := &cobra.Command{
-			Use:          def.Use,
+			Aliases:      def.Aliases,
 			Args:         def.Args,
-			Short:        def.Short,
 			Long:         def.Long,
+			Short:        def.Short,
+			Use:          def.Use,
 			SilenceUsage: true,
 		}
 
-		ctx := ContextWithConfig(context.Background(), cfg)
-		cmd.SetContext(ctx)
-
 		cmd.SetErrPrefix(ui.Danger("Error!"))
+
+		ctx := ContextWithConfig(context.Background(), defaultConfig())
+		cmd.SetContext(ctx)
 
 		fn(cmd)
 
 		cmd.RunE = func(cmd *cobra.Command, args []string) (returnedError error) {
-			cfg := ConfigFromCmd(cmd)
+			ctx := cmd.Context()
+
+			cfg := new(Config)
+			if err := cfg.Load(ctx); err != nil {
+				return err
+			}
+
 			if cfg.Test.SkipRunE {
 				return nil
 			}
+
+			ctx = ContextWithConfig(cmd.Context(), cfg)
+			cmd.SetContext(ctx)
 
 			var t T
 
@@ -269,6 +281,8 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 
 			ctx, cancel := context.WithCancelCause(cmd.Context())
 			defer cancel(nil)
+
+			ctx = ContextWithCalledAs(ctx, cmd.CalledAs())
 
 			drv, prg := ui.NewDriverTUI(ctx)
 			defer func() {
@@ -287,6 +301,10 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 
 				errc <- err
 			}()
+
+			if cfg.TOML != nil {
+				drv.Activate(ctx, models.ConfigLoaded(cfg.File.Path))
+			}
 
 			if err := stacktrace.CapturePanic(func() error { return t.UI().RunTUI(ctx, drv) }); err != nil {
 				var uierr ui.Error

@@ -75,3 +75,13 @@ func (m *Browserless) View() string {
 
 	return b.String()
 }
+
+func ConfigLoaded(path string) tea.Model {
+	return ui.Section{
+		Name: "ConfigFileLoaded",
+		Model: ui.MessageFunc(func(b *strings.Builder) {
+			fmt.Fprintln(b, ui.Whisper(fmt.Sprintf("Configuration loaded from %s file.", path)))
+			fmt.Fprintln(b, ui.Whisper("Use `--skip-config` to ignore this file."))
+		}),
+	}
+}

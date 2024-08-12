@@ -27,10 +27,10 @@ import (
 var CmdTrust = cli.NewCmd[Command](cli.CmdRoot, "trust", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Flags().StringVarP(&cfg.Trust.Org, "org", "o", "", "Organization to trust.")
-	cmd.Flags().BoolVar(&cfg.Trust.NoSudo, "no-sudo", false, "Disable sudo prompts.")
-	cmd.Flags().StringVarP(&cfg.Trust.Realm, "realm", "r", "", "Realm to trust.")
-	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", []string{"homebrew", "nss", "system"}, "Trust stores to update.")
+	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization to trust.")
+	cmd.Flags().BoolVar(&cfg.Trust.NoSudo, "no-sudo", cli.Defaults.Trust.NoSudo, "Disable sudo prompts.")
+	cmd.Flags().StringVarP(&cfg.Realm.APID, "realm", "r", cli.Defaults.Realm.APID, "Realm to trust.")
+	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", cli.Defaults.Trust.Stores, "Trust stores to update.")
 
 	cmd.MarkFlagsRequiredTogether("org", "realm")
 })
@@ -38,6 +38,8 @@ var CmdTrust = cli.NewCmd[Command](cli.CmdRoot, "trust", func(cmd *cobra.Command
 type Command struct {
 	Anc                *api.Session
 	OrgSlug, RealmSlug string
+
+	AuditInfo *truststore.AuditInfo
 }
 
 func (c Command) UI() cli.UI {
@@ -59,63 +61,28 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 	drv.Activate(ctx, models.TrustHeader)
 	drv.Activate(ctx, models.TrustHint)
 
-	err = c.Perform(ctx, drv)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.Perform(ctx, drv)
 }
 
 func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
-	var err error
 	cfg := cli.ConfigFromContext(ctx)
 
 	if isVMOrContainer(cfg) {
 		drv.Activate(ctx, &models.VMHint{})
 	}
 
-	orgSlug, err := c.orgSlug(ctx, cfg, drv)
+	stores, err := LoadStores(ctx, drv)
 	if err != nil {
 		return err
 	}
 
-	realmSlug, err := c.realmSlug(ctx, cfg, drv, orgSlug)
-	if err != nil {
-		return err
+	auditInfo := c.AuditInfo
+	if auditInfo == nil {
+		var err error
+		if auditInfo, err = c.performAudit(ctx, cfg, drv, stores); err != nil {
+			return err
+		}
 	}
-
-	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
-
-	cas, err := fetchExpectedCAs(ctx, c.Anc, orgSlug, realmSlug)
-	if err != nil {
-		return err
-	}
-
-	stores, sudoMgr, err := loadStores(cfg)
-	if err != nil {
-		return err
-	}
-
-	// TODO: handle nosudo
-
-	sudoMgr.AroundSudo = func(sudo func()) {
-		unpausec := drv.Pause()
-		defer close(unpausec)
-
-		sudo()
-	}
-
-	audit := &truststore.Audit{
-		Expected: cas,
-		Stores:   stores,
-		SelectFn: checkAnchorCert,
-	}
-	auditInfo, err := audit.Perform()
-	if err != nil {
-		return err
-	}
-	drv.Send(truststoremodels.AuditInfoMsg(auditInfo))
 
 	if len(auditInfo.Missing) == 0 {
 		return nil
@@ -167,12 +134,40 @@ func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
 	return nil
 }
 
+func (c *Command) performAudit(ctx context.Context, cfg *cli.Config, drv *ui.Driver, stores []truststore.Store) (*truststore.AuditInfo, error) {
+	orgSlug, err := c.orgSlug(ctx, cfg, drv)
+	if err != nil {
+		return nil, err
+	}
+
+	realmSlug, err := c.realmSlug(ctx, cfg, drv, orgSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
+
+	cas, err := FetchExpectedCAs(ctx, c.Anc, orgSlug, realmSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	auditInfo, err := PerformAudit(ctx, stores, cas)
+	if err != nil {
+		return nil, err
+	}
+
+	drv.Send(truststoremodels.AuditInfoMsg(auditInfo))
+
+	return auditInfo, nil
+}
+
 func (c *Command) orgSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if c.OrgSlug != "" {
 		return c.OrgSlug, nil
 	}
-	if cfg.Trust.Org != "" {
-		return cfg.Trust.Org, nil
+	if cfg.Org.APID != "" {
+		return cfg.Org.APID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -195,8 +190,8 @@ func (c *Command) realmSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	if c.RealmSlug != "" {
 		return c.RealmSlug, nil
 	}
-	if cfg.Trust.Realm != "" {
-		return cfg.Trust.Realm, nil
+	if cfg.Realm.APID != "" {
+		return cfg.Realm.APID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
@@ -216,10 +211,11 @@ func (c *Command) realmSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	return realm.Apid, nil
 }
 
+// TODO: Replace with selectors
 func fetchOrgAndRealm(ctx context.Context, anc *api.Session) (string, string, error) {
 	cfg := cli.ConfigFromContext(ctx)
 
-	org, realm := cfg.Trust.Org, cfg.Trust.Realm
+	org, realm := cfg.Org.APID, cfg.Realm.APID
 	if (org == "") != (realm == "") {
 		return "", "", errors.New("--org and --realm flags must both be present or absent")
 	}
@@ -238,19 +234,7 @@ func fetchOrgAndRealm(ctx context.Context, anc *api.Session) (string, string, er
 	return org, realm, nil
 }
 
-func PerformAudit(ctx context.Context, anc *api.Session, org string, realm string) (*truststore.AuditInfo, error) {
-	cfg := cli.ConfigFromContext(ctx)
-
-	cas, err := fetchExpectedCAs(ctx, anc, org, realm)
-	if err != nil {
-		return nil, err
-	}
-
-	stores, _, err := loadStores(cfg)
-	if err != nil {
-		return nil, err
-	}
-
+func PerformAudit(ctx context.Context, stores []truststore.Store, cas []*truststore.CA) (*truststore.AuditInfo, error) {
 	audit := &truststore.Audit{
 		Expected: cas,
 		Stores:   stores,
@@ -264,7 +248,7 @@ func PerformAudit(ctx context.Context, anc *api.Session, org string, realm strin
 	return auditInfo, nil
 }
 
-func fetchExpectedCAs(ctx context.Context, anc *api.Session, org, realm string) ([]*truststore.CA, error) {
+func FetchExpectedCAs(ctx context.Context, anc *api.Session, org, realm string) ([]*truststore.CA, error) {
 	creds, err := anc.FetchCredentials(ctx, org, realm)
 	if err != nil {
 		return nil, err
@@ -296,7 +280,47 @@ func fetchExpectedCAs(ctx context.Context, anc *api.Session, org, realm string) 
 	return cas, nil
 }
 
-func loadStores(cfg *cli.Config) ([]truststore.Store, *SudoManager, error) {
+func FetchLocalDevCAs(ctx context.Context, anc *api.Session) ([]*truststore.CA, error) {
+	userInfo, err := anc.UserInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	orgs, err := anc.GetOrgs(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var cas []*truststore.CA
+	for _, org := range orgs {
+		orgRealms, err := anc.GetOrgRealms(ctx, org.Apid)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, realm := range orgRealms {
+			if org.Apid == userInfo.PersonalOrg.Slug {
+				if realm.Apid != "localhost" {
+					continue
+				}
+			} else if realm.Apid != "development" {
+				continue
+			}
+
+			s, err := FetchExpectedCAs(ctx, anc, org.Apid, realm.Apid)
+			if err != nil {
+				return nil, err
+			}
+
+			cas = append(cas, s...)
+		}
+	}
+	return cas, nil
+}
+
+func LoadStores(ctx context.Context, drv *ui.Driver) ([]truststore.Store, error) {
+	cfg := cli.ConfigFromContext(ctx)
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
@@ -307,6 +331,16 @@ func loadStores(cfg *cli.Config) ([]truststore.Store, *SudoManager, error) {
 	sysFS := &SudoManager{
 		CmdFS:  rootFS,
 		NoSudo: noSudo,
+
+		// TODO: handle nosudo
+		AroundSudo: func(sudo func()) {
+			if drv != nil {
+				unpausec := drv.Pause()
+				defer close(unpausec)
+			}
+
+			sudo()
+		},
 	}
 
 	trustStores := cfg.Trust.Stores
@@ -350,7 +384,7 @@ func loadStores(cfg *cli.Config) ([]truststore.Store, *SudoManager, error) {
 		}
 	}
 
-	return stores, sysFS, nil
+	return stores, nil
 }
 
 func checkAnchorCert(ca *truststore.CA) (bool, error) {

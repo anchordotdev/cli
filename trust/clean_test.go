@@ -32,8 +32,8 @@ func TestCmdTrustClean(t *testing.T) {
 
 	t.Run("-o testOrg -r testRealm", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdTrustClean, "-o", "testOrg", "-r", "testRealm")
-		require.Equal(t, "testOrg", cfg.Trust.Org)
-		require.Equal(t, "testRealm", cfg.Trust.Realm)
+		require.Equal(t, "testOrg", cfg.Org.APID)
+		require.Equal(t, "testRealm", cfg.Realm.APID)
 	})
 
 	t.Run("--realm testRealm", func(t *testing.T) {

@@ -33,8 +33,8 @@ func TestCmdTrustAudit(t *testing.T) {
 
 	t.Run("-o testOrg -r testRealm", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdTrustAudit, "-o", "testOrg", "-r", "testRealm")
-		require.Equal(t, "testOrg", cfg.Trust.Org)
-		require.Equal(t, "testRealm", cfg.Trust.Realm)
+		require.Equal(t, "testOrg", cfg.Org.APID)
+		require.Equal(t, "testRealm", cfg.Realm.APID)
 	})
 
 	t.Run("--realm testRealm", func(t *testing.T) {
@@ -85,7 +85,7 @@ func TestAudit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedCAs, err := fetchExpectedCAs(ctx, anc, org, realm)
+	expectedCAs, err := FetchExpectedCAs(ctx, anc, org, realm)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestAudit(t *testing.T) {
 			extraCA,
 			ignoredCA,
 		}
-		defer func() { truststore.MockCAs = nil }()
+		t.Cleanup(truststore.ResetMockCAs)
 
 		cmd := &Audit{}
 

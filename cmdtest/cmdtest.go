@@ -2,15 +2,27 @@ package cmdtest
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"testing"
 
-	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/ui/uitest"
 	"github.com/joeshaw/envdecode"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
+
+	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/clitest"
+	"github.com/anchordotdev/cli/ui/uitest"
 )
+
+func Config(ctx context.Context) *cli.Config {
+	cfg := new(cli.Config)
+	cfg.Test.SystemFS = clitest.TestFS{}
+	if err := cfg.Load(ctx); err != nil {
+		panic(err)
+	}
+	return cfg
+}
 
 func TestCfg(t *testing.T, cmd *cobra.Command, args ...string) *cli.Config {
 	cmd = cli.NewTestCmd(cmd)

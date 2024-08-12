@@ -2,11 +2,11 @@
     * Fetching organizations…⠋
 ─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
     ? Which organization do you want for this test?
-    > First Org Slug (first-org-slug)  
-      Second Org Slug (second-org-slug)
+    > anky@anchor.dev (ankydotdev)
+      AnkyCo (ankyco)             
 ─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
     ? Which organization do you want for this test?
-      First Org Slug (first-org-slug)  
-    > Second Org Slug (second-org-slug)
+      anky@anchor.dev (ankydotdev)
+    > AnkyCo (ankyco)             
 ─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
-    - Selected second-org-slug organization. You can also use `--org second-org-slug`.
+    - Selected ankyco organization. You can also use `--org ankyco`.

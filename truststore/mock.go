@@ -4,6 +4,8 @@ import "slices"
 
 var MockCAs []*CA
 
+func ResetMockCAs() { MockCAs = []*CA{} }
+
 type Mock struct{}
 
 func (Mock) Check() (bool, error) { return true, nil }

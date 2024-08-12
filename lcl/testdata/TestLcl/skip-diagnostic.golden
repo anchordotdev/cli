@@ -1,0 +1,200 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── LclPreamble ────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+─── LclHeader ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+─── LclHint ────────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+─── AuditHeader ────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+─── AuditHint ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    * Comparing local and expected CA certificates…⠋
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+─── BootstrapSkip ──────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+─── SetupHeader ────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+─── SetupHint ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl, the only available organization. You can also use `--org lcl`.
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl, the only available organization. You can also use `--org lcl`.
+    * Fetching realms…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl, the only available organization. You can also use `--org lcl`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl, the only available organization. You can also use `--org lcl`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    * Fetching services…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl, the only available organization. You can also use `--org lcl`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: no updates needed.
+                                                                                                   
+# Skipped: Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl, the only available organization. You can also use `--org lcl`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    ? Which lcl/localhost service's lcl.host local development environment do you want to setup?
+    > test-app (test-app)
+      Create New Service 

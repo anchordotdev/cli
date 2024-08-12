@@ -385,3 +385,29 @@
 # Next Steps
     - To use these certificates please reference your language and/or framework docs.
     - When these expire, run `anchor lcl mkcert --domains test-app.lcl.host,test-app.localhost --org lcl_setup --realm localhost --service test-app` to generate new ones.
+─── AnchorTOML ─────────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Using lcl_setup, the only available organization. You can also use `--org lcl_setup`.
+    - Using localhost, the only available realm. You can also use `--realm localhost`.
+    - Selected Create New Service.
+    - Scanned current directory.
+    - Entered go application server type.
+    - Entered test-app application name.
+    - Entered test-app.lcl.host domain for local application development.
+    - Resolved test-app.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created test-app [test-app.lcl.host, test-app.localhost] go resources on Anchor.dev.
+    - Entered manual certificate management.
+                                           
+# Provision Certificate `anchor lcl mkcert`
+    - Provisioned certificate for [test-app.lcl.host, test-app.localhost].
+    - Wrote certificate to ./test-app.lcl.host+1-cert.pem
+    - Wrote chain to ./test-app.lcl.host+1-chain.pem
+    - Wrote key to ./test-app.lcl.host+1-key.pem
+            
+# Next Steps
+    - To use these certificates please reference your language and/or framework docs.
+    - When these expire, run `anchor lcl mkcert --domains test-app.lcl.host,test-app.localhost --org lcl_setup --realm localhost --service test-app` to generate new ones.
+    - Be sure to add anchor.toml to your version control system.

@@ -25,6 +25,11 @@ func TestAudit(t *testing.T) {
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
+	cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
+		"/v0/orgs/org-slug/realms": {
+			Example: "development",
+		},
+	}
 	cfg.Trust.Stores = []string{"mock"}
 	var err error
 	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {
@@ -33,6 +38,23 @@ func TestAudit(t *testing.T) {
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run("basics", func(t *testing.T) {
+		uitest.TestTUIOutput(ctx, t, new(Audit).UI())
+	})
+
+	t.Run("missing-localhost-ca", func(t *testing.T) {
+		cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
+			"/v0/orgs": {
+				Example: "anky_personal",
+			},
+			"/v0/orgs/ankydotdev/realms": {
+				Example: "anky_personal",
+			},
+			"/v0/orgs/ankydotdev/realms/localhost/x509/credentials": {
+				Example: "anky_personal",
+			},
+		}
+		ctx = cli.ContextWithConfig(ctx, cfg)
+
 		uitest.TestTUIOutput(ctx, t, new(Audit).UI())
 	})
 }

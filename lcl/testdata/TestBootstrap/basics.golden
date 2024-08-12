@@ -1,0 +1,321 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── BootstrapHeader ────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+─── BootstrapHint ──────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+─── BootstrapDiagnostic ────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    * Checking diagnostic service on Anchor.dev…⠋
+─── BootstrapDiagnostic ────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hi-lcl_config.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? h.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? he.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hel.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hell.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hello.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hello-.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hello-w.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hello-wo.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hello-wor.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hello-worl.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    ? What lcl.host domain would you like to use for diagnostics?
+    | We'll ignore any characters that are not valid in a domain.
+    ? hello-world.lcl.host
+─── DomainInput ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+─── DomainResolver ─────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    * Resolving hello-world.lcl.host domain…⠋
+─── DomainResolver ─────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+─── ProvisionService ───────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Creating hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev… ⠋
+─── ProvisionService ───────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+─── Bootstrap ──────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    ! Press Enter to open http://hello-world.lcl.host:4433 in your browser.
+─── Bootstrap ──────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+─── TrustHeader ────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    | Updates may require sudo privileges, learn why here: https://lcl.host/why-sudo
+    ! Press Enter to install missing certificates. (requires sudo)
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    * Updating Mock: installing lcl_config/localhost - AnchorCA ECDSA… ⠋
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA]
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA]
+    * Updating Mock: installing lcl_config/localhost - AnchorCA RSA… ⠋
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
+─── Bootstrap ──────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
+    | Before we move on, let's test HTTPS.
+    ! Press Enter to open https://hello-world.lcl.host:4433 in your browser.
+─── Bootstrap ──────────────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
+    | Before we move on, let's test HTTPS.
+─── BootstrapSuccess ───────────────────────────────────────────────────────────
+                                                                                          
+# Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
+    | We'll configure your browsers and OS to trust your local development certificates.
+    - Checked diagnostic service on Anchor.dev: need to provision service.
+    - Entered hello-world.lcl.host domain for lcl.host diagnostic certificate.
+    - Resolved hello-world.lcl.host domain: success!
+    | Now we'll provision Anchor.dev resources and HTTPS certificates for you.
+    - Created hello-world [hello-world.lcl.host, hello-world.localhost] diagnostic resources on Anchor.dev.
+    - Great, http://hello-world.lcl.host:4433 works as expected (without HTTPS).
+    | Now, we'll add your personal CA certificates to your system's trust stores.
+                                                                    
+# Manage CA Certificates in your Local Trust Store(s) `anchor trust`
+    - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA, RSA]
+    | Before we move on, let's test HTTPS.
+    - Success! https://hello-world.lcl.host:4433 works as expected (encrypted with HTTPS).

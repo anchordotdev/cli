@@ -22,17 +22,17 @@ func TestCmdLclMkCert(t *testing.T) {
 
 	t.Run("--org test-org", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--org", "test-org")
-		require.Equal(t, "test-org", cfg.Lcl.Org)
+		require.Equal(t, "test-org", cfg.Org.APID)
 	})
 
 	t.Run("--service test-service", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--service", "test-service")
-		require.Equal(t, "test-service", cfg.Lcl.Service)
+		require.Equal(t, "test-service", cfg.Service.APID)
 	})
 
 	t.Run("--realm test-realm", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdLclMkCert, "--realm", "test-realm")
-		require.Equal(t, "test-realm", cfg.Lcl.Realm)
+		require.Equal(t, "test-realm", cfg.Lcl.RealmAPID)
 	})
 }
 
@@ -42,8 +42,8 @@ func TestLclMkcert(t *testing.T) {
 
 	cfg := new(cli.Config)
 	cfg.API.URL = srv.URL
-	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
-	cfg.Lcl.Service = "hi-lcl-mkcert"
+	cfg.Dashboard.URL = "http://anchor.lcl.host:" + srv.RailsPort
+	cfg.Service.APID = "hi-lcl-mkcert"
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}

@@ -10,12 +10,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cli/browser"
+	"github.com/mcuadros/go-defaults"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
 	"github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/stacktrace"
 	"github.com/anchordotdev/cli/ui"
-	"github.com/cli/browser"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var Executable string
@@ -48,22 +50,49 @@ func VersionString() string {
 	return fmt.Sprintf("%s (%s/%s) Commit: %s BuildDate: %s", Version.Version, Version.Os, Version.Arch, Version.Commit, Version.Date)
 }
 
+var Defaults = defaultConfig()
+
+func defaultConfig() *Config {
+	var cfg Config
+	defaults.SetDefaults(&cfg)
+	return &cfg
+}
+
 type UI struct {
 	RunTUI func(context.Context, *ui.Driver) error
 }
 
-type ContextKey string
+type contextKey int
+
+const (
+	configKey contextKey = iota
+	calledAsKey
+)
+
+func CalledAsFromContext(ctx context.Context) string {
+	if calledAs, ok := ctx.Value(calledAsKey).(string); ok {
+		return calledAs
+	}
+	return ""
+}
 
 func ConfigFromContext(ctx context.Context) *Config {
-	return ctx.Value(ContextKey("Config")).(*Config)
+	if v := ctx.Value(configKey); v != nil {
+		return v.(*Config)
+	}
+	return nil
 }
 
 func ConfigFromCmd(cmd *cobra.Command) *Config {
 	return ConfigFromContext(cmd.Context())
 }
 
+func ContextWithCalledAs(ctx context.Context, calledAs string) context.Context {
+	return context.WithValue(ctx, calledAsKey, calledAs)
+}
+
 func ContextWithConfig(ctx context.Context, cfg *Config) context.Context {
-	return context.WithValue(ctx, ContextKey("Config"), cfg)
+	return context.WithValue(ctx, configKey, cfg)
 }
 
 func ReportError(ctx context.Context, err error, drv *ui.Driver, cmd *cobra.Command, args []string) {

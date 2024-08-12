@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/url"
 	"sort"
 	"strings"
 
@@ -22,10 +21,15 @@ var (
 	CmdServiceEnv = cli.NewCmd[Env](CmdService, "env", func(cmd *cobra.Command) {
 		cfg := cli.ConfigFromCmd(cmd)
 
-		cmd.Flags().StringVar(&cfg.Service.Env.Method, "method", "", "Integration method for environment variables.")
-		cmd.Flags().StringVarP(&cfg.Service.Env.Org, "org", "o", "", "Organization to trust.")
-		cmd.Flags().StringVarP(&cfg.Service.Env.Realm, "realm", "r", "", "Realm to trust.")
-		cmd.Flags().StringVarP(&cfg.Service.Env.Service, "service", "s", "", "Service for ENV.")
+		cmd.Flags().StringVar(&cfg.Service.EnvOutput, "env-output", cli.Defaults.Service.EnvOutput, "Integration method for environment variables.")
+		cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization to trust.")
+		cmd.Flags().StringVarP(&cfg.Realm.APID, "realm", "r", cli.Defaults.Realm.APID, "Realm to trust.")
+		cmd.Flags().StringVarP(&cfg.Service.APID, "service", "s", cli.Defaults.Service.APID, "Service for ENV.")
+
+		// alias
+
+		cmd.Flags().StringVar(&cfg.Service.EnvOutput, "method", cli.Defaults.Service.EnvOutput, "Integration method for environment variables.")
+		_ = cmd.Flags().MarkDeprecated("method", "Please use `--env-output` instead.")
 	})
 
 	MethodExport  = "export"
@@ -102,7 +106,7 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	env := make(map[string]string)
 
 	env["ACME_CONTACT"] = c.whoami
-	env["ACME_DIRECTORY_URL"] = cfg.AnchorURL + "/" + url.QueryEscape(orgAPID) + "/" + url.QueryEscape(realmAPID) + "/x509/" + chainAPID + "/acme"
+	env["ACME_DIRECTORY_URL"] = cfg.AcmeURL(orgAPID, realmAPID, chainAPID)
 
 	attachments, err := c.Anc.GetServiceAttachments(ctx, orgAPID, serviceAPID)
 	if err != nil {
@@ -137,21 +141,21 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 
 	drv.Send(models.EnvFetchedMsg{})
 
-	envMethod := cfg.Service.Env.Method
-	if envMethod == "" {
+	envOutput := cfg.Service.EnvOutput
+	if envOutput == "" {
 		choicec := make(chan string)
 		drv.Activate(ctx, &models.EnvMethod{
 			ChoiceCh: choicec,
 		})
 
 		select {
-		case envMethod = <-choicec:
+		case envOutput = <-choicec:
 		case <-ctx.Done():
 			return ctx.Err()
 		}
 	}
 
-	switch envMethod {
+	switch envOutput {
 	case MethodExport:
 		err := c.exportMethod(ctx, drv, env, serviceAPID)
 		if err != nil {
@@ -168,7 +172,7 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 			return err
 		}
 	default:
-		return fmt.Errorf("Unknown method: %s. Please choose either `export` or `dotenv`.", envMethod)
+		return fmt.Errorf("Unknown method: %s. Please choose either `export` or `dotenv`.", envOutput)
 	}
 
 	var lclDomain string
@@ -261,8 +265,8 @@ func (c *Env) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (str
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
-	if cfg.Service.Env.Org != "" {
-		return cfg.Service.Env.Org, nil
+	if cfg.Org.APID != "" {
+		return cfg.Org.APID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -285,8 +289,8 @@ func (c *Env) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, or
 	if c.RealmAPID != "" {
 		return c.RealmAPID, nil
 	}
-	if cfg.Service.Env.Realm != "" {
-		return cfg.Service.Env.Realm, nil
+	if cfg.Realm.APID != "" {
+		return cfg.Realm.APID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
@@ -309,8 +313,8 @@ func (c *Env) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, 
 	if c.ServiceAPID != "" {
 		return c.ServiceAPID, nil
 	}
-	if cfg.Service.Env.Service != "" {
-		return cfg.Service.Env.Service, nil
+	if cfg.Service.APID != "" {
+		return cfg.Service.APID, nil
 	}
 
 	selector := &component.Selector[api.Service]{

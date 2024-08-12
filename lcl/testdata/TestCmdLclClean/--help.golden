@@ -5,3 +5,8 @@ Usage:
 
 Flags:
   -h, --help   help for clean
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

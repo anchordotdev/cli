@@ -55,8 +55,8 @@ func TestCmdTrust(t *testing.T) {
 
 	t.Run("-o testOrg -r testRealm", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdTrust, "-o", "testOrg", "-r", "testRealm")
-		require.Equal(t, "testOrg", cfg.Trust.Org)
-		require.Equal(t, "testRealm", cfg.Trust.Realm)
+		require.Equal(t, "testOrg", cfg.Org.APID)
+		require.Equal(t, "testRealm", cfg.Realm.APID)
 	})
 
 	t.Run("--realm testRealm", func(t *testing.T) {
@@ -81,6 +81,10 @@ func TestCmdTrust(t *testing.T) {
 }
 
 func TestTrust(t *testing.T) {
+	if srv.IsProxy() {
+		t.Skip("trust skipped in proxy mode to avoid golden conflicts")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -97,10 +101,6 @@ func TestTrust(t *testing.T) {
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
 	t.Run(fmt.Sprintf("basics-%s", uitest.TestTagOS()), func(t *testing.T) {
-		if srv.IsProxy() {
-			t.Skip("trust skipped in proxy mode to avoid golden conflicts")
-		}
-
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
@@ -132,10 +132,6 @@ func TestTrust(t *testing.T) {
 	})
 
 	t.Run("noop", func(t *testing.T) {
-		if srv.IsProxy() {
-			t.Skip("trust skipped in proxy mode to avoid golden conflicts")
-		}
-
 		// truststore.MockCAs should still be set from basic
 
 		cmd := Command{}
@@ -158,14 +154,8 @@ func TestTrust(t *testing.T) {
 	})
 
 	t.Run("wsl-vm", func(t *testing.T) {
-		if srv.IsProxy() {
-			t.Skip("trust skipped in proxy mode to avoid golden conflicts")
-		}
-
-		truststore.MockCAs = []*truststore.CA{}
-		t.Cleanup(func() {
-			truststore.MockCAs = []*truststore.CA{}
-		})
+		truststore.ResetMockCAs()
+		t.Cleanup(truststore.ResetMockCAs)
 
 		cfg := *cfg
 		cfg.Test.GOOS = "linux"

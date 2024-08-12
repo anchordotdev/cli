@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"net"
 	"net/http"
 	"testing"
 	"time"
@@ -19,50 +20,50 @@ import (
 	"github.com/anchordotdev/cli/ui/uitest"
 )
 
-func TestCmdLclConfig(t *testing.T) {
+func TestCmdBootstrap(t *testing.T) {
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestHelp(t, CmdLclConfig, "lcl", "config", "--help")
+		cmdtest.TestHelp(t, CmdBootstrap, "lcl", "bootstrap", "--help")
 	})
 
 	t.Run("default --addr", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLclConfig)
-		require.Equal(t, ":4433", cfg.Lcl.DiagnosticAddr)
+		cfg := cmdtest.TestCfg(t, CmdBootstrap)
+		require.Equal(t, ":4433", cfg.Lcl.Diagnostic.Addr)
 	})
 
 	t.Run("-a :4444", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLclConfig, "-a", ":4444")
-		require.Equal(t, ":4444", cfg.Lcl.DiagnosticAddr)
+		cfg := cmdtest.TestCfg(t, CmdBootstrap, "-a", ":4444")
+		require.Equal(t, ":4444", cfg.Lcl.Diagnostic.Addr)
 	})
 
 	t.Run("--addr :4455", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLclConfig, "--addr", ":4455")
-		require.Equal(t, ":4455", cfg.Lcl.DiagnosticAddr)
+		cfg := cmdtest.TestCfg(t, CmdBootstrap, "--addr", ":4455")
+		require.Equal(t, ":4455", cfg.Lcl.Diagnostic.Addr)
 	})
 
-	t.Run("ADDR=:4466", func(t *testing.T) {
-		t.Setenv("ADDR", ":4466")
+	t.Run("DIAGNOSTIC_ADDR=:4466", func(t *testing.T) {
+		t.Setenv("DIAGNOSTIC_ADDR", ":4466")
 
-		cfg := cmdtest.TestCfg(t, CmdLclConfig)
-		require.Equal(t, ":4466", cfg.Lcl.DiagnosticAddr)
+		cfg := cmdtest.TestCfg(t, CmdBootstrap)
+		require.Equal(t, ":4466", cfg.Lcl.Diagnostic.Addr)
 	})
 }
 
-func TestLclConfig(t *testing.T) {
+func TestBootstrap(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	diagPort := "4433"
-
-	diagAddr := "0.0.0.0:" + diagPort
-	httpURL := "http://hello-world.lcl.host:" + diagPort
-	httpsURL := "https://hello-world.lcl.host:" + diagPort
+	if err := srv.RecreateUser("lcl_config"); err != nil {
+		t.Fatal(err)
+	}
 
 	cfg := new(cli.Config)
+	if err := cfg.Load(ctx); err != nil {
+		t.Fatal(err)
+	}
 	cfg.API.URL = srv.URL
-	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
-	cfg.Lcl.DiagnosticAddr = diagAddr
-	cfg.Lcl.Service = "hi-ankydotdev"
-	cfg.Lcl.Subdomain = "hi-ankydotdev"
+	cfg.Test.ACME.URL = "http://anchor.lcl.host:" + srv.RailsPort
+	cfg.Service.APID = "hi-ankydotdev"
+	cfg.Lcl.Diagnostic.Subdomain = "hi-ankydotdev"
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
@@ -72,13 +73,20 @@ func TestLclConfig(t *testing.T) {
 	}
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
+	_, diagPort, err := net.SplitHostPort(cfg.Lcl.Diagnostic.Addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	httpURL := "http://hello-world.lcl.host:" + diagPort
+	httpsURL := "https://hello-world.lcl.host:" + diagPort
+
 	t.Run("basics", func(t *testing.T) {
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := LclConfig{}
+		cmd := Bootstrap{}
 
 		errc := make(chan error, 1)
 		go func() {

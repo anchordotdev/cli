@@ -16,8 +16,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/cmdtest"
+	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
@@ -46,24 +48,24 @@ func TestCmdLcl(t *testing.T) {
 
 	t.Run("default --addr", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdLcl)
-		require.Equal(t, ":4433", cfg.Lcl.DiagnosticAddr)
+		require.Equal(t, ":4433", cfg.Lcl.Diagnostic.Addr)
 	})
 
 	t.Run("-a :4444", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdLcl, "-a", ":4444")
-		require.Equal(t, ":4444", cfg.Lcl.DiagnosticAddr)
+		require.Equal(t, ":4444", cfg.Lcl.Diagnostic.Addr)
 	})
 
 	t.Run("--addr :4455", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdLcl, "--addr", ":4455")
-		require.Equal(t, ":4455", cfg.Lcl.DiagnosticAddr)
+		require.Equal(t, ":4455", cfg.Lcl.Diagnostic.Addr)
 	})
 
-	t.Run("ADDR=:4466", func(t *testing.T) {
-		t.Setenv("ADDR", ":4466")
+	t.Run("DIAGNOSTIC_ADDR=:4466", func(t *testing.T) {
+		t.Setenv("DIAGNOSTIC_ADDR", ":4466")
 
 		cfg := cmdtest.TestCfg(t, CmdLcl)
-		require.Equal(t, ":4466", cfg.Lcl.DiagnosticAddr)
+		require.Equal(t, ":4466", cfg.Lcl.Diagnostic.Addr)
 	})
 
 	// mkcert
@@ -80,14 +82,26 @@ func TestCmdLcl(t *testing.T) {
 
 	// setup
 
-	t.Run("--language ruby", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLcl, "--language", "ruby")
-		require.Equal(t, "ruby", cfg.Lcl.Setup.Language)
+	t.Run("--category ruby", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--category", "ruby")
+		require.Equal(t, "ruby", cfg.Service.Category)
 	})
 
-	t.Run("--method anchor", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLcl, "--method", "anchor")
-		require.Equal(t, "anchor", cfg.Lcl.Setup.Method)
+	t.Run("--cert-style acme", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--method", "acme")
+		require.Equal(t, "acme", cfg.Service.CertStyle)
+	})
+
+	// alias
+
+	t.Run("--language python", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--language", "python")
+		require.Equal(t, "python", cfg.Service.Category)
+	})
+
+	t.Run("--method acme", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--method", "acme")
+		require.Equal(t, "acme", cfg.Service.CertStyle)
 	})
 }
 
@@ -95,41 +109,50 @@ func TestLcl(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	diagAddr, err := apitest.UnusedPort()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, diagPort, err := net.SplitHostPort(diagAddr)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	httpURL := "http://hello-world.lcl.host:" + diagPort
-	httpsURL := "https://hello-world.lcl.host:" + diagPort
-
 	// ensure lcl has no leftover data
-	err = srv.RecreateUser("lcl_setup")
+	err := srv.RecreateUser("lcl")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cfg := new(cli.Config)
-	cfg.API.URL = srv.URL
-	cfg.AnchorURL = "http://anchor.lcl.host:" + srv.RailsPort
-	cfg.Lcl.DiagnosticAddr = diagAddr
-	cfg.Lcl.Subdomain = "hi-ankydotdev"
-	cfg.Trust.MockMode = true
-	cfg.Trust.NoSudo = true
-	cfg.Trust.Stores = []string{"mock"}
+	cfg := cmdtest.Config(ctx)
 	if cfg.API.Token, err = srv.GeneratePAT("lcl@anchor.dev"); err != nil {
 		t.Fatal(err)
 	}
+	cfg.API.URL = srv.URL
+	cfg.Test.ACME.URL = "http://anchor.lcl.host:" + srv.RailsPort
+	cfg.Lcl.Diagnostic.Subdomain = "hi-ankydotdev"
+	cfg.Trust.MockMode = true
+	cfg.Trust.NoSudo = true
+	cfg.Trust.Stores = []string{"mock"}
+	cfg.Test.LclHostPort = 4321
+	cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
+		"/v0/orgs": {
+			Example: "anky_personal",
+		},
+		"/v0/orgs/ankydotdev/realms": {
+			Example: "anky_personal",
+		},
+		"/v0/orgs/ankydotdev/realms/localhost/x509/credentials": {
+			Example: "anky_personal",
+		},
+	}
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
-	setupGuideURL := cfg.AnchorURL + "lcl/services/test-app/guide"
+	_, diagPort, err := net.SplitHostPort(cfg.Lcl.Diagnostic.Addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	httpURL := "http://hello-world.lcl.host:" + diagPort
+	httpsURL := "https://hello-world.lcl.host:" + diagPort
+
+	setupGuideURL := cfg.SetupGuideURL("lcl", "test-app")
 
 	t.Run("basics", func(t *testing.T) {
+		if srv.IsMock() {
+			t.Skip("lcl basic test unsupported in mock mode")
+		}
+
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 
@@ -140,32 +163,21 @@ func TestLcl(t *testing.T) {
 		errc := make(chan error, 1)
 		go func() {
 			errc <- cmd.UI().RunTUI(ctx, drv)
-
 			errc <- tm.Quit()
 		}()
-
-		// wait for prompt
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What lcl.host domain would you like to use for diagnostics?",
 		)
 
 		tm.Type("hello-world")
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
-
-		if !srv.IsProxy() {
-			t.Skip("diagnostic unsupported in mock mode")
-		}
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			fmt.Sprintf("! Press Enter to open %s in your browser.", httpURL),
 		)
 
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		if _, err := http.Get(httpURL); err != nil {
 			t.Fatal(err)
@@ -175,17 +187,13 @@ func TestLcl(t *testing.T) {
 			"! Press Enter to install missing certificates. (requires sudo)",
 		)
 
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			fmt.Sprintf("! Press Enter to open %s in your browser.", httpsURL),
 		)
 
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		pool := x509.NewCertPool()
 		for _, ca := range truststore.MockCAs {
@@ -229,21 +237,124 @@ func TestLcl(t *testing.T) {
 			"? How would you like to manage your lcl.host certificates?",
 		)
 
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
-
-		t.Skip("Pending workaround for consistent setup guide port value")
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
-			fmt.Sprintf("! Press Enter to open %s.", setupGuideURL),
+			fmt.Sprintf("! Press Enter to open %s in your browser.", setupGuideURL),
 		)
 
-		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
-		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
+	})
+
+	// relies on diagnostic app existing and truststore updates from previous test
+	t.Run("skip-diagnostic", func(t *testing.T) {
+		if srv.IsMock() {
+			t.Skip("lcl skip diagnostic test unsupported in mock mode")
+		}
+
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		cmd := Command{}
+
+		errc := make(chan error, 1)
+		go func() {
+			errc <- cmd.UI().RunTUI(ctx, drv)
+			errc <- tm.Quit()
+		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which lcl/localhost service's lcl.host local development environment do you want to setup?",
+		)
+
+		uitest.TestGolden(t, drv.Golden())
+		// just focus on initial portion to check for skip
+	})
+
+	t.Run(fmt.Sprintf("non-personal-cas-missing-%s", uitest.TestTagOS()), func(t *testing.T) {
+		if !srv.IsMock() {
+			t.Skip("lcl non-personal CAs missing test unsupported in mock mode")
+		}
+
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
+			"/v0/orgs": {
+				Example: "anky_team",
+			},
+			"/v0/orgs/ankyco/realms": {
+				Example: "ankyco_development",
+			},
+			"/v0/orgs/ankyco/realms/development/x509/credentials": {
+				Example: "ankyco",
+			},
+			"/v0/orgs/ankyco/services/service-name/attachments": {
+				Example: "ankyco_service",
+			},
+		}
+		ctx = cli.ContextWithConfig(ctx, cfg)
+
+		anc, err := api.NewClient(ctx, cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		personalCAs, err := trust.FetchExpectedCAs(ctx, anc, "ankydotdev", "localhost")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// pre-install ankydotdev/localhost CAs
+
+		truststore.MockCAs = append(truststore.MockCAs, personalCAs...)
+
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		cmd := Command{}
+
+		errc := make(chan error, 1)
+		go func() {
+			if err := cmd.UI().RunTUI(ctx, drv); err != nil {
+				errc <- err
+			}
+			if err := tm.Quit(); err != nil {
+				errc <- err
+			}
+		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"! Press Enter to install missing certificates. (requires sudo)",
+		)
+
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization do you want to manage your local development environment for?",
+		)
+
+		tm.Send(tea.KeyMsg{Type: tea.KeyDown})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which ankyco/development service's lcl.host local development environment do you want to setup?",
+		)
+
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? How would you like to manage your environment variables?",
+		)
+
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+
 		uitest.TestGolden(t, drv.Golden())
 	})
 }

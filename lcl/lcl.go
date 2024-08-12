@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"net"
+	"slices"
 	"time"
 
 	"golang.org/x/crypto/acme"
@@ -15,6 +17,8 @@ import (
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/component"
 	"github.com/anchordotdev/cli/lcl/models"
+	"github.com/anchordotdev/cli/trust"
+	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
 )
@@ -22,20 +26,26 @@ import (
 var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Flags().StringVarP(&cfg.Lcl.Org, "org", "o", "", "Organization for lcl.host local development environment management.")
-	cmd.Flags().StringVarP(&cfg.Lcl.Realm, "realm", "r", "", "Realm for lcl.host local development environment management.")
-	cmd.Flags().StringVarP(&cfg.Lcl.Service, "service", "s", "", "Service for lcl.host local development environment management.")
+	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization for lcl.host local development environment management.")
+	cmd.Flags().StringVarP(&cfg.Lcl.RealmAPID, "realm", "r", cli.Defaults.Lcl.RealmAPID, "Realm for lcl.host local development environment management.")
+	cmd.Flags().StringVarP(&cfg.Service.APID, "service", "s", cli.Defaults.Service.APID, "Service for lcl.host local development environment management.")
 
 	// config
-	cmd.Flags().StringVarP(&cfg.Lcl.DiagnosticAddr, "addr", "a", ":4433", "Address for local diagnostic web server.")
+	cmd.Flags().StringVarP(&cfg.Lcl.Diagnostic.Addr, "addr", "a", cli.Defaults.Lcl.Diagnostic.Addr, "Address for local diagnostic web server.")
 
 	// mkcert
-	cmd.Flags().StringSliceVar(&cfg.Lcl.MkCert.Domains, "domains", []string{}, "Domains to create certificate for.")
-	cmd.Flags().StringVar(&cfg.Lcl.MkCert.SubCa, "subca", "", "SubCA to create certificate for.")
+	cmd.Flags().StringSliceVar(&cfg.Lcl.MkCert.Domains, "domains", cli.Defaults.Lcl.MkCert.Domains, "Domains to create certificate for.")
+	cmd.Flags().StringVar(&cfg.Lcl.MkCert.SubCa, "subca", cli.Defaults.Lcl.MkCert.SubCa, "SubCA to create certificate for.")
 
 	// setup
-	cmd.Flags().StringVar(&cfg.Lcl.Setup.Language, "language", "", "Language to integrate with Anchor.")
-	cmd.Flags().StringVar(&cfg.Lcl.Setup.Method, "method", "", "Integration method for certificates.")
+	cmd.Flags().StringVar(&cfg.Service.Category, "category", cli.Defaults.Service.Category, "Language or software type of the service.")
+	cmd.Flags().StringVar(&cfg.Service.CertStyle, "cert-style", cli.Defaults.Service.CertStyle, "Provisioning method for lcl.host certificates.")
+
+	// alias
+	cmd.Flags().StringVar(&cfg.Service.Category, "language", cli.Defaults.Service.Category, "Language to integrate with Anchor.")
+	_ = cmd.Flags().MarkDeprecated("language", "Please use `--category` instead.")
+	cmd.Flags().StringVar(&cfg.Service.CertStyle, "method", cli.Defaults.Service.CertStyle, "Provisioning method for lcl.host certificates.")
+	_ = cmd.Flags().MarkDeprecated("method", "Please use `--cert-style` instead.")
 })
 
 type Command struct {
@@ -51,22 +61,117 @@ func (c Command) UI() cli.UI {
 }
 
 func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
-	var err error
 	cfg := cli.ConfigFromContext(ctx)
 
+	if err := c.apiAuth(ctx, drv); err != nil {
+		return err
+	}
+
+	drv.Activate(ctx, models.LclPreamble)
+
+	drv.Activate(ctx, models.LclHeader)
+	drv.Activate(ctx, models.LclHint)
+
+	// run audit command
+	drv.Activate(ctx, models.AuditHeader)
+	drv.Activate(ctx, models.AuditHint)
+
+	if err := c.systemConfig(ctx, drv); err != nil {
+		return err
+	}
+
+	return c.appSetup(ctx, cfg, drv)
+}
+
+func (c *Command) apiAuth(ctx context.Context, drv *ui.Driver) error {
 	cmd := &auth.Client{
 		Anc:    c.anc,
 		Hint:   models.LclSignInHint,
 		Source: "lclhost",
 	}
+
+	var err error
 	c.anc, err = cmd.Perform(ctx, drv)
+	return err
+}
+
+func (c *Command) systemConfig(ctx context.Context, drv *ui.Driver) error {
+	// audit diagnostic service
+
+	userInfo, err := c.anc.UserInfo(ctx)
 	if err != nil {
 		return err
 	}
-	drv.Activate(ctx, models.LclPreamble)
 
-	drv.Activate(ctx, models.LclHeader)
-	drv.Activate(ctx, models.LclHint)
+	orgSlug := userInfo.PersonalOrg.Slug
+	realmSlug := "localhost"
+
+	localCAs, err := trust.FetchLocalDevCAs(ctx, c.anc)
+	if err != nil {
+		return err
+	}
+
+	personalCAs, err := trust.FetchExpectedCAs(ctx, c.anc, orgSlug, realmSlug)
+	if err != nil {
+		return err
+	}
+
+	// audit CA certs
+
+	cmdAudit := &Audit{
+		anc: c.anc,
+		cas: localCAs,
+	}
+
+	auditInfo, err := cmdAudit.perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+
+	isLocalhostCA := func(ca *truststore.CA) bool {
+		for _, ca2 := range personalCAs {
+			if ca.UniqueName == ca2.UniqueName {
+				return true
+			}
+		}
+		return false
+	}
+
+	switch {
+	case len(auditInfo.Missing) == 0:
+		drv.Activate(ctx, models.BootstrapSkip)
+
+		return nil
+	case slices.ContainsFunc(auditInfo.Missing, isLocalhostCA):
+		drv.Activate(ctx, models.BootstrapHeader)
+		drv.Activate(ctx, models.BootstrapHint)
+
+		cmdBootstrap := &Bootstrap{
+			anc:       c.anc,
+			orgSlug:   orgSlug,
+			realmSlug: realmSlug,
+
+			auditInfo: auditInfo,
+		}
+
+		return cmdBootstrap.perform(ctx, drv)
+	default:
+		drv.Activate(ctx, models.TrustHeader)
+		drv.Activate(ctx, models.TrustHint)
+
+		cmdTrust := &Trust{
+			anc:       c.anc,
+			auditInfo: auditInfo,
+		}
+
+		return cmdTrust.perform(ctx, drv)
+	}
+}
+
+func (c *Command) appSetup(ctx context.Context, cfg *cli.Config, drv *ui.Driver) error {
+	// run setup command
+	drv.Activate(ctx, models.SetupHeader)
+	drv.Activate(ctx, models.SetupHint)
 
 	orgAPID, err := c.orgAPID(ctx, cfg, drv)
 	if err != nil {
@@ -78,60 +183,22 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	// run audit command
-	drv.Activate(ctx, models.AuditHeader)
-	drv.Activate(ctx, models.AuditHint)
-
-	cmdAudit := &Audit{
-		anc: c.anc,
-	}
-
-	lclAuditResult, err := cmdAudit.perform(ctx, drv)
-	if err != nil {
-		return err
-	}
-
-	if lclAuditResult.diagnosticServiceExists && lclAuditResult.trusted {
-		drv.Activate(ctx, models.LclConfigSkip)
-	} else {
-		// run config command
-		drv.Activate(ctx, models.LclConfigHeader)
-		drv.Activate(ctx, models.LclConfigHint)
-
-		cmdConfig := &LclConfig{
-			anc: c.anc,
-		}
-
-		if err := cmdConfig.perform(ctx, drv); err != nil {
-			return err
-		}
-	}
-
-	// run setup command
-	drv.Activate(ctx, models.SetupHeader)
-	drv.Activate(ctx, models.SetupHint)
-
 	cmdSetup := &Setup{
 		OrgAPID:     orgAPID,
 		RealmAPID:   realmAPID,
-		ServiceAPID: cfg.Lcl.Service, // TODO: cfg access here looks wrong
+		ServiceAPID: cfg.Service.APID, // TODO: cfg access here looks wrong
 		anc:         c.anc,
 	}
 
-	err = cmdSetup.perform(ctx, drv)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return cmdSetup.perform(ctx, drv)
 }
 
 func (c *Command) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
-	if cfg.Lcl.Org != "" {
-		return cfg.Lcl.Org, nil
+	if cfg.Org.APID != "" {
+		return cfg.Org.APID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -154,8 +221,8 @@ func (c *Command) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	if c.RealmAPID != "" {
 		return c.RealmAPID, nil
 	}
-	if cfg.Lcl.Realm != "" {
-		return cfg.Lcl.Realm, nil
+	if cfg.Lcl.RealmAPID != "" {
+		return cfg.Lcl.RealmAPID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
@@ -201,4 +268,27 @@ func provisionCert(eab *api.Eab, domains []string, acmeURL string) (*tls.Certifi
 	}
 
 	return mgr.GetCertificate(clientHello)
+}
+
+func checkLoopbackDomain(ctx context.Context, drv *ui.Driver, domain string) error {
+	drv.Activate(ctx, &models.DomainResolver{
+		Domain: domain,
+	})
+
+	addrs, err := new(net.Resolver).LookupHost(ctx, domain)
+	if err != nil {
+		drv.Send(models.DomainStatusMsg(false))
+		return err
+	}
+
+	for _, addr := range addrs {
+		if !slices.Contains(loopbackAddrs, addr) {
+			drv.Send(models.DomainStatusMsg(false))
+
+			return fmt.Errorf("%s domain resolved to non-loopback interface address: %s", domain, addr)
+		}
+	}
+	drv.Send(models.DomainStatusMsg(true))
+
+	return nil
 }

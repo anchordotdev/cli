@@ -5,12 +5,9 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"net"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 
 	"github.com/cli/browser"
@@ -26,22 +23,27 @@ import (
 	climodels "github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/service"
 	servicemodels "github.com/anchordotdev/cli/service/models"
-	"github.com/anchordotdev/cli/trust"
-	trustmodels "github.com/anchordotdev/cli/trust/models"
 	"github.com/anchordotdev/cli/ui"
 )
 
 var CmdLclSetup = cli.NewCmd[Setup](CmdLcl, "setup", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Flags().StringVar(&cfg.Lcl.Setup.Language, "language", "", "Language to integrate with Anchor.")
-	cmd.Flags().StringVar(&cfg.Lcl.Setup.Method, "method", "", "Integration method for certificates.")
-	cmd.Flags().StringVarP(&cfg.Lcl.Org, "org", "o", "", "Organization for lcl.host application setup.")
-	cmd.Flags().StringVarP(&cfg.Lcl.Realm, "realm", "r", "", "Realm for lcl.host application setup.")
-	cmd.Flags().StringVarP(&cfg.Lcl.Service, "service", "s", "", "Service for lcl.host application setup.")
+	cmd.Flags().StringVar(&cfg.Service.Category, "category", cli.Defaults.Service.Category, "Language or software type of the service.")
+	cmd.Flags().StringVar(&cfg.Service.CertStyle, "cert-style", cli.Defaults.Service.CertStyle, "Provisioning method for lcl.host certificates.")
+	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization for lcl.host application setup.")
+	cmd.Flags().StringVarP(&cfg.Lcl.RealmAPID, "realm", "r", cli.Defaults.Lcl.RealmAPID, "Realm for lcl.host application setup.")
+	cmd.Flags().StringVarP(&cfg.Service.APID, "service", "s", cli.Defaults.Service.APID, "Service for lcl.host application setup.")
+
+	// alias
+	cmd.Flags().StringVar(&cfg.Service.Category, "language", cli.Defaults.Service.Category, "Language to integrate with Anchor.")
+	_ = cmd.Flags().MarkDeprecated("language", "Please use `--category` instead.")
+	cmd.Flags().StringVar(&cfg.Service.CertStyle, "method", cli.Defaults.Service.CertStyle, "Provisioning method for lcl.host certificates.")
+	_ = cmd.Flags().MarkDeprecated("method", "Please use `--cert-style` instead.")
 })
 
 var (
+	MethodACME      = "acme"
 	MethodAnchor    = "anchor"
 	MethodAutomated = "automated"
 	MethodManual    = "manual"
@@ -99,19 +101,110 @@ func (c *Setup) perform(ctx context.Context, drv *ui.Driver) error {
 	if err != nil {
 		return err
 	}
+
 	if serviceAPID == "" {
-		return c.createNewService(ctx, drv, orgAPID, realmAPID)
+		return c.initialSetup(ctx, cfg, drv, orgAPID, realmAPID)
+	}
+	return c.setupServiceEnv(ctx, drv, orgAPID, realmAPID, serviceAPID)
+}
+
+func (c *Setup) initialSetup(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID, realmAPID string) error {
+	// TODO: select name before category
+
+	category, err := c.serviceCategory(ctx, cfg, drv)
+	if err != nil {
+		return err
 	}
 
-	return c.setupService(ctx, drv, orgAPID, realmAPID, serviceAPID)
+	name, err := c.serviceName(ctx, cfg, drv)
+	if err != nil {
+		return err
+	}
+
+	lclDomain, err := c.serviceDomain(ctx, cfg, drv, name)
+	if err != nil {
+		return err
+	}
+	if err := checkLoopbackDomain(ctx, drv, lclDomain); err != nil {
+		return err
+	}
+
+	subdomain := strings.TrimSuffix(lclDomain, ".lcl.host")
+	domains := []string{lclDomain, subdomain + ".localhost"}
+	port := cfg.LclHostPort()
+
+	drv.Activate(ctx, &models.ProvisionService{
+		Name:       name,
+		Domains:    domains,
+		ServerType: category,
+	})
+
+	srv, err := c.anc.GetService(ctx, orgAPID, name)
+	if err != nil {
+		return err
+	}
+	if srv == nil {
+		if srv, err = c.anc.CreateService(ctx, orgAPID, name, category, port); err != nil {
+			return err
+		}
+	}
+
+	// FIXME: we need to lookup and pass the chain and/or make it non-optional
+	chainAPID := "ca"
+
+	atch, err := c.anc.AttachService(ctx, chainAPID, domains, orgAPID, realmAPID, srv.Slug)
+	if err != nil {
+		return err
+	}
+
+	mkcert := &MkCert{
+		anc:         c.anc,
+		domains:     domains,
+		OrgAPID:     orgAPID,
+		RealmAPID:   realmAPID,
+		ServiceAPID: srv.Slug,
+
+		ChainAPID: atch.Relationships.Chain.Slug,
+		SubCaAPID: atch.Relationships.SubCa.Slug,
+	}
+
+	tlsCert, err := mkcert.perform(ctx, drv)
+	if err != nil {
+		return err
+	}
+	drv.Send(models.ServiceProvisionedMsg{})
+
+	certStyle, err := c.certStyle(ctx, cfg, drv)
+	if err != nil {
+		return err
+	}
+
+	switch certStyle {
+	case MethodManual, MethodMkcert:
+		certStyle = MethodMkcert
+		if err := c.manualMethod(ctx, drv, orgAPID, realmAPID, srv.Slug, tlsCert, domains...); err != nil {
+			return err
+		}
+	case MethodACME, MethodAnchor, MethodAutomated:
+		certStyle = MethodACME
+		setupGuideURL := cfg.SetupGuideURL(orgAPID, srv.Slug)
+		lclURL := fmt.Sprintf("https://%s:%d", lclDomain, *srv.LocalhostPort)
+		if err := c.automatedMethod(ctx, drv, setupGuideURL, lclURL); err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("Unknown method: %s. Please choose either `acme` (recommended) or `mkcert`.", certStyle)
+	}
+
+	return c.writeTOML(ctx, *cfg, drv, orgAPID, realmAPID, srv.Slug, category, certStyle)
 }
 
 func (c *Setup) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
-	if cfg.Lcl.Org != "" {
-		return cfg.Lcl.Org, nil
+	if cfg.Org.APID != "" {
+		return cfg.Org.APID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -134,8 +227,8 @@ func (c *Setup) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, 
 	if c.RealmAPID != "" {
 		return c.RealmAPID, nil
 	}
-	if cfg.Lcl.Realm != "" {
-		return cfg.Lcl.Realm, nil
+	if cfg.Lcl.RealmAPID != "" {
+		return cfg.Lcl.RealmAPID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
@@ -158,8 +251,8 @@ func (c *Setup) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	if c.ServiceAPID != "" {
 		return c.ServiceAPID, nil
 	}
-	if cfg.Service.Env.Service != "" {
-		return cfg.Service.Env.Service, nil
+	if cfg.Service.APID != "" {
+		return cfg.Service.APID, nil
 	}
 
 	selector := &component.Selector[api.Service]{
@@ -183,21 +276,47 @@ func (c *Setup) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	return service.Slug, nil
 }
 
-func (c *Setup) createNewService(ctx context.Context, drv *ui.Driver, orgAPID, realmAPID string) error {
-	cfg := cli.ConfigFromContext(ctx)
+func (c *Setup) serviceName(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if cfg.Service.Name != "" {
+		return cfg.Service.Name, nil
+	}
+
+	var defaultName string
+	if path, err := os.Getwd(); err == nil {
+		defaultName = filepath.Base(path) // TODO: use detected name recommendation
+	}
+
+	inputc := make(chan string)
+	drv.Activate(ctx, &models.SetupName{
+		InputCh: inputc,
+		Default: defaultName,
+	})
+
+	select {
+	case serviceName := <-inputc:
+		return serviceName, nil
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+}
+
+func (c *Setup) serviceCategory(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if cfg.Service.Category != "" {
+		return cfg.Service.Category, nil
+	}
 
 	drv.Activate(ctx, &models.SetupScan{})
 
 	path, err := os.Getwd()
 	if err != nil {
-		return err
+		return "", err
 	}
 	dirFS := os.DirFS(path).(detection.FS)
 
 	detectors := detection.DefaultDetectors
-	if cfg.Lcl.Setup.Language != "" {
-		if langDetector, ok := detection.DetectorsByFlag[cfg.Lcl.Setup.Language]; !ok {
-			return errors.New("invalid language specified")
+	if cfg.Service.Category != "" {
+		if langDetector, ok := detection.DetectorsByFlag[cfg.Service.Category]; !ok {
+			return "", errors.New("invalid language specified")
 		} else {
 			detectors = []detection.Detector{langDetector}
 		}
@@ -205,7 +324,7 @@ func (c *Setup) createNewService(ctx context.Context, drv *ui.Driver, orgAPID, r
 
 	results, err := detection.Perform(detectors, dirFS)
 	if err != nil {
-		return err
+		return "", err
 	}
 	drv.Send(results)
 
@@ -215,29 +334,20 @@ func (c *Setup) createNewService(ctx context.Context, drv *ui.Driver, orgAPID, r
 		Results:  results,
 	})
 
-	var serviceCategory string
 	select {
-	case serviceCategory = <-choicec:
+	case category := <-choicec:
+		return category, nil
 	case <-ctx.Done():
-		return ctx.Err()
+		return "", ctx.Err()
 	}
+}
+
+func (c *Setup) serviceDomain(ctx context.Context, cfg *cli.Config, drv *ui.Driver, name string) (string, error) {
+	// TODO: check cfg.Lcl.Domain or something
+
+	defaultDomain := parameterize(name)
 
 	inputc := make(chan string)
-	drv.Activate(ctx, &models.SetupName{
-		InputCh: inputc,
-		Default: filepath.Base(path), // TODO: use detected name recommendation
-	})
-
-	var serviceName string
-	select {
-	case serviceName = <-inputc:
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-
-	defaultDomain := parameterize(serviceName)
-
-	inputc = make(chan string)
 	drv.Activate(ctx, &models.DomainInput{
 		InputCh: inputc,
 		Default: defaultDomain,
@@ -246,86 +356,33 @@ func (c *Setup) createNewService(ctx context.Context, drv *ui.Driver, orgAPID, r
 		Done:    "Entered %s domain for local application development.",
 	})
 
-	var lclDomain string
 	select {
-	case lclDomain = <-inputc:
+	case domain := <-inputc:
+		return domain, nil
 	case <-ctx.Done():
-		return ctx.Err()
-	}
-
-	drv.Activate(ctx, &models.DomainResolver{
-		Domain: lclDomain,
-	})
-
-	addrs, err := new(net.Resolver).LookupHost(ctx, lclDomain)
-	if err != nil {
-		drv.Send(models.DomainStatusMsg(false))
-		return err
-	}
-
-	for _, addr := range addrs {
-		if !slices.Contains(loopbackAddrs, addr) {
-			drv.Send(models.DomainStatusMsg(false))
-
-			return fmt.Errorf("%s domain resolved to non-loopback interface address: %s", lclDomain, addr)
-		}
-	}
-	drv.Send(models.DomainStatusMsg(true))
-
-	subdomain := strings.TrimSuffix(lclDomain, ".lcl.host")
-	domains := []string{lclDomain, subdomain + ".localhost"}
-
-	cmdProvision := &Provision{
-		Domains:   domains,
-		orgSlug:   orgAPID,
-		realmSlug: realmAPID,
-	}
-
-	service, tlsCert, err := cmdProvision.run(ctx, drv, c.anc, serviceName, serviceCategory, nil)
-	if err != nil {
-		return err
-	}
-
-	setupMethod := cfg.Lcl.Setup.Method
-	if setupMethod == "" {
-		choicec = make(chan string)
-		drv.Activate(ctx, &models.SetupMethod{
-			ChoiceCh: choicec,
-		})
-
-		select {
-		case setupMethod = <-choicec:
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
-
-	switch setupMethod {
-	case MethodManual, MethodMkcert:
-		return c.manualMethod(ctx, drv, orgAPID, realmAPID, service.Slug, tlsCert, domains...)
-	case MethodAnchor, MethodAutomated:
-		setupGuideURL := cfg.AnchorURL + "/" + url.QueryEscape(orgAPID) + "/services/" + url.QueryEscape(service.Slug) + "/guide"
-		lclURL := fmt.Sprintf("https://%s:%d", lclDomain, *service.LocalhostPort)
-		return c.automatedMethod(ctx, drv, setupGuideURL, lclURL)
-	default:
-		return fmt.Errorf("Unknown method: %s. Please choose either `anchor` (recommended) or `mkcert`.", setupMethod)
+		return "", ctx.Err()
 	}
 }
 
-func (c *Setup) setupService(ctx context.Context, drv *ui.Driver, orgAPID, realmAPID, serviceAPID string) error {
-	drv.Activate(ctx, trustmodels.TrustHeader)
-	drv.Activate(ctx, trustmodels.TrustHint)
-
-	cmdTrust := &trust.Command{
-		Anc:       c.anc,
-		OrgSlug:   orgAPID,
-		RealmSlug: realmAPID,
+func (c *Setup) certStyle(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if cfg.Service.CertStyle != "" {
+		return cfg.Service.CertStyle, nil
 	}
 
-	if err := cmdTrust.Perform(ctx, drv); err != nil {
-		return err
-	}
+	choicec := make(chan string)
+	drv.Activate(ctx, &models.SetupMethod{
+		ChoiceCh: choicec,
+	})
 
+	select {
+	case certStyle := <-choicec:
+		return certStyle, nil
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+}
+
+func (c *Setup) setupServiceEnv(ctx context.Context, drv *ui.Driver, orgAPID, realmAPID, serviceAPID string) error {
 	drv.Activate(ctx, servicemodels.ServiceEnvHeader)
 	drv.Activate(ctx, servicemodels.ServiceEnvHint)
 
@@ -379,6 +436,22 @@ func (c *Setup) automatedMethod(ctx context.Context, drv *ui.Driver, setupGuideU
 	}
 
 	drv.Activate(ctx, &models.SetupGuideHint{LclUrl: LclURL})
+
+	return nil
+}
+
+func (c *Setup) writeTOML(ctx context.Context, cfg cli.Config, drv *ui.Driver, orgAPID, realmAPID, serviceAPID, category, certStyle string) error {
+	cfg.Org.APID = orgAPID
+	cfg.Lcl.RealmAPID = realmAPID
+	cfg.Service.APID = serviceAPID
+	cfg.Service.Category = category
+	cfg.Service.CertStyle = certStyle
+
+	if err := cfg.WriteTOML(); err != nil {
+		return err
+	}
+
+	drv.Activate(ctx, models.SetupAnchorTOML)
 
 	return nil
 }

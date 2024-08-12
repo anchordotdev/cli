@@ -38,22 +38,22 @@ func TestCmdServiceEnv(t *testing.T) {
 
 	t.Run("--method clipboard", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdServiceEnv, "--method", "clipboard")
-		require.Equal(t, "clipboard", cfg.Service.Env.Method)
+		require.Equal(t, "clipboard", cfg.Service.EnvOutput)
 	})
 
 	t.Run("--org testOrg", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdServiceEnv, "--org", "testOrg")
-		require.Equal(t, "testOrg", cfg.Service.Env.Org)
+		require.Equal(t, "testOrg", cfg.Org.APID)
 	})
 
 	t.Run("--realm testRealm", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdServiceEnv, "--realm", "testRealm")
-		require.Equal(t, "testRealm", cfg.Service.Env.Realm)
+		require.Equal(t, "testRealm", cfg.Realm.APID)
 	})
 
 	t.Run("--service testService", func(t *testing.T) {
 		cfg := cmdtest.TestCfg(t, CmdServiceEnv, "--service", "testService")
-		require.Equal(t, "testService", cfg.Service.Env.Service)
+		require.Equal(t, "testService", cfg.Service.APID)
 	})
 }
 
@@ -62,7 +62,7 @@ func TestServiceEnv(t *testing.T) {
 	defer cancel()
 
 	cfg := new(cli.Config)
-	cfg.AnchorURL = "http://anchor.lcl.host"
+	cfg.Dashboard.URL = "http://anchor.lcl.host"
 	cfg.API.URL = srv.URL
 	var err error
 	if cfg.API.Token, err = srv.GeneratePAT("anky@anchor.dev"); err != nil {

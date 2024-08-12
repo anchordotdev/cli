@@ -4,8 +4,13 @@ Usage:
   anchor service env [flags]
 
 Flags:
-  -h, --help             help for env
-      --method string    Integration method for environment variables.
-  -o, --org string       Organization to trust.
-  -r, --realm string     Realm to trust.
-  -s, --service string   Service for ENV.
+      --env-output string   Integration method for environment variables.
+  -h, --help                help for env
+  -o, --org string          Organization to trust.
+  -r, --realm string        Realm to trust.
+  -s, --service string      Service for ENV.
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

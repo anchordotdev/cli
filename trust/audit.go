@@ -17,9 +17,9 @@ import (
 var CmdTrustAudit = cli.NewCmd[Audit](CmdTrust, "audit", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Flags().StringVarP(&cfg.Trust.Org, "org", "o", "", "Organization to trust.")
-	cmd.Flags().StringVarP(&cfg.Trust.Realm, "realm", "r", "", "Realm to trust.")
-	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", []string{"homebrew", "nss", "system"}, "Trust stores to update.")
+	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization to trust.")
+	cmd.Flags().StringVarP(&cfg.Realm.APID, "realm", "r", cli.Defaults.Realm.APID, "Realm to trust.")
+	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", cli.Defaults.Trust.Stores, "Trust stores to update.")
 
 	cmd.MarkFlagsRequiredTogether("org", "realm")
 })
@@ -45,8 +45,6 @@ func (c *Audit) RunTUI(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	cfg := cli.ConfigFromContext(ctx)
-
 	drv.Activate(ctx, models.TrustAuditHeader)
 	drv.Activate(ctx, models.TrustAuditHint)
 
@@ -57,12 +55,12 @@ func (c *Audit) RunTUI(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	expectedCAs, err := fetchExpectedCAs(ctx, c.anc, org, realm)
+	expectedCAs, err := FetchExpectedCAs(ctx, c.anc, org, realm)
 	if err != nil {
 		return err
 	}
 
-	stores, _, err := loadStores(cfg)
+	stores, err := LoadStores(ctx, nil)
 	if err != nil {
 		return err
 	}

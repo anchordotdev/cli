@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"net/url"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
@@ -19,11 +18,11 @@ import (
 var CmdLclMkCert = cli.NewCmd[MkCert](CmdLcl, "mkcert", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Flags().StringVarP(&cfg.Lcl.Org, "org", "o", "", "Organization to create certificate for.")
-	cmd.Flags().StringVarP(&cfg.Lcl.Realm, "realm", "r", "", "Realm to create certificate for.")
-	cmd.Flags().StringVarP(&cfg.Lcl.Service, "service", "s", "", "Service to create certificate for.")
+	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization to create certificate for.")
+	cmd.Flags().StringVarP(&cfg.Lcl.RealmAPID, "realm", "r", cli.Defaults.Lcl.RealmAPID, "Realm to create certificate for.")
+	cmd.Flags().StringVarP(&cfg.Service.APID, "service", "s", cli.Defaults.Service.APID, "Service to create certificate for.")
 
-	cmd.Flags().StringSliceVar(&cfg.Lcl.MkCert.Domains, "domains", []string{}, "Domains to create certificate for.")
+	cmd.Flags().StringSliceVar(&cfg.Lcl.MkCert.Domains, "domains", cli.Defaults.Lcl.MkCert.Domains, "Domains to create certificate for.")
 })
 
 type MkCert struct {
@@ -114,7 +113,7 @@ func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate,
 		return nil, err
 	}
 
-	acmeURL := cfg.AnchorURL + "/" + url.QueryEscape(orgAPID) + "/" + url.QueryEscape(realmAPID) + "/x509/" + chainAPID + "/acme"
+	acmeURL := cfg.AcmeURL(orgAPID, realmAPID, chainAPID)
 
 	tlsCert, err := provisionCert(c.eab, c.domains, acmeURL)
 	if err != nil {
@@ -128,8 +127,8 @@ func (c *MkCert) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
-	if cfg.Lcl.Org != "" {
-		return cfg.Lcl.Org, nil
+	if cfg.Org.APID != "" {
+		return cfg.Org.APID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -152,8 +151,8 @@ func (c *MkCert) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver,
 	if c.RealmAPID != "" {
 		return c.RealmAPID, nil
 	}
-	if cfg.Lcl.Realm != "" {
-		return cfg.Lcl.Realm, nil
+	if cfg.Lcl.RealmAPID != "" {
+		return cfg.Lcl.RealmAPID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
@@ -176,8 +175,8 @@ func (c *MkCert) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Drive
 	if c.ServiceAPID != "" {
 		return c.ServiceAPID, nil
 	}
-	if cfg.Lcl.Service != "" {
-		return cfg.Lcl.Service, nil
+	if cfg.Service.APID != "" {
+		return cfg.Service.APID, nil
 	}
 
 	selector := &component.Selector[api.Service]{

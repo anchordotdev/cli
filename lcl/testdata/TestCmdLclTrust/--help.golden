@@ -1,0 +1,14 @@
+Install CA Certificates for lcl.host Local Development
+
+Usage:
+  anchor lcl trust [flags]
+
+Flags:
+  -h, --help                   help for trust
+      --no-sudo                Disable sudo prompts.
+      --trust-stores strings   Trust stores to update. (default [homebrew,nss,system])
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

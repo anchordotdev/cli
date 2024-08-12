@@ -3,21 +3,24 @@ package lcl
 import (
 	"context"
 
+	"github.com/spf13/cobra"
+
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/trust"
+	"github.com/anchordotdev/cli/truststore"
 	truststoreModels "github.com/anchordotdev/cli/truststore/models"
 	"github.com/anchordotdev/cli/ui"
-	"github.com/spf13/cobra"
 )
 
 var CmdLclAudit = cli.NewCmd[Audit](CmdLcl, "audit", func(cmd *cobra.Command) {})
 
 type Audit struct {
-	anc                *api.Session
-	orgSlug, realmSlug string
+	anc *api.Session
+
+	cas []*truststore.CA
 }
 
 func (c Audit) UI() cli.UI {
@@ -48,57 +51,28 @@ func (c Audit) run(ctx context.Context, drv *ui.Driver) error {
 	return nil
 }
 
-type LclAuditResult struct {
-	diagnosticServiceExists, trusted bool
-}
+func (c Audit) perform(ctx context.Context, drv *ui.Driver) (*truststore.AuditInfo, error) {
+	drv.Activate(ctx, &truststoreModels.TrustStoreAudit{})
 
-func (c Audit) perform(ctx context.Context, drv *ui.Driver) (*LclAuditResult, error) {
-	var result = LclAuditResult{}
-
-	drv.Activate(ctx, &models.AuditResources{})
-
-	if c.orgSlug == "" {
-		userInfo, err := c.anc.UserInfo(ctx)
-		if err != nil {
-			return nil, err
-		}
-		c.orgSlug = userInfo.PersonalOrg.Slug
-	}
-
-	if c.realmSlug == "" {
-		c.realmSlug = "localhost"
-	}
-
-	var diagnosticService *api.Service
-	services, err := c.anc.GetOrgServices(ctx, c.orgSlug)
+	stores, err := trust.LoadStores(ctx, drv)
 	if err != nil {
 		return nil, err
 	}
-	for _, service := range services {
-		if service.ServerType == "diagnostic" {
-			diagnosticService = &service
+
+	cas := c.cas
+	if len(cas) == 0 {
+		var err error
+		if cas, err = trust.FetchLocalDevCAs(ctx, c.anc); err != nil {
+			return nil, err
 		}
 	}
 
-	if diagnosticService == nil {
-		drv.Send(models.AuditResourcesNotFoundMsg{})
-	} else {
-		result.diagnosticServiceExists = true
-		drv.Send(models.AuditResourcesFoundMsg{})
-	}
-
-	drv.Activate(ctx, &truststoreModels.TrustStoreAudit{})
-
-	auditInfo, err := trust.PerformAudit(ctx, c.anc, c.orgSlug, c.realmSlug)
+	auditInfo, err := trust.PerformAudit(ctx, stores, cas)
 	if err != nil {
 		return nil, err
 	}
 
 	drv.Send(truststoreModels.AuditInfoMsg(auditInfo))
 
-	// TODO: audit local app status
-
-	result.trusted = (len(auditInfo.Missing) == 0)
-
-	return &result, nil
+	return auditInfo, nil
 }

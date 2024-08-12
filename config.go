@@ -1,114 +1,109 @@
 package cli
 
 import (
+	"bytes"
+	"context"
+	"io"
 	"io/fs"
+	"net/url"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
+
+	"github.com/joeshaw/envdecode"
+	"github.com/mcuadros/go-defaults"
+	"github.com/r3labs/diff/v3"
+	"github.com/spf13/pflag"
+
+	"github.com/anchordotdev/cli/toml"
 )
 
 type Config struct {
-	JSON           bool `desc:"Only print JSON output to STDOUT." flag:"json,j" env:"JSON_OUTPUT" toml:"json-output"`
-	NonInteractive bool `desc:"Run without ever asking for user input." flag:"non-interactive,n" env:"NON_INTERACTIVE" toml:"non-interactive"`
-	Verbose        bool `desc:"Verbose output." flag:"verbose,v" env:"VERBOSE" toml:"verbose"`
-
-	AnchorURL string `default:"https://anchor.dev" desc:"TODO" flag:"host" env:"ANCHOR_HOST" toml:"anchor-host"`
+	NonInteractive bool `env:"NON_INTERACTIVE" toml:",omitempty,readonly"`
 
 	API struct {
-		URL   string `default:"https://api.anchor.dev/v0" desc:"Anchor API endpoint URL." flag:"api-url,u" env:"API_URL" json:"api_url" toml:"api-url"`
-		Token string `desc:"Anchor API personal access token (PAT)." flag:"api-token,t" env:"API_TOKEN" json:"api_token" toml:"token"`
-	}
+		URL   string `default:"https://api.anchor.dev/v0" env:"API_URL" toml:"url,omitempty"`
+		Token string `env:"API_TOKEN" toml:"api-token,omitempty,readonly"`
+	} `toml:"api,omitempty"`
+
+	File struct {
+		Path string `default:"anchor.toml" env:"ANCHOR_CONFIG" toml:",omitempty,readonly"`
+		Skip bool   `env:"ANCHOR_SKIP_CONFIG" toml:",omitempty,readonly"`
+	} `toml:",omitempty,readonly"`
+
+	Dashboard struct {
+		URL string `default:"https://anchor.dev" env:"ANCHOR_HOST" toml:"url,omitempty"`
+	} `toml:"dashboard,omitempty"`
 
 	Lcl struct {
-		Org       string `desc:"Organization for lcl.host local development environment management." flag:"org,o" env:"ORG" json:"org" toml:"org"`
-		Realm     string `desc:"Realm for lcl.host local development environment management." flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
-		Service   string `desc:"Service for lcl.host local development environment management." flag:"service" env:"SERVICE" json:"service" toml:"service"`
-		Subdomain string `desc:"Subdomain for lcl.host diagnostic service." flag:"subdomain" env:"SUBDOMAIN" json:"subdomain" toml:"subdomain"`
+		LclHostURL string `default:"https://lcl.host" env:"LCL_HOST_URL" toml:",omitempty,readonly"`
 
-		DiagnosticAddr string `default:":4433" desc:"Local server address" flag:"addr,a" env:"ADDR" json:"address" toml:"address"`
-		LclHostURL     string `default:"https://lcl.host" env:"LCL_HOST_URL"`
+		RealmAPID string `env:"REALM" toml:"realm-apid,omitempty"`
 
-		Audit struct {
-		} `cmd:"audit"`
-
-		Clean struct {
-		} `cmd:"clean"`
-
-		Config struct {
-		} `cmd:"config"`
+		Diagnostic struct {
+			Addr      string `default:":4433" env:"DIAGNOSTIC_ADDR" toml:",omitempty"`
+			Subdomain string `env:"DIAGNOSTIC_SUBDOMAIN" toml:",omitempty"`
+		} `toml:",omitempty,readonly"`
 
 		MkCert struct {
-			Domains []string `flag:"domains"`
-			SubCa   string   `flag:"subca"`
-		} `cmd:"mkcert"`
+			Domains []string `flag:"domains" toml:",omitempty"`
+			SubCa   string   `flag:"subca" toml:",omitempty"`
+		} `toml:",omitempty,readonly"`
+	} `toml:"lcl-host,omitempty"`
 
-		Setup struct {
-			Language string `desc:"Language to use for integrating Anchor." flag:"language" json:"language" toml:"language"`
-			Method   string `desc:"Integration method for certificates."`
-		} `cmd:"setup"`
-	} `cmd:"lcl"`
+	Org struct {
+		APID string `env:"ORG" toml:"apid,omitempty"`
+	} `toml:"org,omitempty"`
+
+	Realm struct {
+		APID string `env:"REALM"`
+	} `toml:",omitempty,readonly"`
 
 	Service struct {
-		Probe struct {
-			Name string `desc:"service name"`
+		APID      string `env:"SERVICE" toml:"apid,omitempty"`
+		Category  string `env:"SERVICE_CATEGORY" toml:"category,omitempty"`
+		Framework string `env:"SERVICE_FRAMEWORK" toml:"framework,omitempty"`
+		Name      string `env:"SERVICE_NAME" toml:",omitempty,readonly"`
 
-			Org   string `desc:"organization" flag:"org,o" env:"ORG" json:"org" toml:"org"`
-			Realm string `desc:"realm" flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
-		} `cmd:"probe"`
-
-		Env struct {
-			Method  string `desc:"Integration method for environment variables."`
-			Org     string `desc:"organization" flag:"org,o" env:"ORG" json:"org" toml:"org"`
-			Realm   string `desc:"realm" flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
-			Service string `desc:"service" flag:"service,s" env:"SERVICE" json:"service" toml:"service"`
-		} `cmd:"env"`
-	} `cmd:"service"`
+		EnvOutput string `env:"ENV_OUTPUT" toml:",omitempty,readonly"`
+		CertStyle string `env:"CERT_STYLE" toml:"cert-style,omitempty"`
+	} `toml:"service,omitempty"`
 
 	Trust struct {
-		Org   string `desc:"organization" flag:"org,o" env:"ORG" json:"org" toml:"org"`
-		Realm string `desc:"realm" flag:"realm,r" env:"REALM" json:"realm" toml:"realm"`
+		NoSudo bool `flag:"no-sudo" env:"NO_SUDO" toml:",omitempty"`
 
-		NoSudo bool `desc:"Disable sudo prompts." flag:"no-sudo" env:"NO_SUDO" toml:"no-sudo"`
+		MockMode bool `env:"ANCHOR_CLI_TRUSTSTORE_MOCK_MODE" toml:",omitempty"`
 
-		MockMode bool `env:"ANCHOR_CLI_TRUSTSTORE_MOCK_MODE"`
-
-		Stores []string `default:"[system,nss,homebrew]" desc:"trust stores" flag:"trust-stores" env:"TRUST_STORES" toml:"trust-stores"`
-
-		Audit struct{} `cmd:"audit"`
+		Stores []string `default:"[homebrew,nss,system]" env:"TRUST_STORES" toml:",omitempty"`
 
 		Clean struct {
-			States []string `default:"[expired]" desc:"cert state(s)" flag:"cert-states" env:"CERT_STATES" toml:"cert-states"`
-		} `cmd:"clean"`
-	} `cmd:"trust"`
-
-	User struct {
-		Auth struct {
-			SignIn struct{} `cmd:"signin"`
-
-			SignOut struct{} `cmd:"signout"`
-
-			WhoAmI struct{} `cmd:"whoami"`
-		} `cmd:"auth"`
-	} `group:"user,user management" toml:"user"`
+			States []string `default:"[expired]" env:"CERT_STATES" toml:",omitempty"`
+		} `toml:",omitempty"`
+	} `toml:",omitempty,readonly"`
 
 	Keyring struct {
 		MockMode bool `env:"ANCHOR_CLI_KEYRING_MOCK_MODE"`
-	}
+	} `toml:",omitempty,readonly"`
 
-	Version struct{} `cmd:"version"`
-
-	Test ConfigTest
+	Test ConfigTest `fake:"-" toml:",omitempty,readonly"`
+	TOML *Config    `fake:"-" toml:",omitempty,readonly"`
 }
 
 // values used for testing
 type ConfigTest struct {
-	Prefer map[string]ConfigTestPrefer `desc:"values for prism prefer header"`
+	Prefer map[string]ConfigTestPrefer // values for prism prefer header
 
-	Browserless bool      `desc:"run as though browserless"`
-	GOOS        string    `desc:"change OS identifier in tests"`
-	ProcFS      fs.FS     `desc:"change the proc filesystem in tests"`
-	SkipRunE    bool      `desc:"skip RunE for testing purposes"`
-	Timestamp   time.Time `desc:"timestamp to use/display in tests"`
+	ACME struct {
+		URL string
+	}
+	Browserless bool      // run as though browserless
+	GOOS        string    // change OS identifier in tests
+	ProcFS      fs.FS     // change the proc filesystem in tests
+	LclHostPort int       // specify lcl host port in tests
+	SkipRunE    bool      // skip RunE for testing purposes
+	SystemFS    SystemFS  // change the system filesystem in tests
+	Timestamp   time.Time // timestamp to use/display in tests
 }
 
 type ConfigTestPrefer struct {
@@ -117,23 +112,161 @@ type ConfigTestPrefer struct {
 	Example string `desc:"override example"`
 }
 
-func (c Config) GOOS() string {
+func (c *Config) encodeTOML(w io.Writer) error {
+	var cfg Config
+	if err := cfg.setNonDefaults(c); err != nil {
+		return err
+	}
+	return toml.NewEncoder[Config](w).Encode(cfg)
+}
+
+func (c *Config) GOOS() string {
 	if goos := c.Test.GOOS; goos != "" {
 		return goos
 	}
 	return runtime.GOOS
 }
 
-func (c Config) ProcFS() fs.FS {
+func (c *Config) AcmeURL(orgAPID string, realmAPID string, chainAPID string) string {
+	baseURL := c.Test.ACME.URL
+	if baseURL == "" {
+		baseURL = c.Dashboard.URL
+	}
+
+	return baseURL + "/" + url.QueryEscape(orgAPID) + "/" + url.QueryEscape(realmAPID) + "/x509/" + url.QueryEscape(chainAPID) + "/acme"
+}
+
+func (c *Config) LclHostPort() *int {
+	lclHostPort := c.Test.LclHostPort
+	if lclHostPort == 0 {
+		return nil
+	}
+	return &lclHostPort
+}
+
+func (c *Config) SetupGuideURL(orgAPID string, serviceAPID string) string {
+	return c.Dashboard.URL + "/" + url.QueryEscape(orgAPID) + "/services/" + url.QueryEscape(serviceAPID) + "/guide"
+}
+
+func (c *Config) Load(ctx context.Context) error {
+	defaults.SetDefaults(c)
+
+	if err := c.loadTOML(c.SystemFS()); err != nil {
+		return err
+	}
+
+	if err := c.loadENV(); err != nil {
+		return err
+	}
+
+	if cfg := ConfigFromContext(ctx); cfg != nil {
+		return c.setNonDefaults(cfg)
+	}
+	return nil
+}
+
+func (c *Config) ProcFS() fs.FS {
 	if procFS := c.Test.ProcFS; procFS != nil {
 		return procFS
 	}
 	return os.DirFS("/proc")
 }
 
-func (c Config) Timestamp() time.Time {
+func (c *Config) SystemFS() SystemFS {
+	if fs := c.Test.SystemFS; fs != nil {
+		return fs
+	}
+	return osFS{}
+}
+
+func (c *Config) Timestamp() time.Time {
 	if timestamp := c.Test.Timestamp; !timestamp.IsZero() {
 		return timestamp
 	}
 	return time.Now().UTC()
+}
+
+func (c *Config) WriteTOML() error {
+	var buf bytes.Buffer
+	if err := c.encodeTOML(&buf); err != nil {
+		return err
+	}
+	return c.SystemFS().WriteFile(c.File.Path, buf.Bytes(), 0644)
+}
+
+func (c *Config) loadENV() error {
+	if err := envdecode.Decode(c); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
+		return err
+	}
+	return nil
+}
+
+func (c *Config) loadTOML(fsys fs.FS) error {
+	if path, ok := os.LookupEnv("ANCHOR_CONFIG"); ok {
+		c.File.Path = path
+	}
+	if skip, ok := os.LookupEnv("ANCHOR_SKIP_CONFIG"); ok {
+		c.File.Skip, _ = strconv.ParseBool(skip) // ignore errors
+	}
+
+	fs := pflag.NewFlagSet("", pflag.ContinueOnError)
+	fs.StringVar(&c.File.Path, "config", Defaults.File.Path, "")
+	fs.BoolVar(&c.File.Skip, "skip-config", Defaults.File.Skip, "")
+	fs.ParseErrorsWhitelist.UnknownFlags = true
+	fs.SetOutput(io.Discard)
+
+	argv := os.Args
+	for _, arg := range os.Args {
+		if len(arg) > 0 && arg[0] == '-' {
+			break
+		}
+		argv = argv[1:]
+	}
+
+	_ = fs.Parse(argv) // ignore errors
+
+	if c.File.Skip {
+		return nil
+	}
+
+	if f, err := fsys.Open(c.File.Path); err == nil {
+		cfg := *Defaults
+		if err := toml.NewDecoder(f).Decode(&cfg); err != nil {
+			return err
+		}
+		if err := c.setNonDefaults(&cfg); err != nil {
+			return err
+		}
+		c.TOML = &cfg
+	} else if c.File.Path != Defaults.File.Path {
+		return err
+	}
+	return nil
+}
+
+func (c *Config) setNonDefaults(other *Config) error {
+	changeLog, err := diff.Diff(Defaults, other)
+	if err != nil {
+		return err
+	}
+
+	_ = diff.Patch(changeLog, &c)
+	return nil
+}
+
+type SystemFS interface {
+	Open(string) (fs.File, error)
+	ReadDir(string) ([]fs.DirEntry, error)
+	Stat(string) (fs.FileInfo, error)
+	WriteFile(string, []byte, os.FileMode) error
+}
+
+// https://github.com/golang/go/issues/47803
+type osFS struct{}
+
+func (osFS) Open(name string) (fs.File, error)          { return os.Open(name) }
+func (osFS) ReadDir(name string) ([]fs.DirEntry, error) { return os.ReadDir(name) }
+func (osFS) Stat(name string) (fs.FileInfo, error)      { return os.Stat(name) }
+func (osFS) WriteFile(name string, data []byte, perm os.FileMode) error {
+	return os.WriteFile(name, data, perm)
 }

@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/inetaf/tcpproxy"
 	"golang.org/x/sync/errgroup"
@@ -98,7 +99,13 @@ func (s *Server) Close() error {
 		return err
 	}
 
-	if err := s.server.Shutdown(context.Background()); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	if err := s.server.Shutdown(ctx); err != nil {
+		return err
+	}
+	if err := s.server.Close(); err != nil {
 		return err
 	}
 

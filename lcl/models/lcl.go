@@ -43,6 +43,20 @@ var (
 			ui.StepHint("We'll set you up to use HTTPS locally in your browsers and other programs."),
 		},
 	}
+
+	TrustHeader = ui.Section{
+		Name: "TrustHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Manage CA Certificates in your Local Trust Store(s) %s", ui.Whisper("`anchor lcl trust`"))),
+		},
+	}
+
+	TrustHint = ui.Section{
+		Name: "TrustHint",
+		Model: ui.MessageLines{
+			ui.StepHint("We'll check your local trust stores and make any needed updates."),
+		},
+	}
 )
 
 type ProvisionService struct {

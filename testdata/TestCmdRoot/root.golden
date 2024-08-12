@@ -15,6 +15,9 @@ Available Commands:
   version     Show version info
 
 Flags:
-  -h, --help   help for anchor
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+  -h, --help               help for anchor
+      --skip-config        Skip loading configuration file.
 
 Use "anchor [command] --help" for more information about a command.

@@ -85,7 +85,7 @@ func TestSelector(t *testing.T) {
 
 		cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
 			"/v0/orgs": {
-				Example: "double",
+				Example: "anky_team",
 			},
 		}
 		ctx = cli.ContextWithConfig(ctx, cfg)
@@ -127,8 +127,12 @@ func TestSelector(t *testing.T) {
 
 		org := <-choicec
 
-		if want, got := "second-org-slug", org.Slug; want != got {
-			errc <- fmt.Errorf("Want org choice: %q, Got: %q", want, got)
+		if want, got := "ankyco", org.Slug; want != got {
+			t.Errorf("Want org choice: %q, Got: %q", want, got)
+		}
+
+		if err := <-errc; err != nil {
+			t.Error(err)
 		}
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))

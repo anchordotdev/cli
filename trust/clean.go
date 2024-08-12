@@ -18,11 +18,11 @@ import (
 var CmdTrustClean = cli.NewCmd[Clean](CmdTrust, "clean", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Flags().StringSliceVar(&cfg.Trust.Clean.States, "cert-states", []string{"expired"}, "Cert states to clean.")
-	cmd.Flags().StringVarP(&cfg.Trust.Org, "org", "o", "", "Organization to trust.")
-	cmd.Flags().BoolVar(&cfg.Trust.NoSudo, "no-sudo", false, "Disable sudo prompts.")
-	cmd.Flags().StringVarP(&cfg.Trust.Realm, "realm", "r", "", "Realm to trust.")
-	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", []string{"homebrew", "nss", "system"}, "Trust stores to update.")
+	cmd.Flags().StringSliceVar(&cfg.Trust.Clean.States, "cert-states", cli.Defaults.Trust.Clean.States, "Cert states to clean.")
+	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization to trust.")
+	cmd.Flags().BoolVar(&cfg.Trust.NoSudo, "no-sudo", cli.Defaults.Trust.NoSudo, "Disable sudo prompts.")
+	cmd.Flags().StringVarP(&cfg.Realm.APID, "realm", "r", cli.Defaults.Realm.APID, "Realm to trust.")
+	cmd.Flags().StringSliceVar(&cfg.Trust.Stores, "trust-stores", cli.Defaults.Trust.Stores, "Trust stores to update.")
 
 	cmd.MarkFlagsRequiredTogether("org", "realm")
 
@@ -79,21 +79,14 @@ func (c Clean) Perform(ctx context.Context, drv *ui.Driver) error {
 
 	drv.Activate(ctx, &models.TrustCleanAudit{})
 
-	expectedCAs, err := fetchExpectedCAs(ctx, c.Anc, c.OrgSlug, c.RealmSlug)
+	expectedCAs, err := FetchExpectedCAs(ctx, c.Anc, c.OrgSlug, c.RealmSlug)
 	if err != nil {
 		return err
 	}
 
-	stores, sudoMgr, err := loadStores(cfg)
+	stores, err := LoadStores(ctx, drv)
 	if err != nil {
 		return err
-	}
-
-	sudoMgr.AroundSudo = func(sudo func()) {
-		unpausec := drv.Pause()
-		defer close(unpausec)
-
-		sudo()
 	}
 
 	audit := &truststore.Audit{

@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/anchordotdev/cli"
@@ -69,8 +70,9 @@ type TrustUpdateStore struct {
 
 	Store truststore.Store
 
-	installing *truststore.CA
-	installed  map[string][]string
+	installing  *truststore.CA
+	installed   map[string][]string
+	commonNames []string
 
 	spinner spinner.Model
 }
@@ -100,6 +102,11 @@ func (m *TrustUpdateStore) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case TrustStoreInstalledCAMsg:
 		m.installing = nil
 		m.installed[msg.CA.Subject.CommonName] = append(m.installed[msg.CA.Subject.CommonName], msg.CA.PublicKeyAlgorithm.String())
+
+		if !slices.Contains(m.commonNames, msg.CA.Subject.CommonName) {
+			m.commonNames = append(m.commonNames, msg.CA.Subject.CommonName)
+		}
+
 		return m, nil
 	}
 
@@ -114,7 +121,9 @@ func (m *TrustUpdateStore) View() string {
 	if len(m.installed) > 0 {
 		var styledCAs []string
 
-		for subjectCommonName, algorithms := range m.installed {
+		for _, subjectCommonName := range m.commonNames {
+			algorithms := m.installed[subjectCommonName]
+
 			styledCAs = append(styledCAs, fmt.Sprintf("%s [%s]",
 				ui.Underline(subjectCommonName),
 				ui.Whisper(strings.Join(algorithms, ", ")),

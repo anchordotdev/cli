@@ -17,3 +17,8 @@ Flags:
   -o, --org string             Organization to trust.
   -r, --realm string           Realm to trust.
       --trust-stores strings   Trust stores to update. (default [homebrew,nss,system])
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

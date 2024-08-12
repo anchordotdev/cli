@@ -9,3 +9,8 @@ Flags:
   -o, --org string        Organization to create certificate for.
   -r, --realm string      Realm to create certificate for.
   -s, --service string    Service to create certificate for.
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

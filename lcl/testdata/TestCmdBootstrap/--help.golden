@@ -1,0 +1,16 @@
+Initial System Configuration for lcl.host Local Development
+
+Usage:
+  anchor lcl bootstrap [flags]
+
+Aliases:
+  bootstrap, config
+
+Flags:
+  -a, --addr string   Address for local diagnostic web server. (default ":4433")
+  -h, --help          help for bootstrap
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

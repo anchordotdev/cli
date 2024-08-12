@@ -50,7 +50,7 @@ func (s *Server) IsProxy() bool {
 }
 
 func (s *Server) RecreateUser(username string) error {
-	if !s.IsProxy() {
+	if s.IsMock() {
 		return nil
 	}
 

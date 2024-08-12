@@ -1,0 +1,576 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── LclPreamble ────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+─── LclHeader ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+─── LclHint ────────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+─── AuditHeader ────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+─── AuditHint ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    * Comparing local and expected CA certificates…⠋
+─── TrustStoreAudit ────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+─── TrustHeader ────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+─── TrustHint ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    | Updates may require sudo privileges, learn why here: https://lcl.host/why-sudo
+    ! Press Enter to install missing certificates. (requires sudo)
+─── TrustUpdateConfirm ─────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    | "ankyco/development - AnchorCA" Thumbprint (sha1): 0FC20F8F F8491310 6CC5441B FAE07B26 B4A036F7
+    * Updating Mock: installing ankyco/development - AnchorCA ECDSA… ⠋
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA]
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA]
+    | "ankyco/development - AnchorCA" Thumbprint (sha1): 5710728A A336B3F0 4A4E96E6 F3E12932 A7FCAC72
+    * Updating Mock: installing ankyco/development - AnchorCA RSA… ⠋
+─── TrustUpdateStore ───────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+─── SetupHeader ────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+─── SetupHint ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    ? Which organization do you want to manage your local development environment for?
+    > anky@anchor.dev (ankydotdev)
+      AnkyCo (ankyco)             
+─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    ? Which organization do you want to manage your local development environment for?
+      anky@anchor.dev (ankydotdev)
+    > AnkyCo (ankyco)             
+─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    * Fetching realms…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    * Fetching services…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    ? Which ankyco/development service's lcl.host local development environment do you want to setup?
+    > service-name (service-name)
+      Create New Service         
+─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+─── ServiceEnvHeader ───────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+─── ServiceEnvHint ─────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+─── EnvFetch ───────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    * Fetching service-name environment variables…⠋
+─── EnvFetch ───────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+─── EnvMethod ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    ? How would you like to manage your environment variables?
+    > Add export commands to your clipboard.                          
+      Add dotenv contents to your clipboard.                          
+      Display export commands. ! WARNING: could be observed by others.
+─── EnvMethod ──────────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    - Selected export environment variable method. You can also use `--method export`.
+─── EnvClipboard ───────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    - Selected export environment variable method. You can also use `--method export`.
+    - Copied service-name export commands to your clipboard.
+    ! Paste and press enter to load your environment variables.
+─── EnvNextSteps ───────────────────────────────────────────────────────────────
+| Let's set up fast and totally free lcl.host HTTPS!
+                                                                 
+# Setup lcl.host HTTPS Local Development Environment `anchor lcl`
+    | We'll set you up to use HTTPS locally in your browsers and other programs.
+                                                                       
+# Audit lcl.host HTTPS Local Development Environment `anchor lcl audit`
+    | We'll compare your local development CA certificates from Anchor and your local trust stores.
+    - Compared local and expected CA certificates: need to install 2 missing certificates.
+                                                                        
+# Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
+    | We'll check your local trust stores and make any needed updates.
+    - Updated Mock: installed ankyco/development - AnchorCA [ECDSA, RSA]
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected ankyco organization. You can also use `--org ankyco`.
+    - Using development, the only available realm. You can also use `--realm development`.
+    - Selected service-name service. You can also use `--service service-name`.
+                                                              
+# Fetch Environment Variables for Service `anchor service env`
+    | We'll set your environment variables to provide configuration and credentials.
+    - Selected export environment variable method. You can also use `--method export`.
+    - Copied service-name export commands to your clipboard.
+    ! Paste and press enter to load your environment variables.
+            
+# Next Steps
+    ! (Re)Start your server.
+    ! Check out your encrypted site: https://service.lcl.host:4433
+    | These certificates will renew automatically, time to enjoy effortless encryption.
