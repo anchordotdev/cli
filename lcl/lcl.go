@@ -148,9 +148,6 @@ func (c *Command) systemConfig(ctx context.Context, drv *ui.Driver) error {
 
 		cmdBootstrap := &Bootstrap{
 			anc:       c.anc,
-			orgSlug:   orgSlug,
-			realmSlug: realmSlug,
-
 			auditInfo: auditInfo,
 		}
 

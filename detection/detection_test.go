@@ -39,6 +39,8 @@ func TestDefaultDetectors(t *testing.T) {
 	fakeFS := fstest.MapFS{
 		"Gemfile":          &fstest.MapFile{Data: []byte(""), Mode: 0644},
 		"Gemfile.lock":     &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"Pipfile":          &fstest.MapFile{Data: []byte(""), Mode: 0644},
+		"Pipfile.lock":     &fstest.MapFile{Data: []byte(""), Mode: 0644},
 		"package.json":     &fstest.MapFile{Data: []byte(""), Mode: 0644},
 		"requirements.txt": &fstest.MapFile{Data: []byte(""), Mode: 0644},
 		"main.go":          &fstest.MapFile{Data: []byte(""), Mode: 0644},

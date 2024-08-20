@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"os/exec"
 	"runtime"
 	"strings"
 	"time"
@@ -17,6 +18,7 @@ import (
 
 	"github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/stacktrace"
+	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui"
 )
 
@@ -169,6 +171,16 @@ func isReportable(err error) bool {
 	case UserError:
 		return false
 	case ui.Error:
+		return false
+	}
+
+	var terr truststore.Error
+	if errors.As(err, &terr) {
+		return false
+	}
+
+	eerr := new(exec.ExitError)
+	if errors.As(err, &eerr) {
 		return false
 	}
 

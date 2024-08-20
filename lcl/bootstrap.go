@@ -32,8 +32,7 @@ var CmdBootstrap = cli.NewCmd[Bootstrap](CmdLcl, "bootstrap", func(cmd *cobra.Co
 var loopbackAddrs = []string{"127.0.0.1", "::1"}
 
 type Bootstrap struct {
-	anc                *api.Session
-	orgSlug, realmSlug string
+	anc *api.Session
 
 	auditInfo *truststore.AuditInfo
 }
@@ -168,10 +167,6 @@ func (c Bootstrap) perform(ctx context.Context, drv *ui.Driver) error {
 }
 
 func (c Bootstrap) personalOrgAPID(ctx context.Context) (string, error) {
-	if c.orgSlug != "" {
-		return c.orgSlug, nil
-	}
-
 	userInfo, err := c.anc.UserInfo(ctx)
 	if err != nil {
 		return "", err
@@ -180,9 +175,6 @@ func (c Bootstrap) personalOrgAPID(ctx context.Context) (string, error) {
 }
 
 func (c Bootstrap) localhostRealmAPID() (string, error) {
-	if c.realmSlug != "" {
-		return c.realmSlug, nil // TODO: is this used?
-	}
 	return "localhost", nil
 }
 

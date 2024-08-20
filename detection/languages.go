@@ -28,7 +28,7 @@ var (
 
 	Python = &FileDetector{
 		Title:             "Python",
-		Paths:             []string{"requirements.txt"},
+		Paths:             []string{"Pipfile", "Pipfile.lock", "requirements.txt"},
 		FollowUpDetectors: []Detector{Django, Flask},
 		AnchorCategory:    anchorcli.CategoryPython,
 	}
