@@ -243,9 +243,9 @@ func (w windowsRootStore) listCerts() ([]*x509.Certificate, error) {
 
 		// Parse cert
 		certBytes := (*[1 << 20]byte)(unsafe.Pointer(cert.EncodedCert))[:cert.Length]
-		if parsedCert, err := x509.ParseCertificate(certBytes); err == nil {
+		if cert, err := parseCertificate(certBytes); cert != nil && err == nil {
 			// ignore individual cert parsing errors
-			certs = append(certs, parsedCert)
+			certs = append(certs, cert)
 		}
 	}
 	return certs, nil

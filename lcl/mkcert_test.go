@@ -64,7 +64,7 @@ func TestLclMkcert(t *testing.T) {
 		defer cancel()
 
 		cmd := MkCert{
-			domains: []string{"hi-lcl-mkcert.lcl.host", "hi-lcl-mkcert.localhost"},
+			Domains: []string{"hi-lcl-mkcert.lcl.host", "hi-lcl-mkcert.localhost"},
 		}
 
 		uitest.TestTUIOutput(ctx, t, cmd.UI())

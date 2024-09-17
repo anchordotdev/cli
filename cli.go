@@ -22,6 +22,11 @@ import (
 	"github.com/anchordotdev/cli/ui"
 )
 
+type Clipboard interface {
+	ReadAll() (string, error)
+	WriteAll(text string) error
+}
+
 var Executable string
 
 var Version = struct {

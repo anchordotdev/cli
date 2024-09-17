@@ -18,6 +18,7 @@ import (
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/cert"
 	"github.com/anchordotdev/cli/component"
+	componentmodels "github.com/anchordotdev/cli/component/models"
 	"github.com/anchordotdev/cli/detection"
 	"github.com/anchordotdev/cli/lcl/models"
 	climodels "github.com/anchordotdev/cli/models"
@@ -53,7 +54,8 @@ var (
 type Setup struct {
 	OrgAPID, RealmAPID, ServiceAPID string
 
-	anc *api.Session
+	anc       *api.Session
+	clipboard cli.Clipboard
 }
 
 func (c Setup) UI() cli.UI {
@@ -121,7 +123,7 @@ func (c *Setup) initialSetup(ctx context.Context, cfg *cli.Config, drv *ui.Drive
 		return err
 	}
 
-	lclDomain, err := c.serviceDomain(ctx, cfg, drv, name)
+	lclDomain, err := c.serviceDomain(ctx, drv, name)
 	if err != nil {
 		return err
 	}
@@ -159,7 +161,7 @@ func (c *Setup) initialSetup(ctx context.Context, cfg *cli.Config, drv *ui.Drive
 
 	mkcert := &MkCert{
 		anc:         c.anc,
-		domains:     domains,
+		Domains:     domains,
 		OrgAPID:     orgAPID,
 		RealmAPID:   realmAPID,
 		ServiceAPID: srv.Slug,
@@ -168,7 +170,7 @@ func (c *Setup) initialSetup(ctx context.Context, cfg *cli.Config, drv *ui.Drive
 		SubCaAPID: atch.Relationships.SubCa.Slug,
 	}
 
-	tlsCert, err := mkcert.perform(ctx, drv)
+	tlsCert, err := mkcert.perform(ctx, cfg, drv)
 	if err != nil {
 		return err
 	}
@@ -189,21 +191,28 @@ func (c *Setup) initialSetup(ctx context.Context, cfg *cli.Config, drv *ui.Drive
 		certStyle = MethodACME
 		setupGuideURL := cfg.SetupGuideURL(orgAPID, srv.Slug)
 		lclURL := fmt.Sprintf("https://%s:%d", lclDomain, *srv.LocalhostPort)
-		if err := c.automatedMethod(ctx, drv, setupGuideURL, lclURL); err != nil {
+		if err := c.automatedMethod(ctx, cfg, drv, setupGuideURL, lclURL); err != nil {
 			return err
 		}
 	default:
 		return fmt.Errorf("Unknown method: %s. Please choose either `acme` (recommended) or `mkcert`.", certStyle)
 	}
 
-	return c.writeTOML(ctx, *cfg, drv, orgAPID, realmAPID, srv.Slug, category, certStyle)
+	return c.writeTOML(ctx, cfg, drv, orgAPID, realmAPID, srv.Slug, category, certStyle)
 }
 
 func (c *Setup) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
+
 	if cfg.Org.APID != "" {
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Org.APID },
+			Flag:          "--org",
+			Singular:      "organization",
+		})
 		return cfg.Org.APID, nil
 	}
 
@@ -227,7 +236,14 @@ func (c *Setup) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, 
 	if c.RealmAPID != "" {
 		return c.RealmAPID, nil
 	}
+
 	if cfg.Lcl.RealmAPID != "" {
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Lcl.RealmAPID },
+			Flag:          "--realm",
+			Singular:      "realm",
+		})
 		return cfg.Lcl.RealmAPID, nil
 	}
 
@@ -251,7 +267,14 @@ func (c *Setup) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	if c.ServiceAPID != "" {
 		return c.ServiceAPID, nil
 	}
+
 	if cfg.Service.APID != "" {
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Service.APID },
+			Flag:          "--service",
+			Singular:      "service",
+		})
 		return cfg.Service.APID, nil
 	}
 
@@ -302,6 +325,12 @@ func (c *Setup) serviceName(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 
 func (c *Setup) serviceCategory(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if cfg.Service.Category != "" {
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Service.Category },
+			Flag:          "--category",
+			Singular:      "service category",
+		})
 		return cfg.Service.Category, nil
 	}
 
@@ -342,7 +371,7 @@ func (c *Setup) serviceCategory(ctx context.Context, cfg *cli.Config, drv *ui.Dr
 	}
 }
 
-func (c *Setup) serviceDomain(ctx context.Context, cfg *cli.Config, drv *ui.Driver, name string) (string, error) {
+func (c *Setup) serviceDomain(ctx context.Context, drv *ui.Driver, name string) (string, error) {
 	// TODO: check cfg.Lcl.Domain or something
 
 	defaultDomain := parameterize(name)
@@ -366,6 +395,12 @@ func (c *Setup) serviceDomain(ctx context.Context, cfg *cli.Config, drv *ui.Driv
 
 func (c *Setup) certStyle(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if cfg.Service.CertStyle != "" {
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Service.CertStyle },
+			Flag:          "--cert-style",
+			Singular:      "certificate style",
+		})
 		return cfg.Service.CertStyle, nil
 	}
 
@@ -387,7 +422,9 @@ func (c *Setup) setupServiceEnv(ctx context.Context, drv *ui.Driver, orgAPID, re
 	drv.Activate(ctx, servicemodels.ServiceEnvHint)
 
 	cmdServiceEnv := &service.Env{
-		Anc:         c.anc,
+		Anc:       c.anc,
+		Clipboard: c.clipboard,
+
 		OrgAPID:     orgAPID,
 		RealmAPID:   realmAPID,
 		ServiceAPID: serviceAPID,
@@ -413,7 +450,7 @@ func (c *Setup) manualMethod(ctx context.Context, drv *ui.Driver, orgAPID string
 	return cmdCertProvision.Perform(ctx, drv)
 }
 
-func (c *Setup) automatedMethod(ctx context.Context, drv *ui.Driver, setupGuideURL string, LclURL string) error {
+func (c *Setup) automatedMethod(ctx context.Context, cfg *cli.Config, drv *ui.Driver, setupGuideURL string, LclURL string) error {
 	setupGuideConfirmCh := make(chan struct{})
 
 	drv.Activate(ctx, &models.SetupGuidePrompt{
@@ -428,7 +465,6 @@ func (c *Setup) automatedMethod(ctx context.Context, drv *ui.Driver, setupGuideU
 		return ctx.Err()
 	}
 
-	cfg := cli.ConfigFromContext(ctx)
 	if !cfg.Trust.MockMode {
 		if err := browser.OpenURL(setupGuideURL); err != nil {
 			drv.Activate(ctx, &climodels.Browserless{Url: setupGuideURL})
@@ -440,7 +476,9 @@ func (c *Setup) automatedMethod(ctx context.Context, drv *ui.Driver, setupGuideU
 	return nil
 }
 
-func (c *Setup) writeTOML(ctx context.Context, cfg cli.Config, drv *ui.Driver, orgAPID, realmAPID, serviceAPID, category, certStyle string) error {
+func (c *Setup) writeTOML(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID, realmAPID, serviceAPID, category, certStyle string) error {
+	cfg = cfg.Copy()
+
 	cfg.Org.APID = orgAPID
 	cfg.Lcl.RealmAPID = realmAPID
 	cfg.Service.APID = serviceAPID

@@ -15,8 +15,7 @@ import (
 var CmdLclClean = cli.NewCmd[LclClean](CmdLcl, "clean", func(cmd *cobra.Command) {})
 
 type LclClean struct {
-	anc                *api.Session
-	orgSlug, realmSlug string
+	anc *api.Session
 }
 
 func (c LclClean) UI() cli.UI {
@@ -39,16 +38,14 @@ func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
 
 	cfg.Trust.Clean.States = []string{"all"}
 
-	if c.orgSlug == "" {
-		userInfo, err := c.anc.UserInfo(ctx)
-		if err != nil {
-			return err
-		}
-		c.orgSlug = userInfo.PersonalOrg.Slug
+	orgAPID, err := c.personalOrgAPID(ctx)
+	if err != nil {
+		return err
 	}
 
-	if c.realmSlug == "" {
-		c.realmSlug = "localhost"
+	realmAPID, err := c.localhostRealmAPID()
+	if err != nil {
+		return err
 	}
 
 	drv.Activate(ctx, models.LclCleanHeader)
@@ -58,8 +55,8 @@ func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
 
 	cmd := &trust.Clean{
 		Anc:       c.anc,
-		OrgSlug:   c.orgSlug,
-		RealmSlug: c.realmSlug,
+		OrgSlug:   orgAPID,
+		RealmSlug: realmAPID,
 	}
 
 	err = cmd.Perform(ctx, drv)
@@ -68,4 +65,16 @@ func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	return nil
+}
+
+func (c LclClean) personalOrgAPID(ctx context.Context) (string, error) {
+	userInfo, err := c.anc.UserInfo(ctx)
+	if err != nil {
+		return "", err
+	}
+	return userInfo.PersonalOrg.Slug, nil
+}
+
+func (c LclClean) localhostRealmAPID() (string, error) {
+	return "localhost", nil
 }

@@ -223,7 +223,7 @@ func (c Bootstrap) diagnosticServer(ctx context.Context, cfg *cli.Config, drv *u
 
 	mkcert := &MkCert{
 		anc:         c.anc,
-		domains:     domains,
+		Domains:     domains,
 		OrgAPID:     srv.Relationships.Organization.Slug,
 		RealmAPID:   realmAPID,
 		ServiceAPID: srv.Slug,
@@ -232,7 +232,7 @@ func (c Bootstrap) diagnosticServer(ctx context.Context, cfg *cli.Config, drv *u
 		SubCaAPID: atch.Relationships.SubCa.Slug,
 	}
 
-	tlsCert, err := mkcert.perform(ctx, drv)
+	tlsCert, err := mkcert.perform(ctx, cfg, drv)
 	if err != nil {
 		return nil, err
 	}

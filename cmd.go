@@ -302,7 +302,7 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 				errc <- err
 			}()
 
-			if cfg.TOML != nil {
+			if cfg.Via.TOML != nil {
 				drv.Activate(ctx, models.ConfigLoaded(cfg.File.Path))
 			}
 

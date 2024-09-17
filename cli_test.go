@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/stacktrace"
 	_ "github.com/anchordotdev/cli/testflags"
 	"github.com/anchordotdev/cli/ui"
@@ -92,8 +93,6 @@ func TestError(t *testing.T) {
 	})
 }
 
-var CmdPanic = cli.NewCmd[PanicCommand](nil, "error", func(cmd *cobra.Command) {})
-
 type PanicCommand struct{}
 
 func (c PanicCommand) UI() cli.UI {
@@ -170,3 +169,35 @@ func (m *TestHint) View() string {
 }
 
 var Timestamp, _ = time.Parse(time.RFC3339Nano, "2024-01-02T15:04:05.987654321Z")
+
+func TestConfigLoadTOMLGolden(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cfg := new(cli.Config)
+	cfg.File.Path = "anchor.toml"
+	cfg.Via.TOML = new(cli.Config)
+
+	ctx = cli.ContextWithConfig(ctx, cfg)
+
+	cmd := tomlCommand{}
+
+	uitest.TestTUIOutput(ctx, t, cmd.UI())
+}
+
+type tomlCommand struct{}
+
+func (c tomlCommand) UI() cli.UI {
+	return cli.UI{
+		RunTUI: c.run,
+	}
+}
+
+func (*tomlCommand) run(ctx context.Context, drv *ui.Driver) error {
+	cfg := cli.ConfigFromContext(ctx)
+	if cfg.Via.TOML != nil {
+		drv.Activate(ctx, models.ConfigLoaded(cfg.File.Path))
+	}
+
+	return nil
+}

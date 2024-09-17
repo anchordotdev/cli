@@ -13,11 +13,14 @@ import (
 
 	"github.com/joeshaw/envdecode"
 	"github.com/mcuadros/go-defaults"
+	"github.com/mohae/deepcopy"
 	"github.com/r3labs/diff/v3"
 	"github.com/spf13/pflag"
 
 	"github.com/anchordotdev/cli/toml"
 )
+
+type ConfigFetchFunc func(*Config) any
 
 type Config struct {
 	NonInteractive bool `env:"NON_INTERACTIVE" toml:",omitempty,readonly"`
@@ -87,7 +90,12 @@ type Config struct {
 	} `toml:",omitempty,readonly"`
 
 	Test ConfigTest `fake:"-" toml:",omitempty,readonly"`
-	TOML *Config    `fake:"-" toml:",omitempty,readonly"`
+
+	Via struct {
+		Defaults *Config `fake:"-" toml:",omitempty,readonly"`
+		ENV      *Config `fake:"-" toml:",omitempty,readonly"`
+		TOML     *Config `fake:"-" toml:",omitempty,readonly"`
+	} `toml:",omitempty,readonly"`
 }
 
 // values used for testing
@@ -148,8 +156,18 @@ func (c *Config) SetupGuideURL(orgAPID string, serviceAPID string) string {
 	return c.Dashboard.URL + "/" + url.QueryEscape(orgAPID) + "/services/" + url.QueryEscape(serviceAPID) + "/guide"
 }
 
+func (c *Config) Copy() *Config {
+	cfg := deepcopy.Copy(*c).(Config)
+	// replace net-new objects with originals
+	cfg.Test.SystemFS = c.Test.SystemFS
+
+	return &cfg
+}
+
 func (c *Config) Load(ctx context.Context) error {
-	defaults.SetDefaults(c)
+	if err := c.loadDefaults(); err != nil {
+		return err
+	}
 
 	if err := c.loadTOML(c.SystemFS()); err != nil {
 		return err
@@ -194,14 +212,27 @@ func (c *Config) WriteTOML() error {
 	return c.SystemFS().WriteFile(c.File.Path, buf.Bytes(), 0644)
 }
 
+func (c *Config) loadDefaults() error {
+	defaults.SetDefaults(c)
+	c.Via.Defaults = defaultConfig()
+	return nil
+}
+
 func (c *Config) loadENV() error {
+	var cfg Config
+	if err := envdecode.Decode(&cfg); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
+		return err
+	}
 	if err := envdecode.Decode(c); err != nil && err != envdecode.ErrNoTargetFieldsAreSet {
 		return err
 	}
+	c.Via.ENV = &cfg
 	return nil
 }
 
 func (c *Config) loadTOML(fsys fs.FS) error {
+	c.Via.TOML = new(Config)
+
 	if path, ok := os.LookupEnv("ANCHOR_CONFIG"); ok {
 		c.File.Path = path
 	}
@@ -237,7 +268,7 @@ func (c *Config) loadTOML(fsys fs.FS) error {
 		if err := c.setNonDefaults(&cfg); err != nil {
 			return err
 		}
-		c.TOML = &cfg
+		c.Via.TOML = &cfg
 	} else if c.File.Path != Defaults.File.Path {
 		return err
 	}
@@ -252,6 +283,24 @@ func (c *Config) setNonDefaults(other *Config) error {
 
 	_ = diff.Patch(changeLog, &c)
 	return nil
+}
+
+func (c *Config) ViaSource(fetcher func(*Config) any) string {
+	value := fetcher(c)
+
+	if fetcher(c.Via.ENV) == value {
+		return "env"
+	}
+
+	if fetcher(c.Via.TOML) == value {
+		return c.File.Path
+	}
+
+	if fetcher(c.Via.Defaults) == value {
+		return "default"
+	}
+
+	return "flag"
 }
 
 type SystemFS interface {

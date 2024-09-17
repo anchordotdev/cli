@@ -38,13 +38,6 @@ func TestCfg(t *testing.T, cmd *cobra.Command, args ...string) *cli.Config {
 	return cfg
 }
 
-func TestCmd(t *testing.T, cmd *cobra.Command, args ...string) *cobra.Command {
-	_, err := executeSkip(cmd, args...)
-	require.NoError(t, err)
-
-	return cmd
-}
-
 func TestError(t *testing.T, cmd *cobra.Command, args ...string) error {
 	_, err := executeSkip(cmd, args...)
 	require.Error(t, err)

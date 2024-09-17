@@ -6,14 +6,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/api/apitest"
-	"github.com/anchordotdev/cli/cmdtest"
-	"github.com/anchordotdev/cli/ui/uitest"
-	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/x/exp/teatest"
 	"github.com/stretchr/testify/require"
+
+	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/api/apitest"
+	"github.com/anchordotdev/cli/clipboard"
+	"github.com/anchordotdev/cli/cmdtest"
+	"github.com/anchordotdev/cli/ui/uitest"
 )
 
 var srv = &apitest.Server{
@@ -76,7 +77,9 @@ func TestServiceEnv(t *testing.T) {
 		}
 
 		drv, tm := uitest.TestTUI(ctx, t)
-		cmd := Env{}
+		cmd := Env{
+			Clipboard: new(clipboard.Mock),
+		}
 		errc := make(chan error, 1)
 
 		go func() {
@@ -105,7 +108,7 @@ func TestServiceEnv(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		env, err := clipboard.ReadAll()
+		env, err := cmd.Clipboard.ReadAll()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -124,7 +127,9 @@ func TestServiceEnv(t *testing.T) {
 		}
 
 		drv, tm := uitest.TestTUI(ctx, t)
-		cmd := Env{}
+		cmd := Env{
+			Clipboard: new(clipboard.Mock),
+		}
 		errc := make(chan error, 1)
 
 		go func() {
@@ -148,7 +153,7 @@ func TestServiceEnv(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		env, err := clipboard.ReadAll()
+		env, err := cmd.Clipboard.ReadAll()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -167,7 +172,9 @@ func TestServiceEnv(t *testing.T) {
 		}
 
 		drv, tm := uitest.TestTUI(ctx, t)
-		cmd := Env{}
+		cmd := Env{
+			Clipboard: new(clipboard.Mock),
+		}
 		errc := make(chan error, 1)
 
 		go func() {

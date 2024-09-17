@@ -11,6 +11,7 @@ import (
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/cert"
 	"github.com/anchordotdev/cli/component"
+	componentmodels "github.com/anchordotdev/cli/component/models"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
 )
@@ -28,8 +29,8 @@ var CmdLclMkCert = cli.NewCmd[MkCert](CmdLcl, "mkcert", func(cmd *cobra.Command)
 type MkCert struct {
 	anc *api.Session
 
-	domains     []string
 	eab         *api.Eab
+	Domains     []string
 	OrgAPID     string
 	RealmAPID   string
 	ServiceAPID string
@@ -57,35 +58,53 @@ func (c *MkCert) run(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	tlsCert, err := c.perform(ctx, drv)
+	cfg := cli.ConfigFromContext(ctx)
+
+	tlsCert, err := c.perform(ctx, cfg, drv)
+	if err != nil {
+		return err
+	}
+
+	domains, err := c.domains(ctx, cfg)
+	if err != nil {
+		return err
+	}
+
+	orgAPID, err := c.orgAPID(ctx, cfg, drv)
+	if err != nil {
+		return err
+	}
+
+	realmAPID, err := c.realmAPID(ctx, cfg, drv, orgAPID)
+	if err != nil {
+		return err
+	}
+
+	serviceAPID, err := c.serviceAPID(ctx, cfg, drv, orgAPID, realmAPID)
 	if err != nil {
 		return err
 	}
 
 	cmdCertProvision := cert.Provision{
 		Cert:        tlsCert,
-		Domains:     c.domains,
-		OrgAPID:     c.OrgAPID,
-		RealmAPID:   c.RealmAPID,
-		ServiceAPID: c.ServiceAPID,
+		Domains:     domains,
+		OrgAPID:     orgAPID,
+		RealmAPID:   realmAPID,
+		ServiceAPID: serviceAPID,
 	}
 
 	return cmdCertProvision.Perform(ctx, drv)
 }
 
-func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate, error) {
-	cfg := cli.ConfigFromContext(ctx)
-
+func (c *MkCert) perform(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (*tls.Certificate, error) {
 	chainAPID := c.ChainAPID
 	if chainAPID == "" {
 		chainAPID = "ca"
 	}
 
-	if len(c.domains) == 0 {
-		c.domains = cfg.Lcl.MkCert.Domains
-		if len(c.domains) == 0 {
-			return nil, cli.UserError{Err: errors.New("domains is required")}
-		}
+	domains, err := c.domains(ctx, cfg)
+	if err != nil {
+		return nil, err
 	}
 
 	orgAPID, err := c.orgAPID(ctx, cfg, drv)
@@ -115,7 +134,7 @@ func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate,
 
 	acmeURL := cfg.AcmeURL(orgAPID, realmAPID, chainAPID)
 
-	tlsCert, err := provisionCert(c.eab, c.domains, acmeURL)
+	tlsCert, err := provisionCert(c.eab, domains, acmeURL)
 	if err != nil {
 		return nil, err
 	}
@@ -123,12 +142,32 @@ func (c *MkCert) perform(ctx context.Context, drv *ui.Driver) (*tls.Certificate,
 	return tlsCert, nil
 }
 
+func (c *MkCert) domains(ctx context.Context, cfg *cli.Config) ([]string, error) {
+	if len(c.Domains) != 0 {
+		return c.Domains, nil
+	}
+
+	c.Domains = cfg.Lcl.MkCert.Domains
+	if len(c.Domains) == 0 {
+		return nil, cli.UserError{Err: errors.New("domains is required")}
+	}
+	return c.Domains, nil
+}
+
 func (c *MkCert) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
+
 	if cfg.Org.APID != "" {
-		return cfg.Org.APID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Org.APID },
+			Flag:          "--org",
+			Singular:      "organization",
+		})
+		c.OrgAPID = cfg.Org.APID
+		return c.OrgAPID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -144,15 +183,24 @@ func (c *MkCert) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (
 	if err != nil {
 		return "", err
 	}
-	return org.Apid, nil
+	c.OrgAPID = org.Apid
+	return c.OrgAPID, nil
 }
 
 func (c *MkCert) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
 	if c.RealmAPID != "" {
 		return c.RealmAPID, nil
 	}
+
 	if cfg.Lcl.RealmAPID != "" {
-		return cfg.Lcl.RealmAPID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Lcl.RealmAPID },
+			Flag:          "--realm",
+			Singular:      "realm",
+		})
+		c.RealmAPID = cfg.Lcl.RealmAPID
+		return c.RealmAPID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
@@ -168,15 +216,24 @@ func (c *MkCert) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver,
 	if err != nil {
 		return "", err
 	}
-	return realm.Apid, nil
+	c.RealmAPID = realm.Apid
+	return c.RealmAPID, nil
 }
 
 func (c *MkCert) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID, realmAPID string) (string, error) {
 	if c.ServiceAPID != "" {
 		return c.ServiceAPID, nil
 	}
+
 	if cfg.Service.APID != "" {
-		return cfg.Service.APID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Service.APID },
+			Flag:          "--service",
+			Singular:      "service",
+		})
+		c.ServiceAPID = cfg.Service.APID
+		return c.ServiceAPID, nil
 	}
 
 	selector := &component.Selector[api.Service]{
@@ -195,14 +252,17 @@ func (c *MkCert) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Drive
 	if service == nil {
 		return "", nil
 	}
-	return service.Slug, nil
+	c.ServiceAPID = service.Slug
+	return c.ServiceAPID, nil
 }
 
 func (c *MkCert) subcaAPID(ctx context.Context, cfg *cli.Config, orgAPID, realmAPID, chainAPID, serviceAPID string) (string, error) {
 	if c.SubCaAPID != "" {
 		return c.SubCaAPID, nil
 	}
+
 	if cfg.Lcl.MkCert.SubCa != "" {
+		c.SubCaAPID = cfg.Lcl.MkCert.SubCa
 		return cfg.Lcl.MkCert.SubCa, nil
 	}
 
@@ -213,6 +273,7 @@ func (c *MkCert) subcaAPID(ctx context.Context, cfg *cli.Config, orgAPID, realmA
 
 	for _, a := range attachments {
 		if a.Relationships.Realm.Apid == realmAPID && a.Relationships.Chain.Apid == chainAPID {
+			c.SubCaAPID = cfg.Lcl.MkCert.SubCa
 			return *a.Relationships.SubCa.Apid, nil
 		}
 	}

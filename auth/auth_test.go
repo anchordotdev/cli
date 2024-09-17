@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/anchordotdev/cli/api/apitest"
@@ -17,9 +18,9 @@ func TestMain(m *testing.M) {
 	if err := srv.Start(context.Background()); err != nil {
 		panic(err)
 	}
-	defer srv.Close()
+	defer os.Exit(m.Run())
 
-	m.Run()
+	srv.Close()
 }
 
 func TestCmdAuth(t *testing.T) {

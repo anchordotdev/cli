@@ -3,7 +3,6 @@ package cli
 import (
 	"bytes"
 	"context"
-	"reflect"
 	"testing"
 	"testing/fstest"
 	"unicode"
@@ -12,6 +11,7 @@ import (
 	"github.com/anchordotdev/cli/clitest"
 	"github.com/anchordotdev/cli/toml"
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/go-test/deep"
 )
 
 func TestConfigLoadENV(t *testing.T) {
@@ -42,7 +42,7 @@ func TestConfigLoadENV(t *testing.T) {
 				"API_URL":                         "https://api.anchor.example.com/v0",
 				"CERT_STATES":                     "valid",
 				"CERT_STYLE":                      "acme",
-				"DIAGNOSTIC_ADDR":                 "4321",
+				"DIAGNOSTIC_ADDR":                 ":4321",
 				"DIAGNOSTIC_SUBDOMAIN":            "ankydotdev",
 				"ENV_OUTPUT":                      "dotenv",
 				"LCL_HOST_URL":                    "https://lcl.host.example.com",
@@ -65,7 +65,7 @@ func TestConfigLoadENV(t *testing.T) {
 				cfg.Dashboard.URL = "https://anchor.example.com"
 				cfg.Lcl.LclHostURL = "https://lcl.host.example.com"
 				cfg.Lcl.RealmAPID = "test-realm"
-				cfg.Lcl.Diagnostic.Addr = "4321"
+				cfg.Lcl.Diagnostic.Addr = ":4321"
 				cfg.Lcl.Diagnostic.Subdomain = "ankydotdev"
 				cfg.NonInteractive = true
 				cfg.Org.APID = "test-org"
@@ -91,16 +91,21 @@ func TestConfigLoadENV(t *testing.T) {
 				t.Setenv(k, v)
 			}
 
+			var expected Config
+			test.cfgFn(&expected)
+
 			var cfg Config
 			if err := cfg.loadENV(); err != nil {
 				t.Fatal(err)
 			}
 
-			var expected Config
-			test.cfgFn(&expected)
+			if diff := deep.Equal(&expected, cfg.Via.ENV); diff != nil {
+				t.Errorf("config.ENV does not match: %s", diff)
+			}
 
-			if want, got := expected, cfg; !reflect.DeepEqual(want, got) {
-				t.Errorf("want env loaded config %#v, got %#v", want, got)
+			cfg.Via.ENV = nil
+			if diff := deep.Equal(&expected, &cfg); diff != nil {
+				t.Errorf("loadEnv does not match: %s", diff)
 			}
 		})
 	}
@@ -147,22 +152,15 @@ func TestConfigLoadTOML(t *testing.T) {
 		},
 	}
 
-	defaultConfig := func() *Config {
-		cfg := new(Config)
-		*cfg = *Defaults
-		return cfg
-	}
-
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			cfg := defaultConfig()
-
 			fs := fstest.MapFS{
 				"anchor.toml": &fstest.MapFile{
 					Data: []byte(test.toml),
 				},
 			}
 
+			cfg := defaultConfig()
 			if err := cfg.loadTOML(fs); err != nil {
 				t.Fatal(err)
 			}
@@ -170,13 +168,13 @@ func TestConfigLoadTOML(t *testing.T) {
 			expected := defaultConfig()
 			test.cfgFn(expected)
 
-			if want, got := expected, cfg.TOML; !reflect.DeepEqual(want, got) {
-				t.Errorf("want config from toml %#v, got %#v", want, got)
+			if diff := deep.Equal(expected, cfg.Via.TOML); diff != nil {
+				t.Errorf("config.TOML does not match: %s", diff)
 			}
 
-			cfg.TOML = nil
-			if want, got := expected, cfg; !reflect.DeepEqual(want, got) {
-				t.Errorf("want combined config %#v, got %#v", want, got)
+			cfg.Via.TOML = nil
+			if diff := deep.Equal(&expected, &cfg); diff != nil {
+				t.Errorf("loadTOML does not match: %s", diff)
 			}
 		})
 	}
@@ -249,7 +247,7 @@ func TestConfigEncodeTOML(t *testing.T) {
 			}
 
 			if want, got := test.toml, buf.String(); want != got {
-				t.Errorf("want config toml %s, got %s", want, got)
+				t.Errorf("toml encoded config does not match.\n\nWant:\n\n%s\n\nGot:\n\n%s", want, got)
 			}
 		})
 	}
@@ -294,10 +292,12 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got.TOML = nil
+			got.Via.Defaults = nil
+			got.Via.ENV = nil
+			got.Via.TOML = nil
 
-			if !reflect.DeepEqual(want, got) {
-				t.Errorf("want round-tripped config %+v, got %+v", want, got)
+			if diff := deep.Equal(want, got); diff != nil {
+				t.Errorf("TOML write+read config does not match: %s", diff)
 			}
 		})
 	}

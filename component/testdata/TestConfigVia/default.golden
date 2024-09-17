@@ -1,0 +1,2 @@
+─── ConfigVia ──────────────────────────────────────────────────────────────────
+    - Using https://api.anchor.dev/v0 api url from default. You can also use `API_URL= https://api.anchor.dev/v0`.

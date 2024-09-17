@@ -2,7 +2,6 @@ package truststore
 
 import (
 	"bytes"
-	"crypto/x509"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -146,9 +145,12 @@ func (s *Platform) listCAs() ([]*CA, error) {
 
 	var cas []*CA
 	for p, buf := pem.Decode(data); p != nil; p, buf = pem.Decode(buf) {
-		cert, err := x509.ParseCertificate(p.Bytes)
+		cert, err := parseCertificate(p.Bytes)
 		if err != nil {
 			return nil, err
+		}
+		if cert == nil {
+			continue
 		}
 
 		ca := &CA{

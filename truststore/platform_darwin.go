@@ -3,7 +3,6 @@ package truststore
 import (
 	"bytes"
 	"crypto/sha256"
-	"crypto/x509"
 	"encoding/asn1"
 	"encoding/hex"
 	"encoding/pem"
@@ -191,12 +190,12 @@ func (s *Platform) listCAs() ([]*CA, error) {
 
 	var cas []*CA
 	for p, buf := pem.Decode(out); p != nil; p, buf = pem.Decode(buf) {
-		cert, err := x509.ParseCertificate(p.Bytes)
+		cert, err := parseCertificate(p.Bytes)
 		if err != nil {
-			if isDupExtErr(err) {
-				continue
-			}
 			return nil, err
+		}
+		if cert == nil {
+			continue
 		}
 
 		ca := &CA{
@@ -236,8 +235,4 @@ func (s *Platform) uninstallCA(ca *CA) (bool, error) {
 		}
 	}
 	return true, nil
-}
-
-func isDupExtErr(err error) bool {
-	return err.Error() == "x509: certificate contains duplicate extensions"
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/clipboard"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
@@ -81,7 +82,9 @@ func TestSetup(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Setup{}
+		cmd := Setup{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {
@@ -122,6 +125,10 @@ func TestSetup(t *testing.T) {
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
 		uitest.TestGolden(t, drv.Golden())
+
+		if _, err := cfg.Test.SystemFS.Stat("anchor.toml"); err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	t.Run("create-service-manual-basics", func(t *testing.T) {
@@ -134,7 +141,9 @@ func TestSetup(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Setup{}
+		cmd := Setup{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {
@@ -177,6 +186,10 @@ func TestSetup(t *testing.T) {
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
 		uitest.TestGolden(t, drv.Golden())
+
+		if _, err := cfg.Test.SystemFS.Stat("anchor.toml"); err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	t.Run(fmt.Sprintf("existing-service-basics-%s", uitest.TestTagOS()), func(t *testing.T) {
@@ -189,7 +202,9 @@ func TestSetup(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Setup{}
+		cmd := Setup{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {
@@ -226,7 +241,9 @@ func TestSetup(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Setup{}
+		cmd := Setup{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {
@@ -269,6 +286,10 @@ func TestSetup(t *testing.T) {
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
 		uitest.TestGolden(t, drv.Golden())
+
+		if _, err := cfg.Test.SystemFS.Stat("anchor.toml"); err != nil {
+			t.Fatal(err)
+		}
 	})
 
 	t.Run("create-service-with-custom-domain", func(t *testing.T) {
@@ -281,7 +302,9 @@ func TestSetup(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Setup{}
+		cmd := Setup{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {
@@ -325,5 +348,9 @@ func TestSetup(t *testing.T) {
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
 		uitest.TestGolden(t, drv.Golden())
+
+		if _, err := cfg.Test.SystemFS.Stat("anchor.toml"); err != nil {
+			t.Fatal(err)
+		}
 	})
 }

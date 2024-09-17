@@ -16,6 +16,7 @@ import (
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/component"
+	componentmodels "github.com/anchordotdev/cli/component/models"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/truststore"
@@ -49,7 +50,8 @@ var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
 })
 
 type Command struct {
-	anc *api.Session
+	anc       *api.Session
+	clipboard cli.Clipboard
 
 	OrgAPID, RealmAPID string
 }
@@ -181,10 +183,11 @@ func (c *Command) appSetup(ctx context.Context, cfg *cli.Config, drv *ui.Driver)
 	}
 
 	cmdSetup := &Setup{
-		OrgAPID:     orgAPID,
-		RealmAPID:   realmAPID,
-		ServiceAPID: cfg.Service.APID, // TODO: cfg access here looks wrong
-		anc:         c.anc,
+		OrgAPID:   orgAPID,
+		RealmAPID: realmAPID,
+
+		anc:       c.anc,
+		clipboard: c.clipboard,
 	}
 
 	return cmdSetup.perform(ctx, drv)
@@ -194,7 +197,14 @@ func (c *Command) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) 
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
+
 	if cfg.Org.APID != "" {
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Org.APID },
+			Flag:          "--org",
+			Singular:      "organization",
+		})
 		return cfg.Org.APID, nil
 	}
 
@@ -218,7 +228,14 @@ func (c *Command) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	if c.RealmAPID != "" {
 		return c.RealmAPID, nil
 	}
+
 	if cfg.Lcl.RealmAPID != "" {
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Lcl.RealmAPID },
+			Flag:          "--realm",
+			Singular:      "realm",
+		})
 		return cfg.Lcl.RealmAPID, nil
 	}
 

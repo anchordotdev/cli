@@ -18,6 +18,7 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/api/apitest"
+	"github.com/anchordotdev/cli/clipboard"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/truststore"
@@ -158,7 +159,9 @@ func TestLcl(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Command{}
+		cmd := Command{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {
@@ -260,7 +263,9 @@ func TestLcl(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Command{}
+		cmd := Command{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {
@@ -316,7 +321,9 @@ func TestLcl(t *testing.T) {
 
 		drv, tm := uitest.TestTUI(ctx, t)
 
-		cmd := Command{}
+		cmd := Command{
+			clipboard: new(clipboard.Mock),
+		}
 
 		errc := make(chan error, 1)
 		go func() {

@@ -7,14 +7,15 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
+	"github.com/anchordotdev/cli/clipboard"
 	"github.com/anchordotdev/cli/component"
 	"github.com/anchordotdev/cli/service/models"
 	"github.com/anchordotdev/cli/ui"
-	"github.com/atotto/clipboard"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -41,6 +42,8 @@ type Env struct {
 	Anc *api.Session
 
 	ChainAPID, OrgAPID, RealmAPID, ServiceAPID string
+
+	Clipboard cli.Clipboard
 
 	whoami string
 }
@@ -74,6 +77,10 @@ func (c *Env) run(ctx context.Context, drv *ui.Driver) error {
 
 func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
+
+	if c.Clipboard == nil {
+		c.Clipboard = clipboard.System
+	}
 
 	chainAPID := c.chainAPID()
 	orgAPID, err := c.orgAPID(ctx, cfg, drv)
@@ -157,12 +164,12 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 
 	switch envOutput {
 	case MethodExport:
-		err := c.exportMethod(ctx, drv, env, serviceAPID)
+		err := c.exportMethod(ctx, cfg, drv, env, serviceAPID)
 		if err != nil {
 			return err
 		}
 	case MethodDotenv:
-		err := c.dotenvMethod(ctx, drv, env, serviceAPID)
+		err := c.dotenvMethod(ctx, cfg, drv, env, serviceAPID)
 		if err != nil {
 			return err
 		}
@@ -191,7 +198,7 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	return nil
 }
 
-func (c *Env) exportMethod(ctx context.Context, drv *ui.Driver, env map[string]string, serviceAPID string) error {
+func (c *Env) exportMethod(ctx context.Context, cfg *cli.Config, drv *ui.Driver, env map[string]string, serviceAPID string) error {
 	var b strings.Builder
 
 	var keys []string
@@ -202,7 +209,7 @@ func (c *Env) exportMethod(ctx context.Context, drv *ui.Driver, env map[string]s
 	for _, key := range keys {
 		fmt.Fprintf(&b, "export %s=\"%s\"\n", key, env[key])
 	}
-	clipboardErr := clipboard.WriteAll(b.String())
+	clipboardErr := c.Clipboard.WriteAll(b.String())
 
 	drv.Activate(ctx, &models.EnvClipboard{
 		InClipboard: (clipboardErr == nil),
@@ -212,7 +219,7 @@ func (c *Env) exportMethod(ctx context.Context, drv *ui.Driver, env map[string]s
 	return nil
 }
 
-func (c *Env) dotenvMethod(ctx context.Context, drv *ui.Driver, env map[string]string, serviceAPID string) error {
+func (c *Env) dotenvMethod(ctx context.Context, cfg *cli.Config, drv *ui.Driver, env map[string]string, serviceAPID string) error {
 	var b bytes.Buffer
 
 	var keys []string
@@ -223,7 +230,7 @@ func (c *Env) dotenvMethod(ctx context.Context, drv *ui.Driver, env map[string]s
 	for _, key := range keys {
 		fmt.Fprintf(&b, "%s=\"%s\"\n", key, env[key])
 	}
-	clipboardErr := clipboard.WriteAll(b.String())
+	clipboardErr := c.Clipboard.WriteAll(b.String())
 
 	drv.Activate(ctx, &models.EnvDotenv{
 		InClipboard: (clipboardErr == nil),

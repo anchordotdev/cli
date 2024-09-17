@@ -1,5 +1,10 @@
 package truststore
 
+import (
+	"crypto/x509"
+	"strings"
+)
+
 func (s *Platform) Check() (bool, error) {
 	ok, err := s.check()
 	if err != nil {
@@ -89,4 +94,16 @@ func (s *Platform) UninstallCA(ca *CA) (uninstalled bool, err error) {
 	}
 
 	return s.uninstallCA(ca)
+}
+
+func parseCertificate(der []byte) (*x509.Certificate, error) {
+	cert, err := x509.ParseCertificate(der)
+	if err != nil {
+		// https://www.alvestrand.no/objectid/2.5.29.37.html
+		if strings.HasPrefix(err.Error(), "x509: certificate contains duplicate extension") {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return cert, nil
 }
