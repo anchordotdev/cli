@@ -55,8 +55,8 @@ func (c LclClean) run(ctx context.Context, drv *ui.Driver) error {
 
 	cmd := &trust.Clean{
 		Anc:       c.anc,
-		OrgSlug:   orgAPID,
-		RealmSlug: realmAPID,
+		OrgAPID:   orgAPID,
+		RealmAPID: realmAPID,
 	}
 
 	err = cmd.Perform(ctx, drv)

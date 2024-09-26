@@ -107,8 +107,8 @@ type Client struct {
 
 	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
-		Organization *RelationshipsOrganizationSlug `json:"organization,omitempty"`
-		Service      *RelationshipsServiceSlug      `json:"service,omitempty"`
+		Organization RelationshipsOrganizationSlug `json:"organization"`
+		Service      RelationshipsServiceSlug      `json:"service"`
 	} `json:"relationships"`
 
 	// Slug A value used as a parameter when referencing this client.
@@ -392,11 +392,11 @@ type CreateCliTokenJSONBody struct {
 
 // CreateClientJSONBody defines parameters for CreateClient.
 type CreateClientJSONBody struct {
-	Relationships *struct {
-		Organization *RelationshipsOrganizationSlug `json:"organization,omitempty"`
-		Service      *RelationshipsServiceSlug      `json:"service,omitempty"`
-	} `json:"relationships,omitempty"`
-	ServerType *string `json:"server_type,omitempty"`
+	Relationships struct {
+		Organization RelationshipsOrganizationSlug `json:"organization"`
+		Service      RelationshipsServiceSlug      `json:"service"`
+	} `json:"relationships"`
+	ServerType string  `json:"server_type"`
 	Type       *string `json:"type,omitempty"`
 }
 

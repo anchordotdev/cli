@@ -9,20 +9,48 @@
                                                                          
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
     | We'll compare your CA certificates from Anchor and your local trust stores.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                         
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+    | We'll compare your CA certificates from Anchor and your local trust stores.
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                         
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+    | We'll compare your CA certificates from Anchor and your local trust stores.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                         
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+    | We'll compare your CA certificates from Anchor and your local trust stores.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    * Fetching realms…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                         
+# Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
+    | We'll compare your CA certificates from Anchor and your local trust stores.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
                                                                          
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
     | We'll compare your CA certificates from Anchor and your local trust stores.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     * Comparing local and expected CA certificates…⠋
 ─── TrustStoreAudit ────────────────────────────────────────────────────────────
                                                                          
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
     | We'll compare your CA certificates from Anchor and your local trust stores.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 1 missing certificates.
 ─── TrustAuditInfo ─────────────────────────────────────────────────────────────
                                                                          
 # Audit CA Certificates in Your Local Trust Store(s) `anchor trust audit`
     | We'll compare your CA certificates from Anchor and your local trust stores.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 1 missing certificates.
     - VALID - oas-examples - AnchorCA ECDSA: trusted by [Mock]
     - MISSING - oas-examples - AnchorCA RSA: missing from [Mock]

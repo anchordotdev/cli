@@ -80,12 +80,14 @@ func TestAudit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	org, realm, err := fetchOrgAndRealm(ctx, anc)
+	userInfo, err := anc.UserInfo(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
+	orgAPID := userInfo.PersonalOrg.Slug
+	realmAPID := "localhost"
 
-	expectedCAs, err := FetchExpectedCAs(ctx, anc, org, realm)
+	expectedCAs, err := FetchExpectedCAs(ctx, anc, orgAPID, realmAPID)
 	if err != nil {
 		t.Fatal(err)
 	}

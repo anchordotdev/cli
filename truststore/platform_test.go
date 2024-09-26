@@ -1,11 +1,12 @@
 package truststore
 
 import (
-	"encoding/hex"
+	"crypto/x509"
+	"encoding/pem"
+	"errors"
+	"reflect"
 	"testing"
 )
-
-var dupExtensionData = "3082032c30820214a003020102020448966180300d06092a864886f70d01010b0500303b311f301d06035504030c16636f6d2e6170706c652e6b65726265726f732e6b646331183016060355040a0c0f53797374656d204964656e74697479301e170d3136313232313232333831395a170d3336313231363232333831395a303b311f301d06035504030c16636f6d2e6170706c652e6b65726265726f732e6b646331183016060355040a0c0f53797374656d204964656e7469747930820122300d06092a864886f70d01010105000382010f003082010a0282010100b0f8a02b7b3fce0c70b96dc22322190b31ee1dd3a80bc4e99cf4d375c86ddb3d2a7a23fee439cdba7fbd18b6dbcaea5a0fa44c86453c72c82ed17a900b8be4ed0ba21a05cc2b4d04cb55f1cd0f46b4ca364b7d34d315397be81615741a0fd536ba2a1d3ffae7c08e952f14e1a8ddf112d0946d685ca5b8efe7147d861aec303a5e6bdfe091102bf68a925c6c7c98965a4fea8012d4b2b9f66d94623feb966cc3e0ac7d3443704aea1a3815ec83be2542c5f925880f03f513bf64df8d52cec3acb29dc81fc227be9d37785e98719caa5e74559f89875978c2503f3170e3b19bb6306b7d6f05c0a4d06c2a28b00105a50e9cc286b3292cedec8092f49f33babe450203010001a3383036300b0603551d0f0404030205a030130603551d25040c300a06082b0601050507030130120603551d25040b300906072b060105020305300d06092a864886f70d01010b0500038201010079ef266b9f73eb58c66e71d71f39ccb6973b61da260666f350d9836799f5375bd5268bc2aeecf5655404770da15022cf7db9e8e5beb8ef2eb60bc88864940d5f8721a58c32451d955c7803b4a87039823774a7de59e25fb4e0da8a3dc755e0f8d23374525fd2e25a27a2cc91dece5a1e807b56d8e50f55ed77f0873638040d0747b4ff414aea1fc1f7ab1872c92fc19176c673a48ce1498a68798943c87a6b533a2ddae91770481cdf253b4ef5b490fa519d9262404345c1dd11093c870b0f3ed0206f1c4575f8c859e3687c3490cd76672be55ebb20664aee9bfd333415809e9fcc11e4cf273b25ef916ed82faa3bb21131e8ab3f8fc97faf925b2dc1c57373"
 
 func TestParseCertificate(t *testing.T) {
 	cert, err := parseCertificate(validCA.Raw)
@@ -15,19 +16,77 @@ func TestParseCertificate(t *testing.T) {
 	if cert == nil {
 		t.Fatal("expect parse certificate with valid certificate to return certificate")
 	}
+
 }
 
-func TestParseCertificateDupExtension(t *testing.T) {
-	dupExtensionBytes, err := hex.DecodeString(dupExtensionData)
-	if err != nil {
-		t.Fatal(err)
+func TestParseInvalidCerts(t *testing.T) {
+	tests := []struct {
+		name string
+
+		data string
+
+		cert *x509.Certificate
+		err  error
+	}{
+		{
+			name: "duplicate-extension",
+
+			data: dupExtensionData,
+		},
+		{
+			name: "inner-outer-signature-mismatch",
+
+			data: signatureMismatchData,
+		},
 	}
 
-	cert, err := parseCertificate(dupExtensionBytes)
-	if cert != nil {
-		t.Fatal("expect parsing duplicate extension certificates to return nil certificate")
-	}
-	if err != nil {
-		t.Fatal("expect parsing duplicate extension certificate to return nil error")
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			blk, _ := pem.Decode([]byte(test.data))
+			cert, err := parseCertificate(blk.Bytes)
+			if want, got := test.cert, cert; !reflect.DeepEqual(want, got) {
+				t.Errorf("expect parsed certificate %+v, got %+v", want, got)
+			}
+			if want, got := test.err, err; !errors.Is(want, got) {
+				t.Errorf("expect err %s, got %s", want, got)
+			}
+		})
 	}
 }
+
+var (
+	dupExtensionData = `-----BEGIN CERTIFICATE-----
+MIIDLDCCAhSgAwIBAgIESJZhgDANBgkqhkiG9w0BAQsFADA7MR8wHQYDVQQDDBZj
+b20uYXBwbGUua2VyYmVyb3Mua2RjMRgwFgYDVQQKDA9TeXN0ZW0gSWRlbnRpdHkw
+HhcNMTYxMjIxMjIzODE5WhcNMzYxMjE2MjIzODE5WjA7MR8wHQYDVQQDDBZjb20u
+YXBwbGUua2VyYmVyb3Mua2RjMRgwFgYDVQQKDA9TeXN0ZW0gSWRlbnRpdHkwggEi
+MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCw+KArez/ODHC5bcIjIhkLMe4d
+06gLxOmc9NN1yG3bPSp6I/7kOc26f70YttvK6loPpEyGRTxyyC7RepALi+TtC6Ia
+BcwrTQTLVfHND0a0yjZLfTTTFTl76BYVdBoP1Ta6Kh0/+ufAjpUvFOGo3fES0JRt
+aFyluO/nFH2GGuwwOl5r3+CRECv2ipJcbHyYllpP6oAS1LK59m2UYj/rlmzD4Kx9
+NENwSuoaOBXsg74lQsX5JYgPA/UTv2TfjVLOw6yyncgfwie+nTd4XphxnKpedFWf
+iYdZeMJQPzFw47GbtjBrfW8FwKTQbCoosAEFpQ6cwoazKSzt7ICS9J8zur5FAgMB
+AAGjODA2MAsGA1UdDwQEAwIFoDATBgNVHSUEDDAKBggrBgEFBQcDATASBgNVHSUE
+CzAJBgcrBgEFAgMFMA0GCSqGSIb3DQEBCwUAA4IBAQB57yZrn3PrWMZucdcfOcy2
+lzth2iYGZvNQ2YNnmfU3W9Umi8Ku7PVlVAR3DaFQIs99uejlvrjvLrYLyIhklA1f
+hyGljDJFHZVceAO0qHA5gjd0p95Z4l+04NqKPcdV4PjSM3RSX9LiWieizJHezloe
+gHtW2OUPVe138Ic2OAQNB0e0/0FK6h/B96sYcskvwZF2xnOkjOFJimh5iUPIemtT
+Oi3a6RdwSBzfJTtO9bSQ+lGdkmJAQ0XB3REJPIcLDz7QIG8cRXX4yFnjaHw0kM12
+ZyvlXrsgZkrum/0zNBWAnp/MEeTPJzsl75Fu2C+qO7IRMeirP4/Jf6+SWy3BxXNz
+-----END CERTIFICATE-----`
+	signatureMismatchData = `-----BEGIN CERTIFICATE-----
+MIICFDCCAX2gAwIBAgIECZcijjALBgkqhkiG9w0BAQUwPDEgMB4GA1UEAwwXY29t
+LmFwcGxlLnN5c3RlbWRlZmF1bHQxGDAWBgNVBAoMD1N5c3RlbSBJZGVudGl0eTAe
+Fw0xNTAzMjUyMTEwMjZaFw0zNTAzMjAyMTEwMjZaMDwxIDAeBgNVBAMMF2NvbS5h
+cHBsZS5zeXN0ZW1kZWZhdWx0MRgwFgYDVQQKDA9TeXN0ZW0gSWRlbnRpdHkwgZ8w
+DQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALonEb9P9qvj1BiLCQp86oLkVC+riuqd
+llz1JJEtbr2BFEAa/j0CH+FptthLizHSWsVdHN+CrPZUa1rCgVlkuz14huzSPrQG
+UjNjpJVDBmlr/T+ALmHewmykM9Sa3yOETVr8q49odjisfcIHLwS+ivymLDgU3mPJ
+Qss2jW+Av6lRAgMBAAGjJTAjMAsGA1UdDwQEAwIEsDAUBgNVHSUEDTALBgkqhkiG
+92NkBAQwDQYJKoZIhvcNAQEFBQADgYEAroEWpwSHikgb1zjueWPdXwY4o+W+zFqY
+uVbrTzd+Tv8SIfgw8+D4Hf9iLLY33yy6CIMZY2xgfGgBh0suSidoLJt3Pr0fiQGK
+d5IUuavJmM5HeYXlPfg/WxvtcwaB1DlPxGpe3ZsRi2GPBZpxVS1AdwKUk5GmoH4G
+J1hlJQKJ8yY=
+-----END CERTIFICATE-----
+`
+)

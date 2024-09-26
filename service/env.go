@@ -14,6 +14,7 @@ import (
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/clipboard"
 	"github.com/anchordotdev/cli/component"
+	componentmodels "github.com/anchordotdev/cli/component/models"
 	"github.com/anchordotdev/cli/service/models"
 	"github.com/anchordotdev/cli/ui"
 )
@@ -273,7 +274,14 @@ func (c *Env) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (str
 		return c.OrgAPID, nil
 	}
 	if cfg.Org.APID != "" {
-		return cfg.Org.APID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Org.APID },
+			Flag:          "--org",
+			Singular:      "organization",
+		})
+		c.OrgAPID = cfg.Org.APID
+		return c.OrgAPID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -297,7 +305,14 @@ func (c *Env) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, or
 		return c.RealmAPID, nil
 	}
 	if cfg.Realm.APID != "" {
-		return cfg.Realm.APID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Realm.APID },
+			Flag:          "--realm",
+			Singular:      "realm",
+		})
+		c.RealmAPID = cfg.Realm.APID
+		return c.RealmAPID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
@@ -321,7 +336,14 @@ func (c *Env) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, 
 		return c.ServiceAPID, nil
 	}
 	if cfg.Service.APID != "" {
-		return cfg.Service.APID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Service.APID },
+			Flag:          "--service",
+			Singular:      "service",
+		})
+		c.ServiceAPID = cfg.Service.APID
+		return c.ServiceAPID, nil
 	}
 
 	selector := &component.Selector[api.Service]{

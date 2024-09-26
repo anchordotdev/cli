@@ -9,13 +9,39 @@
                                                                       
 # Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
 | We'll remove  CA certificates from the mock store(s).
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                      
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+| We'll remove  CA certificates from the mock store(s).
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                      
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+| We'll remove  CA certificates from the mock store(s).
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                      
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+| We'll remove  CA certificates from the mock store(s).
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    * Fetching realms…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                      
+# Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
+| We'll remove  CA certificates from the mock store(s).
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
 ─── TrustCleanAudit ────────────────────────────────────────────────────────────
                                                                       
 # Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
 | We'll remove  CA certificates from the mock store(s).
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     * Auditing local CA certificates…⠋
 ─── TrustCleanAudit ────────────────────────────────────────────────────────────
                                                                       
 # Clean CA Certificates from Local Trust Store(s) `anchor trust clean`
 | We'll remove  CA certificates from the mock store(s).
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Audited local CA certificates: need to remove 0 certificates.

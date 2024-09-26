@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +14,7 @@ import (
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
 	"github.com/anchordotdev/cli/component"
+	componentmodels "github.com/anchordotdev/cli/component/models"
 	"github.com/anchordotdev/cli/ext509"
 	"github.com/anchordotdev/cli/ext509/oid"
 	"github.com/anchordotdev/cli/trust/models"
@@ -37,7 +37,7 @@ var CmdTrust = cli.NewCmd[Command](cli.CmdRoot, "trust", func(cmd *cobra.Command
 
 type Command struct {
 	Anc                *api.Session
-	OrgSlug, RealmSlug string
+	OrgAPID, RealmAPID string
 
 	AuditInfo *truststore.AuditInfo
 }
@@ -135,19 +135,19 @@ func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
 }
 
 func (c *Command) performAudit(ctx context.Context, cfg *cli.Config, drv *ui.Driver, stores []truststore.Store) (*truststore.AuditInfo, error) {
-	orgSlug, err := c.orgSlug(ctx, cfg, drv)
+	orgAPID, err := c.orgAPID(ctx, cfg, drv)
 	if err != nil {
 		return nil, err
 	}
 
-	realmSlug, err := c.realmSlug(ctx, cfg, drv, orgSlug)
+	realmAPID, err := c.realmAPID(ctx, cfg, drv, orgAPID)
 	if err != nil {
 		return nil, err
 	}
 
 	drv.Activate(ctx, &truststoremodels.TrustStoreAudit{})
 
-	cas, err := FetchExpectedCAs(ctx, c.Anc, orgSlug, realmSlug)
+	cas, err := FetchExpectedCAs(ctx, c.Anc, orgAPID, realmAPID)
 	if err != nil {
 		return nil, err
 	}
@@ -162,12 +162,19 @@ func (c *Command) performAudit(ctx context.Context, cfg *cli.Config, drv *ui.Dri
 	return auditInfo, nil
 }
 
-func (c *Command) orgSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
-	if c.OrgSlug != "" {
-		return c.OrgSlug, nil
+func (c *Command) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if c.OrgAPID != "" {
+		return c.OrgAPID, nil
 	}
 	if cfg.Org.APID != "" {
-		return cfg.Org.APID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Org.APID },
+			Flag:          "--org",
+			Singular:      "organization",
+		})
+		c.OrgAPID = cfg.Org.APID
+		return c.OrgAPID, nil
 	}
 
 	selector := &component.Selector[api.Organization]{
@@ -186,21 +193,28 @@ func (c *Command) orgSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver) 
 	return org.Apid, nil
 }
 
-func (c *Command) realmSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgSlug string) (string, error) {
-	if c.RealmSlug != "" {
-		return c.RealmSlug, nil
+func (c *Command) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
+	if c.RealmAPID != "" {
+		return c.RealmAPID, nil
 	}
 	if cfg.Realm.APID != "" {
-		return cfg.Realm.APID, nil
+		drv.Activate(ctx, &componentmodels.ConfigVia{
+			Config:        cfg,
+			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Realm.APID },
+			Flag:          "--realm",
+			Singular:      "realm",
+		})
+		c.RealmAPID = cfg.Realm.APID
+		return c.RealmAPID, nil
 	}
 
 	selector := &component.Selector[api.Realm]{
 
-		Prompt: fmt.Sprintf("Which %s realm do you want to trust?", ui.Emphasize(orgSlug)),
+		Prompt: fmt.Sprintf("Which %s realm do you want to trust?", ui.Emphasize(orgAPID)),
 		Flag:   "--realm",
 
 		Fetcher: &component.Fetcher[api.Realm]{
-			FetchFn: func() ([]api.Realm, error) { return c.Anc.GetOrgRealms(ctx, orgSlug) },
+			FetchFn: func() ([]api.Realm, error) { return c.Anc.GetOrgRealms(ctx, orgAPID) },
 		},
 	}
 
@@ -209,29 +223,6 @@ func (c *Command) realmSlug(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 		return "", err
 	}
 	return realm.Apid, nil
-}
-
-// TODO: Replace with selectors
-func fetchOrgAndRealm(ctx context.Context, anc *api.Session) (string, string, error) {
-	cfg := cli.ConfigFromContext(ctx)
-
-	org, realm := cfg.Org.APID, cfg.Realm.APID
-	if (org == "") != (realm == "") {
-		return "", "", errors.New("--org and --realm flags must both be present or absent")
-	}
-	if org == "" && realm == "" {
-		userInfo, err := anc.UserInfo(ctx)
-		if err != nil {
-			return "", "", err
-		}
-		org = userInfo.PersonalOrg.Slug
-
-		// TODO: use personal org's default realm value from API check-in call,
-		// instead of hard-coding "localhost" here
-		realm = "localhost"
-	}
-
-	return org, realm, nil
 }
 
 func PerformAudit(ctx context.Context, stores []truststore.Store, cas []*truststore.CA) (*truststore.AuditInfo, error) {
