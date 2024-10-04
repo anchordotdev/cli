@@ -197,4 +197,43 @@ func TestServiceEnv(t *testing.T) {
 
 		uitest.TestGolden(t, drv.Golden())
 	})
+
+	t.Run("basics unattached service display", func(t *testing.T) {
+		if srv.IsProxy() {
+			t.Skip("service env unsupported in proxy mode")
+		}
+
+		cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
+			"/v0/orgs/org-slug/services/service-name/attachments": {
+				Example: "empty",
+			},
+		}
+		ctx = cli.ContextWithConfig(ctx, cfg)
+
+		drv, tm := uitest.TestTUI(ctx, t)
+		cmd := Env{
+			Clipboard: new(clipboard.Mock),
+		}
+		errc := make(chan error, 1)
+
+		go func() {
+			errc <- cmd.UI().RunTUI(ctx, drv)
+			errc <- tm.Quit()
+		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? How would you like to manage your environment variables?",
+		)
+
+		tm.Send(tea.KeyMsg{Type: tea.KeyDown})
+		tm.Send(tea.KeyMsg{Type: tea.KeyDown})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		if err := <-errc; err != nil {
+			t.Fatal(err)
+		}
+
+		uitest.TestGolden(t, drv.Golden())
+	})
 }

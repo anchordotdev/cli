@@ -223,7 +223,9 @@ func (m *EnvNextSteps) View() string {
 
 	fmt.Fprintln(&b, ui.Header("Next Steps"))
 	fmt.Fprintln(&b, ui.StepAlert(ui.Action("(Re)Start your server.")))
-	fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s: %s", ui.Action("Check out your encrypted site"), ui.URL(m.LclUrl))))
+	if m.LclUrl != "" {
+		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s: %s", ui.Action("Check out your encrypted site"), ui.URL(m.LclUrl))))
+	}
 	fmt.Fprintln(&b, ui.StepHint("These certificates will renew automatically, time to enjoy effortless encryption."))
 
 	return b.String()

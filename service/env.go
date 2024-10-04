@@ -183,14 +183,17 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 		return fmt.Errorf("Unknown method: %s. Please choose either `export` or `dotenv`.", envOutput)
 	}
 
-	var lclDomain string
-	for _, d := range attachment.Domains {
-		if strings.HasSuffix(d, ".lcl.host") {
-			lclDomain = d
-			break
+	var lclUrl string
+	if attachment != nil {
+		var lclDomain string
+		for _, d := range attachment.Domains {
+			if strings.HasSuffix(d, ".lcl.host") {
+				lclDomain = d
+				break
+			}
 		}
+		lclUrl = fmt.Sprintf("https://%s:%d", lclDomain, *service.LocalhostPort)
 	}
-	lclUrl := fmt.Sprintf("https://%s:%d", lclDomain, *service.LocalhostPort)
 
 	drv.Activate(ctx, &models.EnvNextSteps{
 		LclUrl: lclUrl,
