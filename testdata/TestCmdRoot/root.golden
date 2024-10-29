@@ -12,7 +12,7 @@ Available Commands:
   help        Help about any command
   lcl         Manage lcl.host Local Development Environment
   trust       Manage CA Certificates in your Local Trust Store(s)
-  version     Show version info
+  version     Show Version Info
 
 Flags:
       --api-token string   Anchor API personal access token (PAT).

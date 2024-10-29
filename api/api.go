@@ -26,6 +26,18 @@ var (
 	ErrGnomeKeyringRequired = fmt.Errorf("gnome-keyring required for secure credential storage: %w", ErrSignedOut)
 )
 
+type QueryParam func(url.Values)
+
+type QueryParams []QueryParam
+
+func (q QueryParams) Apply(u *url.URL) {
+	val := u.Query()
+	for _, fn := range q {
+		fn(val)
+	}
+	u.RawQuery = val.Encode()
+}
+
 // NB: can't call this Client since the name is already taken by an openapi
 // generated type. It's more like a session anyways, since it caches some
 // current user info.
@@ -222,6 +234,34 @@ func (s *Session) FetchCredentials(ctx context.Context, orgSlug, realmSlug strin
 	return creds.Items, nil
 }
 
+func getCredentialsURL(orgSlug, realmSlug string) (*url.URL, error) {
+	return url.Parse(fetchCredentialsPath(orgSlug, realmSlug))
+}
+
+func SubCA(apid string) QueryParam {
+	return func(v url.Values) {
+		// TODO: v.Set("type", "subca")
+		v.Set("subject_uid_param", apid)
+	}
+}
+
+func (s *Session) GetCredentials(ctx context.Context, orgSlug, realmSlug string, params ...QueryParam) ([]Credential, error) {
+	var creds struct {
+		Items []Credential `json:"items,omitempty"`
+	}
+
+	u, err := getCredentialsURL(orgSlug, realmSlug)
+	if err != nil {
+		return nil, err
+	}
+	QueryParams(params).Apply(u)
+
+	if err := s.get(ctx, u.RequestURI(), &creds); err != nil {
+		return nil, err
+	}
+	return creds.Items, nil
+}
+
 func (s *Session) UserInfo(ctx context.Context) (*Root, error) {
 	if s.userInfo != nil {
 		return s.userInfo, nil
@@ -293,9 +333,12 @@ func (s *Session) GetService(ctx context.Context, orgSlug, serviceSlug string) (
 	return &svc, nil
 }
 
-func (s *Session) get(ctx context.Context, path string, out any) error {
-	req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
+func (s *Session) get(ctx context.Context, uri string, out any) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", uri, nil)
 	if err != nil {
+		return err
+	}
+	if req.URL, err = url.Parse(uri); err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -426,6 +469,7 @@ func (r urlRewriter) RoundTripper(next http.RoundTripper) http.RoundTripper {
 		if err != nil {
 			return nil, err
 		}
+		u.RawQuery = req.URL.RawQuery
 		req.URL = u.JoinPath(req.URL.Path)
 
 		return next.RoundTrip(req)

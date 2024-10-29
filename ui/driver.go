@@ -40,10 +40,10 @@ type Driver struct {
 	models []tea.Model
 	active tea.Model
 
-	goldenMutex sync.Mutex
-	golden      string
-
-	lastView string
+	goldenMutex  sync.Mutex
+	golden       string
+	lastView     string
+	replacements []string
 }
 
 func NewDriverTest(ctx context.Context) *Driver {
@@ -103,6 +103,13 @@ func (d *Driver) Golden() string {
 	d.goldenMutex.Lock()
 	defer d.goldenMutex.Unlock()
 	return d.golden
+}
+
+func (d *Driver) Replace(unsafe, safe string) {
+	d.goldenMutex.Lock()
+	defer d.goldenMutex.Unlock()
+
+	d.replacements = append(d.replacements, unsafe, safe)
 }
 
 type stopMsg struct{}
@@ -179,31 +186,47 @@ func (d *Driver) View() string {
 	for _, mdl := range d.models {
 		out += mdl.View()
 	}
-	normalizedOut := spinnerReplacer.Replace(out)
-	if out != "" && normalizedOut != d.lastView {
-		var section string
-		if mdl, ok := d.active.(interface{ Section() string }); ok {
-			section = mdl.Section()
-		} else if kind := reflect.TypeOf(d.active).Kind(); kind == reflect.Interface || kind == reflect.Pointer {
-			section = reflect.TypeOf(d.active).Elem().Name()
-		} else {
-			section = reflect.TypeOf(d.active).Name()
-		}
 
-		separator := fmt.Sprintf("─── %s ", section)
-		if separatorRuneCount := utf8.RuneCountInString(separator); separatorRuneCount < 80 {
-			separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
-		} else {
-			runes := []rune(separator)
-			separator = string(runes[:79]) + "…"
-		}
-		d.lastView = normalizedOut
-
-		d.goldenMutex.Lock()
-		defer d.goldenMutex.Unlock()
-		d.golden += strings.Join([]string{separator, normalizedOut}, "\n")
+	if out != "" {
+		d.recordGolden(d.replaced(out))
 	}
+
 	return out
+}
+
+func (d *Driver) replaced(out string) string {
+	replaced := spinnerReplacer.Replace(out)
+	replaced = strings.NewReplacer(d.replacements...).Replace(replaced)
+	return replaced
+}
+
+func (d *Driver) recordGolden(out string) {
+	d.goldenMutex.Lock()
+	defer d.goldenMutex.Unlock()
+
+	if out == d.lastView {
+		return
+	}
+
+	var section string
+	if mdl, ok := d.active.(interface{ Section() string }); ok {
+		section = mdl.Section()
+	} else if kind := reflect.TypeOf(d.active).Kind(); kind == reflect.Interface || kind == reflect.Pointer {
+		section = reflect.TypeOf(d.active).Elem().Name()
+	} else {
+		section = reflect.TypeOf(d.active).Name()
+	}
+
+	separator := fmt.Sprintf("─── %s ", section)
+	if separatorRuneCount := utf8.RuneCountInString(separator); separatorRuneCount < 80 {
+		separator = separator + strings.Repeat("─", 80-utf8.RuneCountInString(separator))
+	} else {
+		runes := []rune(separator)
+		separator = string(runes[:79]) + "…"
+	}
+
+	d.lastView = out
+	d.golden += strings.Join([]string{separator, out}, "\n")
 }
 
 var (

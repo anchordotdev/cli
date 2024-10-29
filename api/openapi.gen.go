@@ -46,6 +46,9 @@ type Attachment struct {
 	// Domains A list of domains for this attachment.
 	Domains []string `json:"domains"`
 
+	// Port TCP port number for the service in the realm.
+	Port int32 `json:"port"`
+
 	// Relationships Values used as parameters when referencing related resources.
 	Relationships struct {
 		Chain        RelationshipsChainApid         `json:"chain"`
@@ -346,6 +349,9 @@ type PathServiceParam = string
 // QueryCaParam defines model for query_ca_param.
 type QueryCaParam = string
 
+// QuerySubjectUidParam defines model for query_subject_uid_param.
+type QuerySubjectUidParam = string
+
 // ServicesXtach200 defines model for services_xtach_200.
 type ServicesXtach200 struct {
 	// Domains A list of domains for this attachment.
@@ -404,6 +410,9 @@ type CreateClientJSONBody struct {
 type GetCredentialsParams struct {
 	// CaParam ca for operation
 	CaParam *QueryCaParam `form:"ca_param,omitempty" json:"ca_param,omitempty"`
+
+	// SubjectUidParam subject uid for operation
+	SubjectUidParam *QuerySubjectUidParam `form:"subject_uid_param,omitempty" json:"subject_uid_param,omitempty"`
 }
 
 // AttachOrgServiceJSONBody defines parameters for AttachOrgService.

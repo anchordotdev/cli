@@ -1,0 +1,9 @@
+─── VersionUpgradeHeader ───────────────────────────────────────────────────────
+                                            
+# Check for Upgrade `anchor version upgrade`
+─── VersionUpgrade ─────────────────────────────────────────────────────────────
+                                            
+# Check for Upgrade `anchor version upgrade`
+    ! Copied winget update Anchor.cli to your clipboard.
+    ! Run `winget update Anchor.cli` to update to the latest version.
+    | Not using homebrew? Explore other options here: https://github.com/anchordotdev/cli

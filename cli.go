@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/cli/browser"
+	"github.com/google/go-github/v54/github"
 	"github.com/mcuadros/go-defaults"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -41,8 +42,50 @@ var Version = struct {
 	Arch:    runtime.GOARCH,
 }
 
+var LatestRelease *Release
+
+type Release = github.RepositoryRelease
+
+var SkipReleaseCheck = false
+
 func IsDevVersion() bool {
 	return Version.Version == "dev"
+}
+
+func IsFreshLatestRelease(ctx context.Context) (bool, error) {
+	release, err := getLatestRelease(ctx)
+	if err != nil {
+		return true, err
+	}
+
+	return release.PublishedAt != nil && time.Since(release.PublishedAt.Time).Hours() < 24, nil
+}
+
+func IsUpgradeable(ctx context.Context) (bool, error) {
+	release, err := getLatestRelease(ctx)
+	if err != nil {
+		return false, err
+	}
+
+	return release.TagName != nil && *release.TagName != ReleaseTagName(), nil
+}
+
+func getLatestRelease(ctx context.Context) (*Release, error) {
+	if LatestRelease != nil {
+		return LatestRelease, nil
+	}
+
+	release, _, err := github.NewClient(nil).Repositories.GetLatestRelease(ctx, "anchordotdev", "cli")
+	if err != nil {
+		return nil, err
+	}
+
+	LatestRelease = &Release{
+		PublishedAt: release.PublishedAt,
+		TagName:     release.TagName,
+	}
+
+	return LatestRelease, nil
 }
 
 func UserAgent() string {

@@ -105,6 +105,9 @@ func parseCertificate(der []byte) (*x509.Certificate, error) {
 		if strings.HasPrefix(err.Error(), "x509: inner and outer signature algorithm identifiers don't match") {
 			return nil, nil
 		}
+		if strings.HasPrefix(err.Error(), "x509: negative serial number") {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return cert, nil

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -11,26 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/anchordotdev/cli"
-	"github.com/anchordotdev/cli/api/apitest"
 	"github.com/anchordotdev/cli/clipboard"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/ui/uitest"
 )
-
-var srv = &apitest.Server{
-	Host:    "api.anchor.lcl.host",
-	RootDir: "../..",
-}
-
-func TestMain(m *testing.M) {
-	if err := srv.Start(context.Background()); err != nil {
-		panic(err)
-	}
-
-	defer os.Exit(m.Run())
-
-	srv.Close()
-}
 
 func TestCmdServiceEnv(t *testing.T) {
 	t.Run("--help", func(t *testing.T) {

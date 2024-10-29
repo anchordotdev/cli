@@ -134,7 +134,7 @@ func (c *MkCert) perform(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (
 
 	acmeURL := cfg.AcmeURL(orgAPID, realmAPID, chainAPID)
 
-	tlsCert, err := provisionCert(c.eab, domains, acmeURL)
+	tlsCert, err := api.ProvisionCert(c.eab, domains, acmeURL)
 	if err != nil {
 		return nil, err
 	}

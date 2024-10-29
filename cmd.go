@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/anchordotdev/cli/models"
 	"github.com/anchordotdev/cli/stacktrace"
 	"github.com/anchordotdev/cli/ui"
 	"github.com/spf13/cobra"
@@ -156,6 +155,13 @@ var rootDef = CmdDef{
 					Args:  cobra.NoArgs,
 					Short: "Fetch Environment Variables for Service",
 				},
+				{
+					Name: "probe",
+
+					Use:   "probe <service> [flags]",
+					Args:  cobra.NoArgs,
+					Short: "Probe a service for proper TLS setup & configuration",
+				},
 			},
 		},
 		{
@@ -206,7 +212,16 @@ var rootDef = CmdDef{
 
 			Use:   "version",
 			Args:  cobra.NoArgs,
-			Short: "Show version info",
+			Short: "Show Version Info",
+			SubDefs: []CmdDef{
+				{
+					Name: "upgrade",
+
+					Use:   "upgrade",
+					Args:  cobra.NoArgs,
+					Short: "Check for Upgrade",
+				},
+			},
 		},
 	},
 }
@@ -301,10 +316,6 @@ func NewCmd[T UIer](parent *cobra.Command, name string, fn func(*cobra.Command))
 
 				errc <- err
 			}()
-
-			if cfg.Via.TOML != nil {
-				drv.Activate(ctx, models.ConfigLoaded(cfg.File.Path))
-			}
 
 			if err := stacktrace.CapturePanic(func() error { return t.UI().RunTUI(ctx, drv) }); err != nil {
 				var uierr ui.Error

@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"io/fs"
+	"net"
 	"net/url"
 	"os"
 	"runtime"
@@ -71,6 +72,10 @@ type Config struct {
 
 		EnvOutput string `env:"ENV_OUTPUT" toml:",omitempty,readonly"`
 		CertStyle string `env:"CERT_STYLE" toml:"cert-style,omitempty"`
+
+		Probe struct {
+			Timeout time.Duration `default:"2m" env:"PROBE_TIMEOUT" toml:",omitempty,readonly"`
+		} `toml:",omitempty,readonly"`
 	} `toml:"service,omitempty"`
 
 	Trust struct {
@@ -98,6 +103,16 @@ type Config struct {
 	} `toml:",omitempty,readonly"`
 }
 
+type Dialer interface {
+	DialContext(context.Context, string, string) (net.Conn, error)
+}
+
+type DialFunc func(context.Context, string, string) (net.Conn, error)
+
+func (fn DialFunc) DialContext(ctx context.Context, network string, address string) (net.Conn, error) {
+	return fn(ctx, network, address)
+}
+
 // values used for testing
 type ConfigTest struct {
 	Prefer map[string]ConfigTestPrefer // values for prism prefer header
@@ -105,13 +120,15 @@ type ConfigTest struct {
 	ACME struct {
 		URL string
 	}
-	Browserless bool      // run as though browserless
-	GOOS        string    // change OS identifier in tests
-	ProcFS      fs.FS     // change the proc filesystem in tests
-	LclHostPort int       // specify lcl host port in tests
-	SkipRunE    bool      // skip RunE for testing purposes
-	SystemFS    SystemFS  // change the system filesystem in tests
-	Timestamp   time.Time // timestamp to use/display in tests
+	Browserless bool          // run as though browserless
+	GOOS        string        // change OS identifier in tests
+	ProcFS      fs.FS         // change the proc filesystem in tests
+	LclHostPort int           // specify lcl host port in tests
+	SkipRunE    bool          // skip RunE for testing purposes
+	SystemFS    SystemFS      // change the system filesystem in tests
+	Timestamp   time.Time     // timestamp to use/display in tests
+	NetResolver *net.Resolver // DNS resolver for (some) tests
+	NetDialer   Dialer        // TCP dialer for (some) tests
 }
 
 type ConfigTestPrefer struct {
@@ -231,8 +248,6 @@ func (c *Config) loadENV() error {
 }
 
 func (c *Config) loadTOML(fsys fs.FS) error {
-	c.Via.TOML = new(Config)
-
 	if path, ok := os.LookupEnv("ANCHOR_CONFIG"); ok {
 		c.File.Path = path
 	}
@@ -292,7 +307,7 @@ func (c *Config) ViaSource(fetcher func(*Config) any) string {
 		return "env"
 	}
 
-	if fetcher(c.Via.TOML) == value {
+	if c.Via.TOML != nil && fetcher(c.Via.TOML) == value {
 		return c.File.Path
 	}
 

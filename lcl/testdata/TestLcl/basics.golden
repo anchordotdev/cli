@@ -1741,7 +1741,7 @@
     - Opened https://anchor.dev/lcl/services/test-app/guide.
             
 # Next Steps
-    - After following the guide, check out your encrypted site at: https://test-app.lcl.host:4321
+    - After following the guide, check out your encrypted site at: https://test-app.lcl.host:<service-port>
     - These certificates will renew automatically, time to enjoy effortless encryption.
 ─── AnchorTOML ─────────────────────────────────────────────────────────────────
 | Let's set up fast and totally free lcl.host HTTPS!
@@ -1786,6 +1786,6 @@
     - Opened https://anchor.dev/lcl/services/test-app/guide.
             
 # Next Steps
-    - After following the guide, check out your encrypted site at: https://test-app.lcl.host:4321
+    - After following the guide, check out your encrypted site at: https://test-app.lcl.host:<service-port>
     - These certificates will renew automatically, time to enjoy effortless encryption.
     - Be sure to add anchor.toml to your version control system.

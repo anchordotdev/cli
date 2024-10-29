@@ -1,7 +1,11 @@
-Show version info
+Show Version Info
 
 Usage:
   anchor version [flags]
+  anchor version [command]
+
+Available Commands:
+  upgrade     Check for Upgrade
 
 Flags:
   -h, --help   help for version
@@ -10,3 +14,5 @@ Global Flags:
       --api-token string   Anchor API personal access token (PAT).
       --config string      Service configuration file. (default "anchor.toml")
       --skip-config        Skip loading configuration file.
+
+Use "anchor version [command] --help" for more information about a command.

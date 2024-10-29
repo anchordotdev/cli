@@ -1,0 +1,92 @@
+─── ProbeHeader ────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+─── ProbeHint ──────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+─── Client ─────────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    * Checking authentication: testing credentials remotely…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    * Fetching organizations…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    * Fetching services…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using service-name, the only available service. You can also use `--service service-name`.
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using service-name, the only available service. You can also use `--service service-name`.
+    * Fetching realms…⠋
+─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using service-name, the only available service. You can also use `--service service-name`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+─── Checker ────────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using service-name, the only available service. You can also use `--service service-name`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    * Checking DNS service.lcl.host…⠋
+─── Checker ────────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using service-name, the only available service. You can also use `--service service-name`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Checked DNS service.lcl.host: success!
+─── Checker ────────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using service-name, the only available service. You can also use `--service service-name`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Checked DNS service.lcl.host: success!
+    * Checking TCP [<tcp-addresses>]…⠋
+─── Checker ────────────────────────────────────────────────────────────────────
+                                                                  
+# Probe Service TLS Setup and Configuration `anchor service probe`
+    | We'll check your running app to ensure TLS works as expected.
+    - Using org-slug, the only available organization. You can also use `--org org-slug`.
+    - Using service-name, the only available service. You can also use `--service service-name`.
+    - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
+    - Checked DNS service.lcl.host: success!
+    ! Checked TCP [<tcp-addresses>]: failed!
+    ! Error! context deadline exceeded

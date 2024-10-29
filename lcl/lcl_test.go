@@ -126,7 +126,6 @@ func TestLcl(t *testing.T) {
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
-	cfg.Test.LclHostPort = 4321
 	cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
 		"/v0/orgs": {
 			Example: "anky_personal",
@@ -245,6 +244,19 @@ func TestLcl(t *testing.T) {
 		uitest.WaitForGoldenContains(t, drv, errc,
 			fmt.Sprintf("! Press Enter to open %s in your browser.", setupGuideURL),
 		)
+
+		anc, err := api.NewClient(ctx, cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		srv, err := anc.GetService(ctx, "lcl", "test-app")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		lclUrl := fmt.Sprintf("https://test-app.lcl.host:%d", *srv.LocalhostPort)
+		drv.Replace(lclUrl, "https://test-app.lcl.host:<service-port>")
 
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 

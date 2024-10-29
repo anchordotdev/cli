@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/cmdtest"
 	_ "github.com/anchordotdev/cli/testflags"
 	"github.com/anchordotdev/cli/ui/uitest"
@@ -21,6 +22,8 @@ func TestCommand(t *testing.T) {
 	t.Run(fmt.Sprintf("golden-%s_%s", runtime.GOOS, runtime.GOARCH), func(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		ctx = cli.ContextWithConfig(ctx, cmdtest.Config(ctx))
 
 		cmd := Command{}
 

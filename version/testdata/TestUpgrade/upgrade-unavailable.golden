@@ -1,0 +1,8 @@
+─── VersionUpgradeHeader ───────────────────────────────────────────────────────
+                                            
+# Check for Upgrade `anchor version upgrade`
+─── VersionUpgradeUnavailable ──────────────────────────────────────────────────
+                                            
+# Check for Upgrade `anchor version upgrade`
+    ! Already up to date!
+    | Your anchor CLI is already up to date, check back soon for updates.

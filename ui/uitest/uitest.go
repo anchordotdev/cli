@@ -16,7 +16,6 @@ import (
 	"github.com/charmbracelet/x/exp/teatest"
 	"github.com/muesli/termenv"
 	"github.com/spf13/pflag"
-	"github.com/stretchr/testify/require"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/ui"
@@ -64,12 +63,6 @@ func (p program) Wait() {
 	// no-op, for TestError and since TestModel doesn't provide a Wait without needing a t.testing
 }
 
-func TestTUIError(ctx context.Context, t *testing.T, tui cli.UI, msgAndArgs ...interface{}) {
-	_, errc := testTUI(ctx, t, tui)
-	err := <-errc
-	require.Error(t, err, msgAndArgs...)
-}
-
 func TestTUIOutput(ctx context.Context, t *testing.T, tui cli.UI) {
 	drv, errc := testTUI(ctx, t, tui)
 
@@ -81,6 +74,10 @@ func TestTUIOutput(ctx context.Context, t *testing.T, tui cli.UI) {
 }
 
 func testTUI(ctx context.Context, t *testing.T, tui cli.UI) (*ui.Driver, chan error) {
+	if cli.ConfigFromContext(ctx) == nil {
+		t.Fatal("context is missing a cli.Config")
+	}
+
 	drv := ui.NewDriverTest(ctx)
 	tm := teatest.NewTestModel(t, drv, teatest.WithInitialTermSize(128, 64))
 

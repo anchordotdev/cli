@@ -4,7 +4,17 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/anchordotdev/cli/ui"
 	tea "github.com/charmbracelet/bubbletea"
+)
+
+var (
+	VersionHeader = ui.Section{
+		Name: "VersionHeader",
+		Model: ui.MessageLines{
+			ui.Header(fmt.Sprintf("Show Version Info %s", ui.Whisper("`anchor version'"))),
+		},
+	}
 )
 
 type Version struct {

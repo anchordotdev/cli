@@ -2,15 +2,9 @@ package lcl
 
 import (
 	"context"
-	"crypto/tls"
-	"encoding/base64"
 	"fmt"
 	"net"
 	"slices"
-	"time"
-
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
@@ -253,35 +247,6 @@ func (c *Command) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 		return "", err
 	}
 	return realm.Apid, nil
-}
-
-func provisionCert(eab *api.Eab, domains []string, acmeURL string) (*tls.Certificate, error) {
-	hmacKey, err := base64.URLEncoding.DecodeString(eab.HmacKey)
-	if err != nil {
-		return nil, err
-	}
-
-	mgr := &autocert.Manager{
-		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(domains...),
-		Client: &acme.Client{
-			DirectoryURL: acmeURL,
-			UserAgent:    cli.UserAgent(),
-		},
-		ExternalAccountBinding: &acme.ExternalAccountBinding{
-			KID: eab.Kid,
-			Key: hmacKey,
-		},
-		RenewBefore: 24 * time.Hour,
-	}
-
-	// TODO: switch to using ACME package here, so that extra domains can be sent through for SAN extension
-	clientHello := &tls.ClientHelloInfo{
-		ServerName:   domains[0],
-		CipherSuites: []uint16{tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256},
-	}
-
-	return mgr.GetCertificate(clientHello)
 }
 
 func checkLoopbackDomain(ctx context.Context, drv *ui.Driver, domain string) error {

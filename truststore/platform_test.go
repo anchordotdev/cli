@@ -38,6 +38,12 @@ func TestParseInvalidCerts(t *testing.T) {
 
 			data: signatureMismatchData,
 		},
+
+		{
+			name: "negative-serial-number",
+
+			data: negativeSerialNumberData,
+		},
 	}
 
 	for _, test := range tests {
@@ -74,6 +80,14 @@ gHtW2OUPVe138Ic2OAQNB0e0/0FK6h/B96sYcskvwZF2xnOkjOFJimh5iUPIemtT
 Oi3a6RdwSBzfJTtO9bSQ+lGdkmJAQ0XB3REJPIcLDz7QIG8cRXX4yFnjaHw0kM12
 ZyvlXrsgZkrum/0zNBWAnp/MEeTPJzsl75Fu2C+qO7IRMeirP4/Jf6+SWy3BxXNz
 -----END CERTIFICATE-----`
+	negativeSerialNumberData = `-----BEGIN CERTIFICATE-----
+MIIBBTCBraADAgECAgH/MAoGCCqGSM49BAMCMA0xCzAJBgNVBAMTAjopMB4XDTIy
+MDQxNDIzNTYwNFoXDTIyMDQxNTAxNTYwNFowDTELMAkGA1UEAxMCOikwWTATBgcq
+hkjOPQIBBggqhkjOPQMBBwNCAAQ9ezsIsj+q17K87z/PXE/rfGRN72P/Wyn5d6oo
+5M0ZbSatuntMvfKdX79CQxXAxN4oXk3Aov4jVSG12AcDI8ShMAoGCCqGSM49BAMC
+A0cAMEQCIBzfBU5eMPT6m5lsR6cXaJILpAaiD9YxOl4v6dT3rzEjAiBHmjnHmAss
+RqUAyJKFzqZxOlK2q4j2IYnuj5+LrLGbQA==
+-----END CERTIFICATE-----`
 	signatureMismatchData = `-----BEGIN CERTIFICATE-----
 MIICFDCCAX2gAwIBAgIECZcijjALBgkqhkiG9w0BAQUwPDEgMB4GA1UEAwwXY29t
 LmFwcGxlLnN5c3RlbWRlZmF1bHQxGDAWBgNVBAoMD1N5c3RlbSBJZGVudGl0eTAe
@@ -87,6 +101,5 @@ Qss2jW+Av6lRAgMBAAGjJTAjMAsGA1UdDwQEAwIEsDAUBgNVHSUEDTALBgkqhkiG
 uVbrTzd+Tv8SIfgw8+D4Hf9iLLY33yy6CIMZY2xgfGgBh0suSidoLJt3Pr0fiQGK
 d5IUuavJmM5HeYXlPfg/WxvtcwaB1DlPxGpe3ZsRi2GPBZpxVS1AdwKUk5GmoH4G
 J1hlJQKJ8yY=
------END CERTIFICATE-----
-`
+-----END CERTIFICATE-----`
 )

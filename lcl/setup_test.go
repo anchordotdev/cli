@@ -6,14 +6,16 @@ import (
 	"testing"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/exp/teatest"
+	"github.com/stretchr/testify/require"
+
 	"github.com/anchordotdev/cli"
+	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/clipboard"
 	"github.com/anchordotdev/cli/cmdtest"
 	"github.com/anchordotdev/cli/truststore"
 	"github.com/anchordotdev/cli/ui/uitest"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/x/exp/teatest"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCmdLclSetup(t *testing.T) {
@@ -58,7 +60,6 @@ func TestSetup(t *testing.T) {
 	cfg := cmdtest.Config(ctx)
 	cfg.API.URL = srv.URL
 	cfg.Test.ACME.URL = "http://anchor.lcl.host:" + srv.RailsPort
-	cfg.Test.LclHostPort = 4321
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
@@ -120,6 +121,22 @@ func TestSetup(t *testing.T) {
 		uitest.WaitForGoldenContains(t, drv, errc,
 			fmt.Sprintf("! Press Enter to open %s in your browser.", setupGuideURL),
 		)
+
+		{
+			anc, err := api.NewClient(ctx, cfg)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			srv, err := anc.GetService(ctx, "lcl_setup", "test-app")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			lclUrl := fmt.Sprintf("https://test-app.lcl.host:%d", *srv.LocalhostPort)
+
+			drv.Replace(lclUrl, "https://test-app.lcl.host:<service-port>")
+		}
 
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
