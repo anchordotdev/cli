@@ -211,7 +211,7 @@ func (m *EnvDisplay) View() string {
 }
 
 type EnvNextSteps struct {
-	LclUrl string
+	LclUrl, OrgApid, RealmApid, ServiceApid string
 }
 
 func (m *EnvNextSteps) Init() tea.Cmd { return nil }
@@ -224,7 +224,13 @@ func (m *EnvNextSteps) View() string {
 	fmt.Fprintln(&b, ui.Header("Next Steps"))
 	fmt.Fprintln(&b, ui.StepAlert(ui.Action("(Re)Start your server.")))
 	if m.LclUrl != "" {
-		fmt.Fprintln(&b, ui.StepAlert(fmt.Sprintf("%s: %s", ui.Action("Check out your encrypted site"), ui.URL(m.LclUrl))))
+		fmt.Fprintln(&b, ui.StepAlert(
+			fmt.Sprintf("%s: run `anchor service verify --org %s --realm %s --service %s`.",
+				ui.Action("Verify TLS setup and configuration"),
+				m.OrgApid,
+				m.RealmApid,
+				m.ServiceApid,
+			)))
 	}
 	fmt.Fprintln(&b, ui.StepHint("These certificates will renew automatically, time to enjoy effortless encryption."))
 

@@ -113,5 +113,5 @@
             
 # Next Steps
     ! (Re)Start your server.
-    ! Check out your encrypted site: https://service.lcl.host:4433
+    ! Verify TLS setup and configuration: run `anchor service verify --org org-slug --realm realm-slug --service service-name`.
     | These certificates will renew automatically, time to enjoy effortless encryption.

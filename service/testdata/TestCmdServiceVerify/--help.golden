@@ -1,0 +1,16 @@
+Verify Service TLS Setup and Configuration
+
+Usage:
+  anchor service verify <service> [flags]
+
+Flags:
+  -h, --help               help for verify
+  -o, --org string         Organization of the service to verify.
+  -r, --realm string       Realm instance of the service to verify.
+  -s, --service string     Service to verify.
+      --timeout duration   Time to wait for a successful verification of the service. (default 2m0s)
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

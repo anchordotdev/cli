@@ -22,29 +22,29 @@ import (
 	"github.com/anchordotdev/cli/ui"
 )
 
-var cmdServiceProbe = cli.NewCmd[Probe](CmdService, "probe", func(cmd *cobra.Command) {
+var cmdServiceVerify = cli.NewCmd[Verify](CmdService, "verify", func(cmd *cobra.Command) {
 	cfg := cli.ConfigFromCmd(cmd)
 
-	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization of the service to probe.")
-	cmd.Flags().StringVarP(&cfg.Realm.APID, "realm", "r", cli.Defaults.Realm.APID, "Realm instance of the service to probe.")
-	cmd.Flags().StringVarP(&cfg.Service.APID, "service", "s", cli.Defaults.Service.APID, "Service to probe.")
+	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization of the service to verify.")
+	cmd.Flags().StringVarP(&cfg.Realm.APID, "realm", "r", cli.Defaults.Realm.APID, "Realm instance of the service to verify.")
+	cmd.Flags().StringVarP(&cfg.Service.APID, "service", "s", cli.Defaults.Service.APID, "Service to verify.")
 
-	cmd.Flags().DurationVar(&cfg.Service.Probe.Timeout, "timeout", cli.Defaults.Service.Probe.Timeout, "Time to wait for a successful probe of the service.")
+	cmd.Flags().DurationVar(&cfg.Service.Verify.Timeout, "timeout", cli.Defaults.Service.Verify.Timeout, "Time to wait for a successful verification of the service.")
 })
 
-type Probe struct {
+type Verify struct {
 	anc *api.Session
 
 	OrgAPID, RealmAPID, ServiceAPID string
 }
 
-func (c Probe) UI() cli.UI {
+func (c Verify) UI() cli.UI {
 	return cli.UI{
 		RunTUI: c.RunTUI,
 	}
 }
 
-func (c *Probe) RunTUI(ctx context.Context, drv *ui.Driver) error {
+func (c *Verify) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	cfg := cli.ConfigFromContext(ctx)
 
 	var err error
@@ -52,8 +52,8 @@ func (c *Probe) RunTUI(ctx context.Context, drv *ui.Driver) error {
 		Anc: c.anc,
 	}
 
-	drv.Activate(ctx, models.ProbeHeader)
-	drv.Activate(ctx, models.ProbeHint)
+	drv.Activate(ctx, models.VerifyHeader)
+	drv.Activate(ctx, models.VerifyHint)
 
 	c.anc, err = cmd.Perform(ctx, drv)
 	if err != nil {
@@ -96,7 +96,7 @@ func (c *Probe) RunTUI(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, cfg.Service.Probe.Timeout)
+	ctx, cancel := context.WithTimeout(ctx, cfg.Service.Verify.Timeout)
 	defer cancel()
 
 	addrs, err := c.probeDNS(ctx, cfg, drv, attachment)
@@ -113,7 +113,7 @@ func (c *Probe) RunTUI(ctx context.Context, drv *ui.Driver) error {
 	return nil
 }
 
-func (c *Probe) probeDNS(ctx context.Context, cfg *cli.Config, drv *ui.Driver, attachment api.Attachment) ([]string, error) {
+func (c *Verify) probeDNS(ctx context.Context, cfg *cli.Config, drv *ui.Driver, attachment api.Attachment) ([]string, error) {
 	resolver := cfg.Test.NetResolver
 	if resolver == nil {
 		resolver = new(net.Resolver)
@@ -136,7 +136,7 @@ func (c *Probe) probeDNS(ctx context.Context, cfg *cli.Config, drv *ui.Driver, a
 	return ips, nil
 }
 
-func (c *Probe) probeTCP(ctx context.Context, cfg *cli.Config, drv *ui.Driver, attachment api.Attachment, ips []string) (net.Conn, error) {
+func (c *Verify) probeTCP(ctx context.Context, cfg *cli.Config, drv *ui.Driver, attachment api.Attachment, ips []string) (net.Conn, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -184,7 +184,7 @@ func (c *Probe) probeTCP(ctx context.Context, cfg *cli.Config, drv *ui.Driver, a
 	}
 }
 
-func (c *Probe) probeTLS(ctx context.Context, drv *ui.Driver, attachment api.Attachment, credentials []api.Credential, conn net.Conn) error {
+func (c *Verify) probeTLS(ctx context.Context, drv *ui.Driver, attachment api.Attachment, credentials []api.Credential, conn net.Conn) error {
 	domain := attachment.Domains[0]
 
 	mdl := &models.Checker{
@@ -211,7 +211,7 @@ func (c *Probe) probeTLS(ctx context.Context, drv *ui.Driver, attachment api.Att
 	return nil
 }
 
-func (c *Probe) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+func (c *Verify) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
 	if c.OrgAPID != "" {
 		return c.OrgAPID, nil
 	}
@@ -228,7 +228,7 @@ func (c *Probe) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (s
 	}
 
 	selector := &component.Selector[api.Organization]{
-		Prompt: "What is the organization of the service you want to probe?",
+		Prompt: "What is the organization of the service you want to verify?",
 		Flag:   "--org",
 
 		Fetcher: &component.Fetcher[api.Organization]{
@@ -243,7 +243,7 @@ func (c *Probe) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (s
 	return org.Apid, nil
 }
 
-func (c *Probe) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID, serviceAPID string, attachments []api.Attachment) (string, error) {
+func (c *Verify) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID, serviceAPID string, attachments []api.Attachment) (string, error) {
 	if c.RealmAPID == "" && cfg.Lcl.RealmAPID != "" {
 		drv.Activate(ctx, &componentmodels.ConfigVia{
 			Config:        cfg,
@@ -256,7 +256,7 @@ func (c *Probe) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, 
 
 	if c.RealmAPID == "" {
 		selector := &component.Selector[api.Realm]{
-			Prompt: fmt.Sprintf("Which realm of the %s/%s service do you want to probe?", ui.Emphasize(orgAPID), ui.Emphasize(serviceAPID)),
+			Prompt: fmt.Sprintf("Which realm of the %s/%s service do you want to verify?", ui.Emphasize(orgAPID), ui.Emphasize(serviceAPID)),
 			Flag:   "--realm",
 
 			Fetcher: &component.Fetcher[api.Realm]{
@@ -283,7 +283,7 @@ func (c *Probe) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, 
 	return "", fmt.Errorf("%s service is not attached to the %s/%s realm", serviceAPID, orgAPID, c.RealmAPID)
 }
 
-func (c *Probe) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
+func (c *Verify) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
 	if c.ServiceAPID != "" {
 		return c.ServiceAPID, nil
 	}
@@ -300,7 +300,7 @@ func (c *Probe) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	}
 
 	selector := &component.Selector[api.Service]{
-		Prompt: fmt.Sprintf("Which %s service do you want to probe?", ui.Emphasize(orgAPID)),
+		Prompt: fmt.Sprintf("Which %s service do you want to verify?", ui.Emphasize(orgAPID)),
 		Flag:   "--service",
 
 		Fetcher: &component.Fetcher[api.Service]{

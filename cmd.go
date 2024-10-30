@@ -156,11 +156,11 @@ var rootDef = CmdDef{
 					Short: "Fetch Environment Variables for Service",
 				},
 				{
-					Name: "probe",
+					Name: "verify",
 
-					Use:   "probe <service> [flags]",
+					Use:   "verify <service> [flags]",
 					Args:  cobra.NoArgs,
-					Short: "Probe a service for proper TLS setup & configuration",
+					Short: "Verify Service TLS Setup and Configuration",
 				},
 			},
 		},

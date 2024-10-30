@@ -10,15 +10,15 @@ import (
 )
 
 var (
-	ProbeHeader = ui.Section{
-		Name: "ProbeHeader",
+	VerifyHeader = ui.Section{
+		Name: "VerifyHeader",
 		Model: ui.MessageLines{
-			ui.Header(fmt.Sprintf("Probe Service TLS Setup and Configuration %s", ui.Whisper("`anchor service probe`"))),
+			ui.Header(fmt.Sprintf("Verify Service TLS Setup and Configuration %s", ui.Whisper("`anchor service verify`"))),
 		},
 	}
 
-	ProbeHint = ui.Section{
-		Name: "ProbeHint",
+	VerifyHint = ui.Section{
+		Name: "VerifyHint",
 		Model: ui.MessageLines{
 			ui.StepHint("We'll check your running app to ensure TLS works as expected."),
 		},

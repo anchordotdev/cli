@@ -1,79 +1,79 @@
-─── ProbeHeader ────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
-─── ProbeHint ──────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+─── VerifyHeader ───────────────────────────────────────────────────────────────
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
+─── VerifyHint ─────────────────────────────────────────────────────────────────
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
 ─── Client ─────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     * Checking authentication: probing credentials locally…⠋
 ─── Client ─────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     * Checking authentication: testing credentials remotely…⠋
 ─── Client ─────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
 ─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     * Fetching organizations…⠋
 ─── Fetcher[github.com/anchordotdev/cli/api.Organization] ──────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
 ─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     * Fetching services…⠋
 ─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
 ─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
     * Fetching realms…⠋
 ─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
     - Using localhost, the only available realm. You can also use `--realm localhost`.
 ─── Checker ────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
     - Using localhost, the only available realm. You can also use `--realm localhost`.
     * Checking DNS ankydotdev.lcl.host…⠋
 ─── Checker ────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
     - Using localhost, the only available realm. You can also use `--realm localhost`.
     - Checked DNS ankydotdev.lcl.host: success!
 ─── Checker ────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
@@ -81,8 +81,8 @@
     - Checked DNS ankydotdev.lcl.host: success!
     * Checking TCP [[::1]:<service-port>, 127.0.0.1:<service-port>]…⠋
 ─── Checker ────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
@@ -90,8 +90,8 @@
     - Checked DNS ankydotdev.lcl.host: success!
     - Checked TCP [[::1]:<service-port>, 127.0.0.1:<service-port>]: success!
 ─── Checker ────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.
@@ -100,8 +100,8 @@
     - Checked TCP [[::1]:<service-port>, 127.0.0.1:<service-port>]: success!
     * Checking TLS ankydotdev.lcl.host…⠋
 ─── Checker ────────────────────────────────────────────────────────────────────
-                                                                  
-# Probe Service TLS Setup and Configuration `anchor service probe`
+                                                                    
+# Verify Service TLS Setup and Configuration `anchor service verify`
     | We'll check your running app to ensure TLS works as expected.
     - Using ankydotdev, the only available organization. You can also use `--org ankydotdev`.
     - Using ankydotdev, the only available service. You can also use `--service ankydotdev`.

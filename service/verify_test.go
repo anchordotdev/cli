@@ -19,15 +19,15 @@ import (
 	"github.com/charmbracelet/x/exp/teatest"
 )
 
-func TestCmdServiceProbe(t *testing.T) {
+func TestCmdServiceVerify(t *testing.T) {
 	t.Run("--help", func(t *testing.T) {
-		cmdtest.TestHelp(t, cmdServiceProbe, "service", "probe", "--help")
+		cmdtest.TestHelp(t, cmdServiceVerify, "service", "verify", "--help")
 	})
 }
 
-func TestProbe(t *testing.T) {
+func TestVerify(t *testing.T) {
 	if !srv.IsProxy() {
-		t.Skip("service probe errors unsupported in non-proxy mode")
+		t.Skip("service verify errors unsupported in non-proxy mode")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -42,7 +42,7 @@ func TestProbe(t *testing.T) {
 	cfg.API.Token = apiToken
 	cfg.API.URL = srv.URL
 	cfg.Dashboard.URL = "http://anchor.lcl.host:" + srv.RailsPort
-	cfg.Service.Probe.Timeout = 3 * time.Second
+	cfg.Service.Verify.Timeout = 3 * time.Second
 
 	anc, err := api.NewClient(ctx, cfg)
 	if err != nil {
@@ -82,7 +82,7 @@ func TestProbe(t *testing.T) {
 
 	ctx = cli.ContextWithConfig(ctx, cfg)
 
-	cmd := &Probe{
+	cmd := &Verify{
 		anc: anc,
 	}
 
@@ -100,9 +100,9 @@ func TestProbe(t *testing.T) {
 	uitest.TestGolden(t, drv.Golden())
 }
 
-func TestProbeErrors(t *testing.T) {
+func TestVerifyErrors(t *testing.T) {
 	if srv.IsProxy() {
-		t.Skip("service probe errors unsupported in proxy mode")
+		t.Skip("service verify errors unsupported in proxy mode")
 	}
 
 	apiToken, err := srv.GeneratePAT("anky@anchor.dev")
@@ -114,7 +114,7 @@ func TestProbeErrors(t *testing.T) {
 		cfg := cmdtest.Config(ctx)
 		cfg.API.Token = apiToken
 		cfg.API.URL = srv.URL
-		cfg.Service.Probe.Timeout = 2 * time.Second
+		cfg.Service.Verify.Timeout = 2 * time.Second
 
 		anc, err := api.NewClient(ctx, cfg)
 		return cfg, anc, err
@@ -150,7 +150,7 @@ func TestProbeErrors(t *testing.T) {
 
 		ctx = cli.ContextWithConfig(ctx, cfg)
 
-		cmd := &Probe{
+		cmd := &Verify{
 			anc: anc,
 		}
 
@@ -184,11 +184,11 @@ func TestProbeErrors(t *testing.T) {
 			t.Fatal(err)
 		}
 		cfg.Test.NetDialer = dialer
-		cfg.Service.Probe.Timeout = 100 * time.Millisecond
+		cfg.Service.Verify.Timeout = 100 * time.Millisecond
 
 		ctx = cli.ContextWithConfig(ctx, cfg)
 
-		cmd := &Probe{
+		cmd := &Verify{
 			anc: anc,
 		}
 
@@ -236,11 +236,11 @@ func TestProbeErrors(t *testing.T) {
 			t.Fatal(err)
 		}
 		cfg.Test.NetDialer = dialer
-		cfg.Service.Probe.Timeout = 100 * time.Millisecond
+		cfg.Service.Verify.Timeout = 100 * time.Millisecond
 
 		ctx = cli.ContextWithConfig(ctx, cfg)
 
-		cmd := &Probe{
+		cmd := &Verify{
 			anc: anc,
 		}
 
@@ -286,7 +286,7 @@ func TestProbeErrors(t *testing.T) {
 
 		ctx = cli.ContextWithConfig(ctx, cfg)
 
-		cmd := &Probe{
+		cmd := &Verify{
 			anc: anc,
 		}
 
@@ -332,7 +332,7 @@ func TestProbeErrors(t *testing.T) {
 
 		ctx = cli.ContextWithConfig(ctx, cfg)
 
-		cmd := &Probe{
+		cmd := &Verify{
 			anc: anc,
 		}
 

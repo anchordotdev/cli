@@ -196,7 +196,10 @@ func (c *Env) Perform(ctx context.Context, drv *ui.Driver) error {
 	}
 
 	drv.Activate(ctx, &models.EnvNextSteps{
-		LclUrl: lclUrl,
+		LclUrl:      lclUrl,
+		OrgApid:     orgAPID,
+		RealmApid:   realmAPID,
+		ServiceApid: serviceAPID,
 	})
 
 	return nil

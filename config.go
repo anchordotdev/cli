@@ -73,8 +73,8 @@ type Config struct {
 		EnvOutput string `env:"ENV_OUTPUT" toml:",omitempty,readonly"`
 		CertStyle string `env:"CERT_STYLE" toml:"cert-style,omitempty"`
 
-		Probe struct {
-			Timeout time.Duration `default:"2m" env:"PROBE_TIMEOUT" toml:",omitempty,readonly"`
+		Verify struct {
+			Timeout time.Duration `default:"2m" env:"VERIFY_TIMEOUT" toml:",omitempty,readonly"`
 		} `toml:",omitempty,readonly"`
 	} `toml:"service,omitempty"`
 
