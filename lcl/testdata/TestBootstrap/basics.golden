@@ -228,7 +228,7 @@
     | Now, we'll add your personal CA certificates to your system's trust stores.
                                                                     
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
-    * Updating Mock: installing lcl_config/localhost - AnchorCA ECDSA… ⠋
+    * [1/2] Updating Mock: installing lcl_config/localhost - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
                                                                                           
 # Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`
@@ -257,7 +257,7 @@
                                                                     
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
     - Updated Mock: installed lcl_config/localhost - AnchorCA [ECDSA]
-    * Updating Mock: installing lcl_config/localhost - AnchorCA RSA… ⠋
+    * [2/2] Updating Mock: installing lcl_config/localhost - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
                                                                                           
 # Initial System Configuration for lcl.host Local HTTPS Development `anchor lcl bootstrap`

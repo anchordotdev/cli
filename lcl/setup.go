@@ -220,6 +220,8 @@ func (c *Setup) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (s
 		Prompt: "Which organization's lcl.host local development environment do you want to setup?",
 		Flag:   "--org",
 
+		Creatable: true,
+
 		Fetcher: &component.Fetcher[api.Organization]{
 			FetchFn: func() ([]api.Organization, error) { return c.anc.GetOrgs(ctx) },
 		},
@@ -229,7 +231,38 @@ func (c *Setup) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (s
 	if err != nil {
 		return "", err
 	}
+	if org == nil || (*org == api.Organization{}) {
+		orgName, err := c.orgName(ctx, cfg, drv)
+		if err != nil {
+			return "", err
+		}
+
+		if org, err = c.anc.CreateOrg(ctx, orgName); err != nil {
+			return "", err
+		}
+		// FIXME: provide nicer output about using newly created value, and hint flag?
+		return org.Apid, nil
+	}
 	return org.Apid, nil
+
+}
+
+func (c *Setup) orgName(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
+	if cfg.Org.Name != "" {
+		return cfg.Org.Name, nil
+	}
+
+	inputc := make(chan string)
+	drv.Activate(ctx, &models.SetupOrgName{
+		InputCh: inputc,
+	})
+
+	select {
+	case orgName := <-inputc:
+		return orgName, nil
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
 }
 
 func (c *Setup) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
@@ -293,7 +326,7 @@ func (c *Setup) serviceAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	if err != nil {
 		return "", err
 	}
-	if service == nil {
+	if service == nil || (*service == api.Service{}) {
 		return "", nil
 	}
 	return service.Slug, nil
@@ -310,7 +343,7 @@ func (c *Setup) serviceName(ctx context.Context, cfg *cli.Config, drv *ui.Driver
 	}
 
 	inputc := make(chan string)
-	drv.Activate(ctx, &models.SetupName{
+	drv.Activate(ctx, &models.SetupServiceName{
 		InputCh: inputc,
 		Default: defaultName,
 	})

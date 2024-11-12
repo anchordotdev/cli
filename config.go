@@ -58,6 +58,7 @@ type Config struct {
 
 	Org struct {
 		APID string `env:"ORG" toml:"apid,omitempty"`
+		Name string `env:"ORG_NAME" toml:",omitempty,readonly"`
 	} `toml:"org,omitempty"`
 
 	Realm struct {

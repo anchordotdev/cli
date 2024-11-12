@@ -8,17 +8,6 @@ import (
 	"testing"
 )
 
-func TestParseCertificate(t *testing.T) {
-	cert, err := parseCertificate(validCA.Raw)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if cert == nil {
-		t.Fatal("expect parse certificate with valid certificate to return certificate")
-	}
-
-}
-
 func TestParseInvalidCerts(t *testing.T) {
 	tests := []struct {
 		name string

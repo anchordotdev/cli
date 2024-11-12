@@ -60,3 +60,20 @@ func pathExists(sfs fs.StatFS, path string) bool {
 	_, err := sfs.Stat(strings.Trim(path, string(os.PathSeparator)))
 	return err == nil
 }
+
+func parseCertificate(der []byte) (*x509.Certificate, error) {
+	cert, err := x509.ParseCertificate(der)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "x509: certificate contains duplicate extension") {
+			return nil, nil
+		}
+		if strings.HasPrefix(err.Error(), "x509: inner and outer signature algorithm identifiers don't match") {
+			return nil, nil
+		}
+		if strings.HasPrefix(err.Error(), "x509: negative serial number") {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return cert, nil
+}

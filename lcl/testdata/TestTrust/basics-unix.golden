@@ -36,7 +36,7 @@
 # Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
     | We'll check your local trust stores and make any needed updates.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
-    * Updating Mock: installing oas-examples - AnchorCA ECDSA… ⠋
+    * [1/2] Updating Mock: installing oas-examples - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
                                                                         
 # Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
@@ -49,7 +49,7 @@
     | We'll check your local trust stores and make any needed updates.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
-    * Updating Mock: installing oas-examples - AnchorCA RSA… ⠋
+    * [2/2] Updating Mock: installing oas-examples - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
                                                                         
 # Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`

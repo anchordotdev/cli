@@ -2,6 +2,7 @@ package lcl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"slices"
@@ -9,8 +10,6 @@ import (
 	"github.com/anchordotdev/cli"
 	"github.com/anchordotdev/cli/api"
 	"github.com/anchordotdev/cli/auth"
-	"github.com/anchordotdev/cli/component"
-	componentmodels "github.com/anchordotdev/cli/component/models"
 	"github.com/anchordotdev/cli/lcl/models"
 	"github.com/anchordotdev/cli/trust"
 	"github.com/anchordotdev/cli/truststore"
@@ -46,8 +45,6 @@ var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
 type Command struct {
 	anc       *api.Session
 	clipboard cli.Clipboard
-
-	OrgAPID, RealmAPID string
 }
 
 func (c Command) UI() cli.UI {
@@ -57,8 +54,6 @@ func (c Command) UI() cli.UI {
 }
 
 func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
-	cfg := cli.ConfigFromContext(ctx)
-
 	if err := c.apiAuth(ctx, drv); err != nil {
 		return err
 	}
@@ -76,7 +71,7 @@ func (c *Command) run(ctx context.Context, drv *ui.Driver) error {
 		return err
 	}
 
-	return c.appSetup(ctx, cfg, drv)
+	return c.appSetup(ctx, drv)
 }
 
 func (c *Command) apiAuth(ctx context.Context, drv *ui.Driver) error {
@@ -161,92 +156,17 @@ func (c *Command) systemConfig(ctx context.Context, drv *ui.Driver) error {
 	}
 }
 
-func (c *Command) appSetup(ctx context.Context, cfg *cli.Config, drv *ui.Driver) error {
+func (c *Command) appSetup(ctx context.Context, drv *ui.Driver) error {
 	// run setup command
 	drv.Activate(ctx, models.SetupHeader)
 	drv.Activate(ctx, models.SetupHint)
 
-	orgAPID, err := c.orgAPID(ctx, cfg, drv)
-	if err != nil {
-		return err
-	}
-
-	realmAPID, err := c.realmAPID(ctx, cfg, drv, orgAPID)
-	if err != nil {
-		return err
-	}
-
 	cmdSetup := &Setup{
-		OrgAPID:   orgAPID,
-		RealmAPID: realmAPID,
-
 		anc:       c.anc,
 		clipboard: c.clipboard,
 	}
 
 	return cmdSetup.perform(ctx, drv)
-}
-
-func (c *Command) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
-	if c.OrgAPID != "" {
-		return c.OrgAPID, nil
-	}
-
-	if cfg.Org.APID != "" {
-		drv.Activate(ctx, &componentmodels.ConfigVia{
-			Config:        cfg,
-			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Org.APID },
-			Flag:          "--org",
-			Singular:      "organization",
-		})
-		return cfg.Org.APID, nil
-	}
-
-	selector := &component.Selector[api.Organization]{
-		Prompt: "Which organization do you want to manage your local development environment for?",
-		Flag:   "--org",
-
-		Fetcher: &component.Fetcher[api.Organization]{
-			FetchFn: func() ([]api.Organization, error) { return c.anc.GetOrgs(ctx) },
-		},
-	}
-
-	org, err := selector.Choice(ctx, drv)
-	if err != nil {
-		return "", err
-	}
-	return org.Apid, nil
-}
-
-func (c *Command) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {
-	if c.RealmAPID != "" {
-		return c.RealmAPID, nil
-	}
-
-	if cfg.Lcl.RealmAPID != "" {
-		drv.Activate(ctx, &componentmodels.ConfigVia{
-			Config:        cfg,
-			ConfigFetchFn: func(cfg *cli.Config) any { return cfg.Lcl.RealmAPID },
-			Flag:          "--realm",
-			Singular:      "realm",
-		})
-		return cfg.Lcl.RealmAPID, nil
-	}
-
-	selector := &component.Selector[api.Realm]{
-		Prompt: fmt.Sprintf("Which %s realm do you want to manage your local development environment for?", ui.Emphasize(orgAPID)),
-		Flag:   "--realm",
-
-		Fetcher: &component.Fetcher[api.Realm]{
-			FetchFn: func() ([]api.Realm, error) { return c.anc.GetOrgRealms(ctx, orgAPID) },
-		},
-	}
-
-	realm, err := selector.Choice(ctx, drv)
-	if err != nil {
-		return "", err
-	}
-	return realm.Apid, nil
 }
 
 func checkLoopbackDomain(ctx context.Context, drv *ui.Driver, domain string) error {
@@ -257,6 +177,12 @@ func checkLoopbackDomain(ctx context.Context, drv *ui.Driver, domain string) err
 	addrs, err := new(net.Resolver).LookupHost(ctx, domain)
 	if err != nil {
 		drv.Send(models.DomainStatusMsg(false))
+
+		var dnserr *net.DNSError
+		if errors.As(err, &dnserr) {
+			return cli.UserError{Err: errors.New("no such host")}
+		}
+
 		return err
 	}
 

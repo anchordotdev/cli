@@ -94,6 +94,11 @@ func TestSetup(t *testing.T) {
 		}()
 
 		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select first option, "lcl_setup"
+
+		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What application server type?",
 		)
 
@@ -169,6 +174,11 @@ func TestSetup(t *testing.T) {
 		}()
 
 		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select first option, "lcl_setup"
+
+		uitest.WaitForGoldenContains(t, drv, errc,
 			"? Which lcl_setup/localhost service's lcl.host local development environment do you want to setup?",
 		)
 
@@ -230,6 +240,11 @@ func TestSetup(t *testing.T) {
 		}()
 
 		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select first option, "org-solo"
+
+		uitest.WaitForGoldenContains(t, drv, errc,
 			"? Which org-slug/realm-slug service's lcl.host local development environment do you want to setup?",
 		)
 
@@ -267,6 +282,11 @@ func TestSetup(t *testing.T) {
 			errc <- cmd.UI().RunTUI(ctx, drv)
 			errc <- tm.Quit()
 		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select first option, "lcl_setup"
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? Which lcl_setup/localhost service's lcl.host local development environment do you want to setup?",
@@ -328,6 +348,11 @@ func TestSetup(t *testing.T) {
 			errc <- cmd.UI().RunTUI(ctx, drv)
 			errc <- tm.Quit()
 		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select first option, "lcl_setup"
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? Which lcl_setup/localhost service's lcl.host local development environment do you want to setup?",

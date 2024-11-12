@@ -1,6 +1,6 @@
 package api
 
-//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --package=api -generate=types -o ./openapi.gen.go ../../config/openapi.yml
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --package=api -generate=types -o ./openapi.gen.go ../../config/openapi.yml
 
 import (
 	"bytes"
@@ -204,9 +204,21 @@ func (s *Session) CreateEAB(ctx context.Context, chainSlug, orgSlug, realmSlug, 
 	return &eabOutput, nil
 }
 
-func (s *Session) CreateService(ctx context.Context, orgSlug, serviceSlug, serverType string, localhostPort *int) (*Service, error) {
+func (s *Session) CreateOrg(ctx context.Context, orgName string) (*Organization, error) {
+	orgInput := CreateOrgJSONRequestBody{
+		Name: orgName,
+	}
+
+	var orgOutput Organization
+	if err := s.post(ctx, "/orgs", orgInput, &orgOutput); err != nil {
+		return nil, err
+	}
+	return &orgOutput, nil
+}
+
+func (s *Session) CreateService(ctx context.Context, orgSlug, serviceName, serverType string, localhostPort *int) (*Service, error) {
 	serviceInput := CreateServiceJSONRequestBody{
-		Name:          serviceSlug,
+		Name:          serviceName,
 		ServerType:    serverType,
 		LocalhostPort: localhostPort,
 	}

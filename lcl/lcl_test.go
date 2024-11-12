@@ -168,6 +168,8 @@ func TestLcl(t *testing.T) {
 			errc <- tm.Quit()
 		}()
 
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select first option, "lcl"
+
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What lcl.host domain would you like to use for diagnostics?",
 		)
@@ -217,15 +219,18 @@ func TestLcl(t *testing.T) {
 		// setup
 
 		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select first option, "lcl_setup"
+
+		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What application server type?",
 		)
-
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What is the application name?",
 		)
-
 		tm.Type("test-app")
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -286,11 +291,11 @@ func TestLcl(t *testing.T) {
 		}()
 
 		uitest.WaitForGoldenContains(t, drv, errc,
-			"? Which lcl/localhost service's lcl.host local development environment do you want to setup?",
+			"? Which organization's lcl.host local development environment do you want to setup?",
 		)
 
-		uitest.TestGolden(t, drv.Golden())
 		// just focus on initial portion to check for skip
+		uitest.TestGolden(t, drv.Golden())
 	})
 
 	t.Run(fmt.Sprintf("non-personal-cas-missing-%s", uitest.TestTagOS()), func(t *testing.T) {
@@ -354,7 +359,7 @@ func TestLcl(t *testing.T) {
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
-			"? Which organization do you want to manage your local development environment for?",
+			"? Which organization's lcl.host local development environment do you want to setup?",
 		)
 
 		tm.Send(tea.KeyMsg{Type: tea.KeyDown})

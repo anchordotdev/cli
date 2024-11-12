@@ -68,8 +68,10 @@ func (m *TrustUpdateConfirm) View() string {
 type TrustUpdateStore struct {
 	Config *cli.Config
 
-	Store truststore.Store
+	MissingCount int
+	Store        truststore.Store
 
+	index       int
 	installing  *truststore.CA
 	installed   map[string][]string
 	commonNames []string
@@ -78,6 +80,7 @@ type TrustUpdateStore struct {
 }
 
 func (m *TrustUpdateStore) Init() tea.Cmd {
+	m.index = 1
 	m.installed = make(map[string][]string)
 	m.spinner = ui.WaitingSpinner()
 
@@ -85,6 +88,10 @@ func (m *TrustUpdateStore) Init() tea.Cmd {
 }
 
 type (
+	TrustStoreExistingCAMsg struct {
+		truststore.CA
+	}
+
 	TrustStoreInstallingCAMsg struct {
 		truststore.CA
 	}
@@ -96,12 +103,16 @@ type (
 
 func (m *TrustUpdateStore) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case TrustStoreExistingCAMsg:
+		m.index += 1
+		return m, nil
 	case TrustStoreInstallingCAMsg:
 		m.installing = &msg.CA
 		return m, nil
 	case TrustStoreInstalledCAMsg:
 		m.installing = nil
 		m.installed[msg.CA.Subject.CommonName] = append(m.installed[msg.CA.Subject.CommonName], msg.CA.PublicKeyAlgorithm.String())
+		m.index += 1
 
 		if !slices.Contains(m.commonNames, msg.CA.Subject.CommonName) {
 			m.commonNames = append(m.commonNames, msg.CA.Subject.CommonName)
@@ -145,7 +156,9 @@ func (m *TrustUpdateStore) View() string {
 			)))
 		}
 
-		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("Updating %s: installing %s %s… %s",
+		fmt.Fprintln(&b, ui.StepInProgress(fmt.Sprintf("[%d/%d] Updating %s: installing %s %s… %s",
+			m.index,
+			m.MissingCount,
 			ui.Emphasize(m.Store.Description()),
 			ui.Underline(m.installing.Subject.CommonName),
 			ui.Whisper(m.installing.PublicKeyAlgorithm.String()),

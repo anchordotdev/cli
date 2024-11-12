@@ -15,6 +15,16 @@ import (
 	_ "github.com/anchordotdev/cli/testflags"
 )
 
+func TestParseCertificate(t *testing.T) {
+	cert, err := parseCertificate(validCA.Raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cert == nil {
+		t.Fatal("expect parse certificate with valid certificate to return certificate")
+	}
+}
+
 func testStore(t *testing.T, store Store) {
 	if ok, err := store.Check(); err != nil {
 		t.Fatal(err)

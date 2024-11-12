@@ -108,7 +108,7 @@
 # Manage CA Certificates in your Local Trust Store(s) `anchor lcl trust`
     | We'll check your local trust stores and make any needed updates.
     | "ankyco/development - AnchorCA" Thumbprint (sha1): 0FC20F8F F8491310 6CC5441B FAE07B26 B4A036F7
-    * Updating Mock: installing ankyco/development - AnchorCA ECDSA… ⠋
+    * [1/2] Updating Mock: installing ankyco/development - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 | Let's set up fast and totally free lcl.host HTTPS!
                                                                  
@@ -136,7 +136,7 @@
     | We'll check your local trust stores and make any needed updates.
     - Updated Mock: installed ankyco/development - AnchorCA [ECDSA]
     | "ankyco/development - AnchorCA" Thumbprint (sha1): 5710728A A336B3F0 4A4E96E6 F3E12932 A7FCAC72
-    * Updating Mock: installing ankyco/development - AnchorCA RSA… ⠋
+    * [2/2] Updating Mock: installing ankyco/development - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
 | Let's set up fast and totally free lcl.host HTTPS!
                                                                  
@@ -230,9 +230,10 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    ? Which organization do you want to manage your local development environment for?
+    ? Which organization's lcl.host local development environment do you want to setup?
     > anky@anchor.dev (ankydotdev)
       AnkyCo (ankyco)             
+      Create New Organization     
 ─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
 | Let's set up fast and totally free lcl.host HTTPS!
                                                                  
@@ -249,9 +250,10 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    ? Which organization do you want to manage your local development environment for?
+    ? Which organization's lcl.host local development environment do you want to setup?
       anky@anchor.dev (ankydotdev)
     > AnkyCo (ankyco)             
+      Create New Organization     
 ─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
 | Let's set up fast and totally free lcl.host HTTPS!
                                                                  

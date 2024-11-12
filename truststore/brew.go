@@ -87,7 +87,7 @@ func (s *Brew) ListCAs() ([]*CA, error) {
 
 	var cas []*CA
 	for p, buf := pem.Decode(buf); p != nil; p, buf = pem.Decode(buf) {
-		cert, err := x509.ParseCertificate(p.Bytes)
+		cert, err := parseCertificate(p.Bytes)
 		if err != nil {
 			return nil, err
 		}

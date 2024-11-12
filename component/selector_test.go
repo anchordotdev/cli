@@ -78,6 +78,69 @@ func TestSelector(t *testing.T) {
 		uitest.TestGolden(t, drv.Golden())
 	})
 
+	t.Run("orgs solo creatable", func(t *testing.T) {
+		if srv.IsProxy() {
+			t.Skip("selector tests unsupported in proxy mode")
+		}
+
+		cfg.Test.Prefer = map[string]cli.ConfigTestPrefer{
+			"/v0/orgs": {
+				Example: "solo",
+			},
+		}
+		ctx = cli.ContextWithConfig(ctx, cfg)
+
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		choicec := make(chan api.Organization, 1)
+		errc := make(chan error, 1)
+		go func() {
+			selector := component.Selector[api.Organization]{
+				Prompt: "Which organization do you want for this test?",
+				Flag:   "--org",
+
+				Creatable: true,
+
+				Fetcher: &component.Fetcher[api.Organization]{
+					FetchFn: func() ([]api.Organization, error) { return anc.GetOrgs(ctx) },
+				},
+			}
+
+			org, err := selector.Choice(ctx, drv)
+			if err != nil {
+				errc <- err
+				return
+			}
+
+			choicec <- *org
+			errc <- tm.Quit()
+		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization do you want for this test?",
+		)
+
+		tm.Send(tea.KeyMsg{
+			Type: tea.KeyDown,
+		})
+		tm.Send(tea.KeyMsg{
+			Type: tea.KeyEnter,
+		})
+
+		org := <-choicec
+
+		if want, got := "", org.Slug; want != got {
+			t.Errorf("Want org choice: %q, Got: %q", want, got)
+		}
+
+		if err := <-errc; err != nil {
+			t.Error(err)
+		}
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+		uitest.TestGolden(t, drv.Golden())
+	})
+
 	t.Run("orgs double", func(t *testing.T) {
 		if srv.IsProxy() {
 			t.Skip("selector tests unsupported in proxy mode")

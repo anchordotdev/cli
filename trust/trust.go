@@ -114,11 +114,13 @@ func (c *Command) Perform(ctx context.Context, drv *ui.Driver) error {
 
 	for _, store := range stores {
 		drv.Activate(ctx, &models.TrustUpdateStore{
-			Config: cfg,
-			Store:  store,
+			Config:       cfg,
+			MissingCount: len(auditInfo.Missing),
+			Store:        store,
 		})
 		for _, ca := range auditInfo.Missing {
 			if auditInfo.IsPresent(ca, store) {
+				drv.Send(models.TrustStoreExistingCAMsg{CA: *ca})
 				continue
 			}
 			drv.Send(models.TrustStoreInstallingCAMsg{CA: *ca})

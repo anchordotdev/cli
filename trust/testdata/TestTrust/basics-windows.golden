@@ -69,7 +69,7 @@
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     | "oas-examples - AnchorCA" Thumbprint (sha1): BA470EAC 5067C499 99F3F5A1 ACE9E8CA 48E2731C
-    * Updating Mock: installing oas-examples - AnchorCA ECDSA… ⠋
+    * [1/2] Updating Mock: installing oas-examples - AnchorCA ECDSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
                                                                     
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`
@@ -87,7 +87,7 @@
     - Compared local and expected CA certificates: need to install 2 missing certificates.
     - Updated Mock: installed oas-examples - AnchorCA [ECDSA]
     | "oas-examples - AnchorCA" Thumbprint (sha1): E1CE91B0 FC124890 24F7583B 8F0844EE 2291BE47
-    * Updating Mock: installing oas-examples - AnchorCA RSA… ⠋
+    * [2/2] Updating Mock: installing oas-examples - AnchorCA RSA… ⠋
 ─── TrustUpdateStore ───────────────────────────────────────────────────────────
                                                                     
 # Manage CA Certificates in your Local Trust Store(s) `anchor trust`

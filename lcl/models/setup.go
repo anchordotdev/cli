@@ -166,7 +166,62 @@ func (m *SetupCategory) View() string {
 	return b.String()
 }
 
-type SetupName struct {
+type SetupOrgName struct {
+	InputCh chan<- string
+
+	input  *textinput.Model
+	choice string
+}
+
+func (m *SetupOrgName) Init() tea.Cmd {
+	ti := textinput.New()
+	ti.Prompt = ""
+	ti.Cursor.Style = ui.Prompt
+	ti.Focus()
+
+	m.input = &ti
+
+	return textinput.Blink
+}
+
+func (m *SetupOrgName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.Type {
+		case tea.KeyEnter:
+			if m.InputCh != nil {
+				value := m.input.Value()
+
+				m.choice = value
+				m.InputCh <- value
+				m.InputCh = nil
+			}
+			return m, nil
+		case tea.KeyEsc:
+			return m, ui.Exit
+		}
+	}
+
+	ti, cmd := m.input.Update(msg)
+	m.input = &ti
+	return m, cmd
+}
+
+func (m *SetupOrgName) View() string {
+	var b strings.Builder
+
+	if m.InputCh != nil {
+		fmt.Fprintln(&b, ui.StepPrompt("What is the organization name?"))
+		fmt.Fprintln(&b, ui.StepPrompt(m.input.View()))
+		return b.String()
+	}
+
+	fmt.Fprintln(&b, ui.StepDone(fmt.Sprintf("Entered %s organization name.", ui.Emphasize(m.choice))))
+
+	return b.String()
+}
+
+type SetupServiceName struct {
 	InputCh chan<- string
 
 	Default string
@@ -175,7 +230,7 @@ type SetupName struct {
 	choice string
 }
 
-func (m *SetupName) Init() tea.Cmd {
+func (m *SetupServiceName) Init() tea.Cmd {
 	ti := textinput.New()
 	ti.Prompt = ""
 	ti.Cursor.Style = ui.Prompt
@@ -190,7 +245,7 @@ func (m *SetupName) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m *SetupName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *SetupServiceName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -216,7 +271,7 @@ func (m *SetupName) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *SetupName) View() string {
+func (m *SetupServiceName) View() string {
 	var b strings.Builder
 
 	if m.InputCh != nil {

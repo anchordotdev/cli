@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -144,7 +143,8 @@ func (m *Selector[T]) View() string {
 		return b.String()
 	}
 
-	if reflect.ValueOf(m.chosen.Value).IsZero() {
+	var zeroT T
+	if m.chosen.Value == zeroT {
 		fmt.Fprintln(&b, ui.StepDone(
 			fmt.Sprintf("Selected %s.", ui.Emphasize(m.chosen.String)),
 		))
