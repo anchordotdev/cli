@@ -19,6 +19,7 @@ Flags:
       --domains strings     Domains to create certificate for.
   -h, --help                help for lcl
   -o, --org string          Organization for lcl.host local development environment management.
+      --org-name string     Name for created org.
   -r, --realm string        Realm for lcl.host local development environment management.
   -s, --service string      Service for lcl.host local development environment management.
       --subca string        SubCA to create certificate for.

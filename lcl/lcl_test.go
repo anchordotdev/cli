@@ -89,8 +89,13 @@ func TestCmdLcl(t *testing.T) {
 	})
 
 	t.Run("--cert-style acme", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLcl, "--method", "acme")
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--cert-style", "acme")
 		require.Equal(t, "acme", cfg.Service.CertStyle)
+	})
+
+	t.Run("--org-name org", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLcl, "--org-name", "org")
+		require.Equal(t, "org", cfg.Org.Name)
 	})
 
 	// alias
@@ -174,7 +179,10 @@ func TestLcl(t *testing.T) {
 			"? What lcl.host domain would you like to use for diagnostics?",
 		)
 
-		tm.Type("hello-world")
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("hello-world"),
+			Type:  tea.KeyRunes,
+		})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
@@ -231,7 +239,10 @@ func TestLcl(t *testing.T) {
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What is the application name?",
 		)
-		tm.Type("test-app")
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("test-app"),
+			Type:  tea.KeyRunes,
+		})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,

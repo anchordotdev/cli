@@ -1,0 +1,43 @@
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: probing credentials locally…⠋
+─── Client ─────────────────────────────────────────────────────────────────────
+    * Checking authentication: testing credentials remotely…⠋
+─── OrgCreateHeader ────────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+─── OrgCreateHint ──────────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+─── CreateOrgNameInput ─────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    ? What is the new organization's name?
+    ?  
+─── CreateOrgNameInput ─────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    ? What is the new organization's name?
+    ? Org Name 
+─── CreateOrgNameInput ─────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    - Entered Org Name organization name.
+─── CreateOrgSpinner ───────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    - Entered Org Name organization name.
+    * Creating new organization…⠋
+─── CreateOrgSpinner ───────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+─── CreateOrgResult ────────────────────────────────────────────────────────────
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    - Created Org Name (org-slug) organization.

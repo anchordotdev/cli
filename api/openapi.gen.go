@@ -408,7 +408,7 @@ type CreateClientJSONBody struct {
 
 // CreateOrgJSONBody defines parameters for CreateOrg.
 type CreateOrgJSONBody struct {
-	// Name The name for this organization.
+	// Name The name for the new organization.
 	Name string `json:"name"`
 }
 

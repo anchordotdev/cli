@@ -29,8 +29,13 @@ func TestCmdLclSetup(t *testing.T) {
 	})
 
 	t.Run("--cert-style acme", func(t *testing.T) {
-		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--method", "acme")
+		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--cert-style", "acme")
 		require.Equal(t, "acme", cfg.Service.CertStyle)
+	})
+
+	t.Run("--org-name org", func(t *testing.T) {
+		cfg := cmdtest.TestCfg(t, CmdLclSetup, "--org-name", "org")
+		require.Equal(t, "org", cfg.Org.Name)
 	})
 
 	// alias
@@ -59,7 +64,9 @@ func TestSetup(t *testing.T) {
 
 	cfg := cmdtest.Config(ctx)
 	cfg.API.URL = srv.URL
-	cfg.Test.ACME.URL = "http://anchor.lcl.host:" + srv.RailsPort
+	if srv.IsProxy() {
+		cfg.Test.ACME.URL = "http://anchor.lcl.host:" + srv.RailsPort
+	}
 	cfg.Trust.MockMode = true
 	cfg.Trust.NoSudo = true
 	cfg.Trust.Stores = []string{"mock"}
@@ -72,6 +79,67 @@ func TestSetup(t *testing.T) {
 	t.Cleanup(truststore.ResetMockCAs)
 
 	setupGuideURL := cfg.SetupGuideURL("lcl_setup", "test-app")
+
+	t.Run("create-org-existing-service-basics", func(t *testing.T) {
+		if srv.IsProxy() {
+			t.Skip("lcl setup existing service unsupported in proxy mode")
+		}
+
+		ctx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		drv, tm := uitest.TestTUI(ctx, t)
+
+		cmd := Setup{
+			clipboard: new(clipboard.Mock),
+		}
+
+		errc := make(chan error, 1)
+		go func() {
+			errc <- cmd.UI().RunTUI(ctx, drv)
+			errc <- tm.Quit()
+		}()
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which organization's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyDown})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter}) // select second option, "Create New Org"
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? What is the new organization's name?",
+		)
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("Org Name"),
+			Type:  tea.KeyRunes,
+		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? Which org-slug/realm-slug service's lcl.host local development environment do you want to setup?",
+		)
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		uitest.WaitForGoldenContains(t, drv, errc,
+			"? How would you like to manage your environment variables?",
+		)
+
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
+
+		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
+
+		env, err := cmd.clipboard.ReadAll()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want := "export ACME_CONTACT=\"anky@anchor.dev\"\nexport ACME_DIRECTORY_URL=\"https://anchor.dev/org-slug/realm-slug/x509/ca/acme\"\nexport ACME_HMAC_KEY=\"abcdefghijklmnopqrstuvwxyz0123456789-_ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\nexport ACME_KID=\"aae_abcdefghijklmnopqrstuvwxyz0123456789-_ABCDEF\"\nexport HTTPS_PORT=\"4433\"\nexport SERVER_NAMES=\"service.lcl.host\"\n"
+		if got := env; want != got {
+			t.Errorf("Want env clipboard:\n\n%q,\n\nGot:\n\n%q\n\n", want, got)
+		}
+
+		uitest.TestGolden(t, drv.Golden())
+	})
 
 	t.Run("create-service-automated-basics", func(t *testing.T) {
 		if srv.IsMock() {
@@ -108,7 +176,10 @@ func TestSetup(t *testing.T) {
 			"? What is the application name?",
 		)
 
-		tm.Type("test-app")
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("test-app"),
+			Type:  tea.KeyRunes,
+		})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
@@ -181,7 +252,6 @@ func TestSetup(t *testing.T) {
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? Which lcl_setup/localhost service's lcl.host local development environment do you want to setup?",
 		)
-
 		tm.Send(tea.KeyMsg{Type: tea.KeyDown})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -195,7 +265,10 @@ func TestSetup(t *testing.T) {
 			"? What is the application name?",
 		)
 
-		tm.Type("test-app")
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("test-app"),
+			Type:  tea.KeyRunes,
+		})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
@@ -219,7 +292,7 @@ func TestSetup(t *testing.T) {
 		}
 	})
 
-	t.Run(fmt.Sprintf("existing-service-basics-%s", uitest.TestTagOS()), func(t *testing.T) {
+	t.Run("existing-service-basics", func(t *testing.T) {
 		if srv.IsProxy() {
 			t.Skip("lcl setup existing service unsupported in proxy mode")
 		}
@@ -258,7 +331,15 @@ func TestSetup(t *testing.T) {
 
 		tm.WaitFinished(t, teatest.WithFinalTimeout(time.Second*3))
 
-		// FIXME: check clipboard values for accuracy (can't easily access values)
+		env, err := cmd.clipboard.ReadAll()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want := "export ACME_CONTACT=\"anky@anchor.dev\"\nexport ACME_DIRECTORY_URL=\"https://anchor.dev/org-slug/realm-slug/x509/ca/acme\"\nexport ACME_HMAC_KEY=\"abcdefghijklmnopqrstuvwxyz0123456789-_ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\nexport ACME_KID=\"aae_abcdefghijklmnopqrstuvwxyz0123456789-_ABCDEF\"\nexport HTTPS_PORT=\"4433\"\nexport SERVER_NAMES=\"service.lcl.host\"\n"
+		if got := env; want != got {
+			t.Errorf("Want env clipboard:\n\n%q,\n\nGot:\n\n%q\n\n", want, got)
+		}
 
 		uitest.TestGolden(t, drv.Golden())
 	})
@@ -305,7 +386,10 @@ func TestSetup(t *testing.T) {
 			"? What is the application name?",
 		)
 
-		tm.Type("Test App")
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("Test App"),
+			Type:  tea.KeyRunes,
+		})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
@@ -370,15 +454,19 @@ func TestSetup(t *testing.T) {
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What is the application name?",
 		)
-
-		tm.Type("test-explicit-subdomain-app")
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("test-explicit-subdomain-app"),
+			Type:  tea.KeyRunes,
+		})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,
 			"? What lcl.host domain would you like to use for local application development?",
 		)
-
-		tm.Type("this-is-my-weird-subdomain")
+		tm.Send(tea.KeyMsg{
+			Runes: []rune("this-is-my-weird-subdomain"),
+			Type:  tea.KeyRunes,
+		})
 		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		uitest.WaitForGoldenContains(t, drv, errc,

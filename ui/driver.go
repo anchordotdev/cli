@@ -85,6 +85,10 @@ type activateMsg struct {
 	donec chan<- struct{}
 }
 
+type HideModelsMsg struct {
+	Models []string
+}
+
 func (d *Driver) Activate(ctx context.Context, model tea.Model) {
 	donec := make(chan struct{})
 
@@ -149,6 +153,10 @@ func (d *Driver) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.Type {
 		case tea.KeyCtrlC:
 			return d, tea.Quit
+		}
+	case HideModelsMsg:
+		for _, mdl := range d.models {
+			mdl.Update(msg)
 		}
 	}
 

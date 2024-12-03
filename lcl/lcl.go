@@ -34,6 +34,7 @@ var CmdLcl = cli.NewCmd[Command](cli.CmdRoot, "lcl", func(cmd *cobra.Command) {
 	// setup
 	cmd.Flags().StringVar(&cfg.Service.Category, "category", cli.Defaults.Service.Category, "Language or software type of the service.")
 	cmd.Flags().StringVar(&cfg.Service.CertStyle, "cert-style", cli.Defaults.Service.CertStyle, "Provisioning method for lcl.host certificates.")
+	cmd.Flags().StringVar(&cfg.Org.Name, "org-name", "", "Name for created org.")
 
 	// alias
 	cmd.Flags().StringVar(&cfg.Service.Category, "language", cli.Defaults.Service.Category, "Language to integrate with Anchor.")

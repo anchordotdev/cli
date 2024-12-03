@@ -103,6 +103,7 @@ func List[T any](items []ListItem[T]) list.Model {
 	}
 
 	l := list.New(lis, itemDelegate[T]{}, 80, len(items))
+	l.InfiniteScrolling = true
 	l.SetShowFilter(false)
 	l.SetShowHelp(false)
 	l.SetShowPagination(false)

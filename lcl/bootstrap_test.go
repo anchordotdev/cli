@@ -105,10 +105,11 @@ func TestBootstrap(t *testing.T) {
 			"? What lcl.host domain would you like to use for diagnostics?",
 		)
 
-		tm.Type("hello-world")
 		tm.Send(tea.KeyMsg{
-			Type: tea.KeyEnter,
+			Runes: []rune("hello-world"),
+			Type:  tea.KeyRunes,
 		})
+		tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
 
 		if !srv.IsProxy() {
 			t.Skip("diagnostic unsupported in mock mode")

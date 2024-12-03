@@ -6,5 +6,4 @@ import (
 )
 
 var CmdService = cli.NewCmd[cli.ShowHelp](cli.CmdRoot, "service", func(cmd *cobra.Command) {
-	cmd.Hidden = true
 })

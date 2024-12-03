@@ -29,37 +29,126 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    ? Which organization's lcl.host local development environment do you want to setup?
+      Org Slug (org-slug)    
+    > Create New Organization
+─── Selector[github.com/anchordotdev/cli/api.Organization] ─────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+─── OrgCreateHeader ────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+─── OrgCreateHint ──────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+─── CreateOrgNameInput ─────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    ? What is the new organization's name?
+    ?  
+─── CreateOrgNameInput ─────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    ? What is the new organization's name?
+    ? Org Name 
+─── CreateOrgNameInput ─────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    - Entered Org Name organization name.
+─── CreateOrgSpinner ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    - Entered Org Name organization name.
+    * Creating new organization…⠋
+─── CreateOrgSpinner ───────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+─── CreateOrgResult ────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+                                             
+# Create New Organization `anchor org create`
+    | We'll create a new organization to facilitate collaboration.
+    - Created Org Name (org-slug) organization.
+─── CreateOrgResult ────────────────────────────────────────────────────────────
+                                               
+# Setup lcl.host Application `anchor lcl setup`
+    | We'll integrate your application and system for HTTPS local development.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
 ─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     * Fetching realms…⠋
 ─── Fetcher[github.com/anchordotdev/cli/api.Realm] ─────────────────────────────
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
 ─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     * Fetching services…⠋
 ─── Fetcher[github.com/anchordotdev/cli/api.Service] ───────────────────────────
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
 ─── Selector[github.com/anchordotdev/cli/api.Service] ──────────────────────────
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     ? Which org-slug/realm-slug service's lcl.host local development environment do you want to setup?
     > service-name (service-name)
@@ -68,14 +157,16 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
 ─── ServiceEnvHeader ───────────────────────────────────────────────────────────
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               
@@ -84,7 +175,8 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               
@@ -94,7 +186,8 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               
@@ -105,7 +198,8 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               
@@ -115,7 +209,8 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               
@@ -129,7 +224,8 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               
@@ -140,7 +236,8 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               
@@ -153,7 +250,8 @@
                                                
 # Setup lcl.host Application `anchor lcl setup`
     | We'll integrate your application and system for HTTPS local development.
-    - Selected org-slug organization. You can also use `--org org-slug`.
+    - Selected Create New Organization.
+    - Created Org Name (org-slug) organization.
     - Using realm-slug, the only available realm. You can also use `--realm realm-slug`.
     - Selected service-name service. You can also use `--service service-name`.
                                                               

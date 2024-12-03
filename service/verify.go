@@ -109,7 +109,7 @@ func (c *Verify) RunTUI(ctx context.Context, drv *ui.Driver) error {
 		return nil
 	}
 
-	c.probeTLS(ctx, drv, attachment, credentials, conn)
+	_ = c.probeTLS(ctx, drv, attachment, credentials, conn)
 	return nil
 }
 
@@ -143,11 +143,6 @@ func (c *Verify) probeTCP(ctx context.Context, cfg *cli.Config, drv *ui.Driver, 
 	innerDialer := cfg.Test.NetDialer
 	if innerDialer == nil {
 		innerDialer = new(net.Dialer)
-	}
-
-	resolver := cfg.Test.NetResolver
-	if resolver == nil {
-		resolver = new(net.Resolver)
 	}
 
 	var addrs []string

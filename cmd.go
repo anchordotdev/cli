@@ -142,6 +142,22 @@ var rootDef = CmdDef{
 			},
 		},
 		{
+			Name: "org",
+
+			Use:   "org [flags]",
+			Args:  cobra.NoArgs,
+			Short: "Manage Organizations",
+			SubDefs: []CmdDef{
+				{
+					Name: "create",
+
+					Use:   "create [flags]",
+					Args:  cobra.NoArgs,
+					Short: "Create New Organization",
+				},
+			},
+		},
+		{
 			Name: "service",
 
 			Use:   "service [flags]",

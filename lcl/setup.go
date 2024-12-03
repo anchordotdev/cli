@@ -22,6 +22,8 @@ import (
 	"github.com/anchordotdev/cli/detection"
 	"github.com/anchordotdev/cli/lcl/models"
 	climodels "github.com/anchordotdev/cli/models"
+	"github.com/anchordotdev/cli/org"
+	orgmodels "github.com/anchordotdev/cli/org/models"
 	"github.com/anchordotdev/cli/service"
 	servicemodels "github.com/anchordotdev/cli/service/models"
 	"github.com/anchordotdev/cli/ui"
@@ -33,6 +35,7 @@ var CmdLclSetup = cli.NewCmd[Setup](CmdLcl, "setup", func(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&cfg.Service.Category, "category", cli.Defaults.Service.Category, "Language or software type of the service.")
 	cmd.Flags().StringVar(&cfg.Service.CertStyle, "cert-style", cli.Defaults.Service.CertStyle, "Provisioning method for lcl.host certificates.")
 	cmd.Flags().StringVarP(&cfg.Org.APID, "org", "o", cli.Defaults.Org.APID, "Organization for lcl.host application setup.")
+	cmd.Flags().StringVar(&cfg.Org.Name, "org-name", "", "Name for created org.")
 	cmd.Flags().StringVarP(&cfg.Lcl.RealmAPID, "realm", "r", cli.Defaults.Lcl.RealmAPID, "Realm for lcl.host application setup.")
 	cmd.Flags().StringVarP(&cfg.Service.APID, "service", "s", cli.Defaults.Service.APID, "Service for lcl.host application setup.")
 
@@ -227,42 +230,30 @@ func (c *Setup) orgAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (s
 		},
 	}
 
-	org, err := selector.Choice(ctx, drv)
+	selectedOrg, err := selector.Choice(ctx, drv)
 	if err != nil {
 		return "", err
 	}
-	if org == nil || (*org == api.Organization{}) {
-		orgName, err := c.orgName(ctx, cfg, drv)
+	if selectedOrg == nil || (*selectedOrg == api.Organization{}) {
+		drv.Activate(ctx, &orgmodels.OrgCreateHeader{})
+		drv.Activate(ctx, &orgmodels.OrgCreateHint{})
+		defer drv.Send(ui.HideModelsMsg{
+			Models: []string{"OrgCreateHeader", "OrgCreateHint"},
+		})
+
+		cmdOrgCreate := &org.Create{
+			Anc: c.anc,
+		}
+
+		org, err := cmdOrgCreate.Perform(ctx, drv)
 		if err != nil {
 			return "", err
 		}
 
-		if org, err = c.anc.CreateOrg(ctx, orgName); err != nil {
-			return "", err
-		}
-		// FIXME: provide nicer output about using newly created value, and hint flag?
 		return org.Apid, nil
 	}
-	return org.Apid, nil
+	return selectedOrg.Apid, nil
 
-}
-
-func (c *Setup) orgName(ctx context.Context, cfg *cli.Config, drv *ui.Driver) (string, error) {
-	if cfg.Org.Name != "" {
-		return cfg.Org.Name, nil
-	}
-
-	inputc := make(chan string)
-	drv.Activate(ctx, &models.SetupOrgName{
-		InputCh: inputc,
-	})
-
-	select {
-	case orgName := <-inputc:
-		return orgName, nil
-	case <-ctx.Done():
-		return "", ctx.Err()
-	}
 }
 
 func (c *Setup) realmAPID(ctx context.Context, cfg *cli.Config, drv *ui.Driver, orgAPID string) (string, error) {

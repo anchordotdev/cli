@@ -1,0 +1,13 @@
+Create New Organization
+
+Usage:
+  anchor org create [flags]
+
+Flags:
+  -h, --help              help for create
+      --org-name string   Name for created org.
+
+Global Flags:
+      --api-token string   Anchor API personal access token (PAT).
+      --config string      Service configuration file. (default "anchor.toml")
+      --skip-config        Skip loading configuration file.

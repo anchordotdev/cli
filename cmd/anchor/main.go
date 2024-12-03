@@ -8,6 +8,7 @@ import (
 	"github.com/anchordotdev/cli"
 	_ "github.com/anchordotdev/cli/auth"
 	_ "github.com/anchordotdev/cli/lcl"
+	_ "github.com/anchordotdev/cli/org"
 	_ "github.com/anchordotdev/cli/service"
 	_ "github.com/anchordotdev/cli/trust"
 	versionpkg "github.com/anchordotdev/cli/version"

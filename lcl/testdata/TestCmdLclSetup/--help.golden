@@ -8,6 +8,7 @@ Flags:
       --cert-style string   Provisioning method for lcl.host certificates.
   -h, --help                help for setup
   -o, --org string          Organization for lcl.host application setup.
+      --org-name string     Name for created org.
   -r, --realm string        Realm for lcl.host application setup.
   -s, --service string      Service for lcl.host application setup.
 

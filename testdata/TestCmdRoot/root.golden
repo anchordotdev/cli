@@ -11,6 +11,8 @@ Available Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   lcl         Manage lcl.host Local Development Environment
+  org         Manage Organizations
+  service     Manage services
   trust       Manage CA Certificates in your Local Trust Store(s)
   version     Show Version Info
 

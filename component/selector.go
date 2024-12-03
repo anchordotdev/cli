@@ -54,9 +54,12 @@ func (s *Selector[T]) Choice(ctx context.Context, drv *ui.Driver) (*T, error) {
 	var choices []ui.ListItem[T]
 	for _, item := range s.Choices {
 		choice := ui.ListItem[T]{
-			Key:    item.Key(),
-			String: fmt.Sprintf("%s (%s)", item.String(), item.Key()),
-			Value:  item,
+			Key: item.Key(),
+			String: fmt.Sprintf("%s %s",
+				item.String(),
+				ui.Whisper(fmt.Sprintf("(%s)", item.Key())),
+			),
+			Value: item,
 		}
 		choices = append(choices, choice)
 	}
