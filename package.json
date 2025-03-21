@@ -4,6 +4,6 @@
   "dependencies": {},
   "scripts": {},
   "devDependencies": {
-    "@stoplight/prism-cli": "5.10.0"
+    "@stoplight/prism-cli": "5.12.0"
   }
 }
