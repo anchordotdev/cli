@@ -109,4 +109,4 @@
     - Checked DNS service.lcl.host: success!
     - Checked TCP [<tcp-addresses>]: success!
     ! Checked TLS service.lcl.host: failed!
-    ! Error! tls: failed to verify certificate: x509: certificate is valid for example.com, not service.lcl.host
+    ! Error! tls: failed to verify certificate: x509: certificate is valid for example.com, *.example.com, not service.lcl.host

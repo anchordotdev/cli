@@ -30,6 +30,11 @@ const (
 	Revoked CredentialStatus = "revoked"
 )
 
+// Defines values for EabIdentifiersType.
+const (
+	EabIdentifiersTypeDns EabIdentifiersType = "dns"
+)
+
 // Defines values for ServiceServerType.
 const (
 	ServiceServerTypeCaddy      ServiceServerType = "caddy"
@@ -39,6 +44,11 @@ const (
 	ServiceServerTypeJavascript ServiceServerType = "javascript"
 	ServiceServerTypePython     ServiceServerType = "python"
 	ServiceServerTypeRuby       ServiceServerType = "ruby"
+)
+
+// Defines values for CreateEabTokenJSONBodyIdentifiersType.
+const (
+	CreateEabTokenJSONBodyIdentifiersTypeDns CreateEabTokenJSONBodyIdentifiersType = "dns"
 )
 
 // Attachment defines model for attachment.
@@ -173,6 +183,15 @@ type Eab struct {
 	// HmacKey EAB HMAC key
 	HmacKey string `json:"hmac_key"`
 
+	// Identifiers An optional list of identifiers to limits what certificates this token may provision certificates for.
+	Identifiers []struct {
+		// Type A type for the identifier, only `dns` is supported at this time.
+		Type EabIdentifiersType `json:"type"`
+
+		// Value A value for the identifier.
+		Value string `json:"value"`
+	} `json:"identifiers"`
+
 	// Kid EAB key identifier
 	Kid string `json:"kid"`
 
@@ -185,6 +204,9 @@ type Eab struct {
 		SubCa        RelationshipsSubCaSlug        `json:"sub_ca"`
 	} `json:"relationships"`
 }
+
+// EabIdentifiersType A type for the identifier, only `dns` is supported at this time.
+type EabIdentifiersType string
 
 // Error defines model for error.
 type Error struct {
@@ -381,6 +403,14 @@ type ServicesXtach struct {
 
 // CreateEabTokenJSONBody defines parameters for CreateEabToken.
 type CreateEabTokenJSONBody struct {
+	// Identifiers An optional list of identifiers to limits what certificates this token may provision certificates for.
+	Identifiers *[]struct {
+		// Type A type for the identifier, only `dns` is supported at this time.
+		Type CreateEabTokenJSONBodyIdentifiersType `json:"type"`
+
+		// Value A value for the identifier.
+		Value string `json:"value"`
+	} `json:"identifiers,omitempty"`
 	Relationships struct {
 		Chain        RelationshipsChainSlug        `json:"chain"`
 		Organization RelationshipsOrganizationSlug `json:"organization"`
@@ -389,6 +419,9 @@ type CreateEabTokenJSONBody struct {
 		SubCa        RelationshipsSubCaSlug        `json:"sub_ca"`
 	} `json:"relationships"`
 }
+
+// CreateEabTokenJSONBodyIdentifiersType defines parameters for CreateEabToken.
+type CreateEabTokenJSONBodyIdentifiersType string
 
 // CreateCliTokenJSONBody defines parameters for CreateCliToken.
 type CreateCliTokenJSONBody struct {

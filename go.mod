@@ -1,6 +1,6 @@
 module github.com/anchordotdev/cli
 
-go 1.23.2
+go 1.24.2
 
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
@@ -10,8 +10,8 @@ require (
 	github.com/benburkert/dns v0.0.0-20190225204957-d356cf78cdfc
 	github.com/brianvoe/gofakeit/v7 v7.2.1
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.3.4
-	github.com/charmbracelet/lipgloss v1.0.0
+	github.com/charmbracelet/bubbletea v1.3.5
+	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/exp/teatest v0.0.0-20240222131549-03ee51df8bea
 	github.com/cli/browser v1.3.0
 	github.com/fatih/structtag v1.2.0
@@ -25,17 +25,17 @@ require (
 	github.com/muesli/termenv v0.16.0
 	github.com/oapi-codegen/oapi-codegen/v2 v2.4.1
 	github.com/oapi-codegen/runtime v1.1.1
-	github.com/pelletier/go-toml/v2 v2.2.3
+	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/r3labs/diff/v3 v3.0.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
 	github.com/zalando/go-keyring v0.2.6
-	golang.org/x/crypto v0.35.0
+	golang.org/x/crypto v0.37.0
 	golang.org/x/exp v0.0.0-20240318143956-a85f2c67cd81
-	golang.org/x/sync v0.11.0
-	golang.org/x/sys v0.30.0
-	golang.org/x/text v0.22.0
+	golang.org/x/sync v0.13.0
+	golang.org/x/sys v0.33.0
+	golang.org/x/text v0.24.0
 	howett.net/plist v1.0.1
 )
 
@@ -43,8 +43,10 @@ require (
 	al.essio.dev/pkg/shellescape v1.5.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
+	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
-	github.com/charmbracelet/x/exp/golden v0.0.0-20240815200342-61de596daa2b // indirect
+	github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd // indirect
+	github.com/charmbracelet/x/exp/golden v0.0.0-20241011142426-46044092ad91 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
@@ -55,6 +57,7 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -76,8 +79,9 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
-	golang.org/x/mod v0.23.0 // indirect
-	golang.org/x/net v0.36.0 // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/tools v0.29.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
