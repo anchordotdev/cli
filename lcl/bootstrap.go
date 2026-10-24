@@ -103,7 +103,7 @@ func (c Bootstrap) perform(ctx context.Context, drv *ui.Driver) error {
 		drv.Send(models.BootstrapDiagnosticNotFoundMsg{})
 
 		if diagService, err = c.createDiagnosticService(ctx, drv, orgAPID, diagPort); err != nil {
-			return nil
+			return err
 		}
 	} else {
 		drv.Send(models.BootstrapDiagnosticFoundMsg{})
